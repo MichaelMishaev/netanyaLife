@@ -1,0 +1,254 @@
+{
+  "common": {
+    "appName": "Нетания Локал",
+    "tagline": "Местный бизнес-справочник Нетании",
+    "loading": "Загрузка...",
+    "error": "Ошибка",
+    "success": "Успех",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "close": "Закрыть",
+    "back": "Назад",
+    "next": "Далее",
+    "prev": "Предыдущий",
+    "submit": "Отправить",
+    "search": "Поиск",
+    "filter": "Фильтр",
+    "sort": "Сортировка",
+    "clear": "Очистить",
+    "noResults": "Результаты не найдены",
+    "required": "Обязательное поле"
+  },
+  "nav": {
+    "home": "Главная",
+    "search": "Поиск",
+    "addBusiness": "Добавить бизнес",
+    "about": "О нас",
+    "contact": "Контакты",
+    "admin": "Управление",
+    "logout": "Выйти",
+    "languageSwitch": "עברית / Русский",
+    "skipToContent": "Перейти к содержимому"
+  },
+  "home": {
+    "hero": {
+      "title": "Найдите местный бизнес в Нетании",
+      "subtitle": "Местный бизнес-справочник для жителей Нетании, разделенный по районам",
+      "cta": "Начать поиск"
+    },
+    "search": {
+      "title": "Что вы ищете?",
+      "categoryPlaceholder": "Выберите категорию",
+      "neighborhoodPlaceholder": "Выберите район",
+      "allNetanya": "Вся Нетания",
+      "searchButton": "Найти",
+      "requiredFields": "Необходимо выбрать категорию и район"
+    },
+    "popularCategories": {
+      "title": "Популярные категории",
+      "viewAll": "Посмотреть все категории"
+    },
+    "neighborhoods": {
+      "title": "Поиск по району",
+      "merkaz": "Центр",
+      "tsafon": "Север",
+      "darom": "Юг",
+      "mizrahHair": "Восток города"
+    },
+    "recentlyViewed": {
+      "title": "Недавно просмотренные",
+      "empty": "Нет недавно просмотренных предприятий"
+    }
+  },
+  "results": {
+    "title": "{category} в {neighborhood}",
+    "back": "Назад",
+    "results": "{count, plural, =0 {результатов} one {результат} few {результата} other {результатов}}",
+    "noResults": "Результаты не найдены в выбранном районе",
+    "searchAllCity": "Искать по всей Нетании",
+    "pinned": "Рекомендуемые предприятия",
+    "verified": "Проверено",
+    "viewDetails": "Посмотреть детали",
+    "callNow": "Позвонить сейчас",
+    "whatsapp": "WhatsApp",
+    "website": "Сайт",
+    "directions": "Как добраться"
+  },
+  "filters": {
+    "title": "Фильтры и сортировка",
+    "sortBy": "Сортировать по",
+    "filterBy": "Фильтровать по",
+    "applyFilters": "Применить фильтры",
+    "resetFilters": "Сбросить фильтры",
+    "sort": {
+      "recommended": "Рекомендуемые",
+      "rating": "Рейтинг",
+      "newest": "Новые",
+      "mostReviews": "Больше отзывов"
+    },
+    "verified": {
+      "label": "Только проверенные предприятия",
+      "description": "Показать только предприятия с меткой проверки"
+    },
+    "hasReviews": {
+      "label": "С отзывами",
+      "description": "Показать только предприятия с отзывами"
+    }
+  },
+  "business": {
+    "details": "Детали",
+    "reviews": "Отзывы",
+    "writeReview": "Написать отзыв",
+    "contact": "Контакты",
+    "phone": "Телефон",
+    "whatsapp": "WhatsApp",
+    "website": "Веб-сайт",
+    "email": "Эл. почта",
+    "address": "Адрес",
+    "openingHours": "Часы работы",
+    "neighborhood": "Район",
+    "category": "Категория",
+    "verified": "Проверенное предприятие",
+    "description": "Описание",
+    "noDescription": "Описание недоступно",
+    "rating": "Рейтинг",
+    "reviewsCount": "{count, plural, =0 {нет отзывов} one {отзыв} few {отзыва} other {отзывов}}"
+  },
+  "share": {
+    "shareButton": "Поделиться",
+    "shareWhatsApp": "Поделиться в WhatsApp",
+    "copyLink": "Скопировать ссылку",
+    "linkCopied": "Ссылка скопирована в буфер обмена",
+    "shareText": "Я нашел {name} в Нетания Локал",
+    "attributionText": "Найдено через Нетания Локал - местный бизнес-справочник"
+  },
+  "breadcrumb": {
+    "home": "Главная",
+    "search": "Поиск",
+    "results": "{category}"
+  },
+  "review": {
+    "title": "Написать отзыв",
+    "rating": "Рейтинг",
+    "ratingRequired": "Необходимо выбрать рейтинг",
+    "comment": "Комментарий (необязательно)",
+    "commentPlaceholder": "Поделитесь своим опытом...",
+    "authorName": "Имя (необязательно)",
+    "authorNamePlaceholder": "Анонимно",
+    "anonymous": "Анонимно",
+    "submit": "Отправить отзыв",
+    "success": "Отзыв успешно отправлен",
+    "error": "Ошибка при отправке отзыва"
+  },
+  "addBusiness": {
+    "title": "Добавить новое предприятие",
+    "subtitle": "Добавьте ваше предприятие в справочник",
+    "form": {
+      "name": "Название предприятия",
+      "namePlaceholder": "Например: Электрика Йоси",
+      "category": "Категория",
+      "categoryPlaceholder": "Выберите категорию",
+      "neighborhood": "Район",
+      "neighborhoodPlaceholder": "Выберите район",
+      "description": "Описание",
+      "descriptionPlaceholder": "Опишите ваши услуги...",
+      "phone": "Телефон",
+      "phonePlaceholder": "+972-50-123-4567",
+      "whatsapp": "WhatsApp",
+      "whatsappPlaceholder": "+972-50-123-4567",
+      "website": "Веб-сайт",
+      "websitePlaceholder": "https://example.com",
+      "email": "Эл. почта",
+      "emailPlaceholder": "email@example.com",
+      "address": "Адрес",
+      "addressPlaceholder": "ул. Герцль 25, Нетания",
+      "openingHours": "Часы работы",
+      "openingHoursPlaceholder": "Пн-Чт: 08:00-17:00",
+      "submitterName": "Ваше имя",
+      "submitterNamePlaceholder": "Необязательно",
+      "submitterEmail": "Ваш email",
+      "submitterEmailPlaceholder": "Необязательно - для связи",
+      "contactRequired": "Необходимо заполнить телефон или WhatsApp (хотя бы одно)"
+    },
+    "submit": "Отправить на проверку",
+    "success": "Предприятие успешно отправлено на проверку",
+    "error": "Ошибка при отправке предприятия",
+    "pending": "Ваше предприятие ожидает одобрения администратором"
+  },
+  "accessibility": {
+    "title": "Доступность",
+    "fontSize": "Размер шрифта",
+    "fontSizes": {
+      "normal": "Обычный",
+      "medium": "Средний",
+      "large": "Большой"
+    },
+    "contrast": "Высокая контрастность",
+    "underlineLinks": "Подчеркнуть ссылки",
+    "keyboardNav": "Навигация с клавиатуры"
+  },
+  "admin": {
+    "title": "Управление",
+    "login": {
+      "title": "Вход администратора",
+      "email": "Эл. почта",
+      "password": "Пароль",
+      "submit": "Войти",
+      "error": "Ошибка входа"
+    },
+    "dashboard": {
+      "title": "Панель управления",
+      "stats": {
+        "businesses": "Предприятия",
+        "pending": "Ожидают",
+        "categories": "Категории",
+        "reviews": "Отзывы"
+      }
+    },
+    "businesses": {
+      "title": "Управление предприятиями",
+      "add": "Добавить предприятие",
+      "edit": "Редактировать",
+      "delete": "Удалить",
+      "visible": "Видимый",
+      "verified": "Проверен",
+      "pinned": "Закреплен"
+    },
+    "pending": {
+      "title": "Ожидающие одобрения",
+      "approve": "Одобрить",
+      "reject": "Отклонить",
+      "noRequests": "Нет ожидающих запросов"
+    },
+    "categories": {
+      "title": "Управление категориями",
+      "add": "Добавить категорию",
+      "popular": "Популярный"
+    },
+    "settings": {
+      "title": "Настройки",
+      "topPinnedCount": "Количество закрепленных предприятий в результатах"
+    }
+  },
+  "footer": {
+    "about": "О Нетания Локал",
+    "terms": "Условия использования",
+    "privacy": "Политика конфиденциальности",
+    "contact": "Контакты",
+    "copyright": "© {year} Нетания Локал. Все права защищены."
+  },
+  "errors": {
+    "notFound": "Страница не найдена",
+    "serverError": "Ошибка сервера",
+    "tryAgain": "Попробуйте снова",
+    "goHome": "Вернуться на главную"
+  },
+  "pwa": {
+    "installPrompt": "Установите Нетания Локал на ваше устройство",
+    "installButton": "Установить",
+    "laterButton": "Может быть позже",
+    "offlineMessage": "Нет подключения к интернету. Вы можете просмотреть некоторый контент, сохраненный с последнего визита."
+  }
+}

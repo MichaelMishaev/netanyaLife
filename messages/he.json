@@ -1,0 +1,254 @@
+{
+  "common": {
+    "appName": "נתניה לוקל",
+    "tagline": "מדריך עסקים מקומיים בנתניה",
+    "loading": "טוען...",
+    "error": "שגיאה",
+    "success": "הצלחה",
+    "cancel": "ביטול",
+    "save": "שמירה",
+    "delete": "מחיקה",
+    "edit": "עריכה",
+    "close": "סגירה",
+    "back": "חזור",
+    "next": "הבא",
+    "prev": "הקודם",
+    "submit": "שלח",
+    "search": "חיפוש",
+    "filter": "סינון",
+    "sort": "מיון",
+    "clear": "נקה",
+    "noResults": "לא נמצאו תוצאות",
+    "required": "שדה חובה"
+  },
+  "nav": {
+    "home": "ראשי",
+    "search": "חיפוש",
+    "addBusiness": "הוסף עסק",
+    "about": "אודות",
+    "contact": "יצירת קשר",
+    "admin": "ניהול",
+    "logout": "התנתק",
+    "languageSwitch": "עברית / Русский",
+    "skipToContent": "דלג לתוכן"
+  },
+  "home": {
+    "hero": {
+      "title": "מצא עסקים מקומיים בנתניה",
+      "subtitle": "מדריך עסקים מקומיים לתושבי נתניה, מחולק לפי שכונות",
+      "cta": "התחל חיפוש"
+    },
+    "search": {
+      "title": "מה אתה מחפש?",
+      "categoryPlaceholder": "בחר קטגוריה",
+      "neighborhoodPlaceholder": "בחר שכונה",
+      "allNetanya": "כל נתניה",
+      "searchButton": "חפש",
+      "requiredFields": "יש לבחור קטגוריה ושכונה"
+    },
+    "popularCategories": {
+      "title": "קטגוריות פופולריות",
+      "viewAll": "צפה בכל הקטגוריות"
+    },
+    "neighborhoods": {
+      "title": "חפש לפי שכונה",
+      "merkaz": "מרכז",
+      "tsafon": "צפון",
+      "darom": "דרום",
+      "mizrahHair": "מזרח העיר"
+    },
+    "recentlyViewed": {
+      "title": "נצפו לאחרונה",
+      "empty": "אין עסקים שנצפו לאחרונה"
+    }
+  },
+  "results": {
+    "title": "{category} ב{neighborhood}",
+    "back": "חזור",
+    "results": "{count, plural, =0 {תוצאות} one {תוצאה אחת} other {# תוצאות}}",
+    "noResults": "לא נמצאו תוצאות בשכונה שנבחרה",
+    "searchAllCity": "חיפוש בכל נתניה",
+    "pinned": "עסקים מומלצים",
+    "verified": "מאומת",
+    "viewDetails": "צפה בפרטים",
+    "callNow": "התקשר עכשיו",
+    "whatsapp": "WhatsApp",
+    "website": "אתר",
+    "directions": "הוראות הגעה"
+  },
+  "filters": {
+    "title": "פילטרים ומיון",
+    "sortBy": "מיון לפי",
+    "filterBy": "סינון לפי",
+    "applyFilters": "החל פילטרים",
+    "resetFilters": "אפס פילטרים",
+    "sort": {
+      "recommended": "מומלץ",
+      "rating": "דירוג",
+      "newest": "חדשים",
+      "mostReviews": "הכי הרבה ביקורות"
+    },
+    "verified": {
+      "label": "עסקים מאומתים בלבד",
+      "description": "הצג רק עסקים עם תג אימות"
+    },
+    "hasReviews": {
+      "label": "עם ביקורות",
+      "description": "הצג רק עסקים עם ביקורות"
+    }
+  },
+  "business": {
+    "details": "פרטים",
+    "reviews": "ביקורות",
+    "writeReview": "כתוב ביקורת",
+    "contact": "יצירת קשר",
+    "phone": "טלפון",
+    "whatsapp": "WhatsApp",
+    "website": "אתר אינטרנט",
+    "email": "דוא״ל",
+    "address": "כתובת",
+    "openingHours": "שעות פתיחה",
+    "neighborhood": "שכונה",
+    "category": "קטגוריה",
+    "verified": "עסק מאומת",
+    "description": "תיאור",
+    "noDescription": "אין תיאור זמין",
+    "rating": "דירוג",
+    "reviewsCount": "{count, plural, =0 {אין ביקורות} one {ביקורת אחת} other {# ביקורות}}"
+  },
+  "share": {
+    "shareButton": "שיתוף",
+    "shareWhatsApp": "שיתוף ב-WhatsApp",
+    "copyLink": "העתק קישור",
+    "linkCopied": "הקישור הועתק ללוח",
+    "shareText": "מצאתי את {name} ב-נתניה לוקל",
+    "attributionText": "נמצא דרך נתניה לוקל - מדריך עסקים מקומיים"
+  },
+  "breadcrumb": {
+    "home": "ראשי",
+    "search": "חיפוש",
+    "results": "{category}"
+  },
+  "review": {
+    "title": "כתוב ביקורת",
+    "rating": "דירוג",
+    "ratingRequired": "יש לבחור דירוג",
+    "comment": "תגובה (אופציונלי)",
+    "commentPlaceholder": "שתף את החוויה שלך...",
+    "authorName": "שם (אופציונלי)",
+    "authorNamePlaceholder": "אנונימי",
+    "anonymous": "אנונימי",
+    "submit": "שלח ביקורת",
+    "success": "הביקורת נשלחה בהצלחה",
+    "error": "שגיאה בשליחת הביקורת"
+  },
+  "addBusiness": {
+    "title": "הוסף עסק חדש",
+    "subtitle": "הוסף את העסק שלך למדריך",
+    "form": {
+      "name": "שם העסק",
+      "namePlaceholder": "לדוגמה: חשמל יוסי",
+      "category": "קטגוריה",
+      "categoryPlaceholder": "בחר קטגוריה",
+      "neighborhood": "שכונה",
+      "neighborhoodPlaceholder": "בחר שכונה",
+      "description": "תיאור",
+      "descriptionPlaceholder": "תאר את השירותים שלך...",
+      "phone": "טלפון",
+      "phonePlaceholder": "+972-50-123-4567",
+      "whatsapp": "WhatsApp",
+      "whatsappPlaceholder": "+972-50-123-4567",
+      "website": "אתר אינטרנט",
+      "websitePlaceholder": "https://example.com",
+      "email": "דוא״ל",
+      "emailPlaceholder": "email@example.com",
+      "address": "כתובת",
+      "addressPlaceholder": "רחוב הרצל 25, נתניה",
+      "openingHours": "שעות פתיחה",
+      "openingHoursPlaceholder": "א׳-ה׳: 08:00-17:00",
+      "submitterName": "שמך",
+      "submitterNamePlaceholder": "אופציונלי",
+      "submitterEmail": "הדוא״ל שלך",
+      "submitterEmailPlaceholder": "אופציונלי - ליצירת קשר",
+      "contactRequired": "חובה למלא טלפון או מספר WhatsApp אחד לפחות"
+    },
+    "submit": "שלח לאישור",
+    "success": "העסק נשלח לאישור בהצלחה",
+    "error": "שגיאה בשליחת העסק",
+    "pending": "העסק שלך ממתין לאישור מנהל"
+  },
+  "accessibility": {
+    "title": "נגישות",
+    "fontSize": "גודל גופן",
+    "fontSizes": {
+      "normal": "רגיל",
+      "medium": "בינוני",
+      "large": "גדול"
+    },
+    "contrast": "ניגודיות גבוהה",
+    "underlineLinks": "הדגש קישורים",
+    "keyboardNav": "ניווט במקלדת"
+  },
+  "admin": {
+    "title": "ניהול",
+    "login": {
+      "title": "כניסת מנהל",
+      "email": "דוא״ל",
+      "password": "סיסמה",
+      "submit": "התחבר",
+      "error": "שגיאה בהתחברות"
+    },
+    "dashboard": {
+      "title": "לוח בקרה",
+      "stats": {
+        "businesses": "עסקים",
+        "pending": "ממתינים",
+        "categories": "קטגוריות",
+        "reviews": "ביקורות"
+      }
+    },
+    "businesses": {
+      "title": "ניהול עסקים",
+      "add": "הוסף עסק",
+      "edit": "עריכה",
+      "delete": "מחיקה",
+      "visible": "גלוי",
+      "verified": "מאומת",
+      "pinned": "מוצמד"
+    },
+    "pending": {
+      "title": "אישורים ממתינים",
+      "approve": "אשר",
+      "reject": "דחה",
+      "noRequests": "אין בקשות ממתינות"
+    },
+    "categories": {
+      "title": "ניהול קטגוריות",
+      "add": "הוסף קטגוריה",
+      "popular": "פופולרי"
+    },
+    "settings": {
+      "title": "הגדרות",
+      "topPinnedCount": "מספר עסקים מוצמדים בתוצאות"
+    }
+  },
+  "footer": {
+    "about": "אודות נתניה לוקל",
+    "terms": "תנאי שימוש",
+    "privacy": "מדיניות פרטיות",
+    "contact": "יצירת קשר",
+    "copyright": "© {year} נתניה לוקל. כל הזכויות שמורות."
+  },
+  "errors": {
+    "notFound": "העמוד לא נמצא",
+    "serverError": "שגיאת שרת",
+    "tryAgain": "נסה שוב",
+    "goHome": "חזור לדף הבית"
+  },
+  "pwa": {
+    "installPrompt": "התקן את נתניה לוקל במכשיר שלך",
+    "installButton": "התקן",
+    "laterButton": "אולי מאוחר יותר",
+    "offlineMessage": "אין חיבור לאינטרנט. אפשר לראות חלק מהתוכן שנשמר מהביקור האחרון."
+  }
+}
