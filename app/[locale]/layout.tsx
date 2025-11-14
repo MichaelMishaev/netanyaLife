@@ -3,8 +3,11 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { locales } from '@/i18n/request'
+import { AccessibilityProvider } from '@/contexts/AccessibilityContext'
 import Header from '@/components/server/Header'
 import Footer from '@/components/server/Footer'
+import AccessibilityPanel from '@/components/client/AccessibilityPanel'
+import PWAInstaller from '@/components/client/PWAInstaller'
 import '../globals.css'
 
 export const metadata: Metadata = {
@@ -37,11 +40,36 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} dir={dir}>
+      <head>
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="theme-color" content="#2563eb" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+          name="apple-mobile-web-app-status-bar-style"
+          content="default"
+        />
+        <meta name="apple-mobile-web-app-title" content="Netanya Local" />
+      </head>
       <body className="flex min-h-screen flex-col">
         <NextIntlClientProvider messages={messages}>
-          <Header />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <AccessibilityProvider>
+            {/* PWA Service Worker */}
+            <PWAInstaller />
+
+            {/* Skip Link */}
+            <a href="#main-content" className="skip-link">
+              {locale === 'he' ? 'דלג לתוכן' : 'Перейти к содержимому'}
+            </a>
+
+            <Header />
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+            <Footer />
+
+            {/* Accessibility Panel */}
+            <AccessibilityPanel />
+          </AccessibilityProvider>
         </NextIntlClientProvider>
       </body>
     </html>

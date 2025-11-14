@@ -196,6 +196,7 @@
   },
   "accessibility": {
     "title": "נגישות",
+    "close": "סגור",
     "fontSize": "גודל גופן",
     "fontSizes": {
       "normal": "רגיל",

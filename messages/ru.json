@@ -196,6 +196,7 @@
   },
   "accessibility": {
     "title": "Доступность",
+    "close": "Закрыть",
     "fontSize": "Размер шрифта",
     "fontSizes": {
       "normal": "Обычный",

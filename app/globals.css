@@ -19,6 +19,55 @@
   [dir='ltr'] {
     direction: ltr;
   }
+
+  /* Accessibility: High Contrast Mode */
+  html.high-contrast {
+    @apply bg-white;
+  }
+
+  html.high-contrast body {
+    @apply bg-white text-black;
+  }
+
+  html.high-contrast a {
+    @apply text-blue-800 underline;
+  }
+
+  html.high-contrast button {
+    @apply border-2 border-black;
+  }
+
+  html.high-contrast .bg-primary-600 {
+    @apply bg-black text-white;
+  }
+
+  html.high-contrast .text-primary-600 {
+    @apply text-black;
+  }
+
+  html.high-contrast .border-gray-300 {
+    @apply border-black;
+  }
+
+  html.high-contrast .text-gray-600,
+  html.high-contrast .text-gray-700 {
+    @apply text-black;
+  }
+
+  /* Accessibility: Underline Links */
+  html.underline-links a {
+    @apply underline;
+  }
+
+  /* Accessibility: Focus Visible */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary-600;
+  }
+
+  /* Skip Link */
+  .skip-link {
+    @apply fixed left-0 top-0 z-[100] -translate-y-full bg-primary-600 px-4 py-2 text-white transition focus:translate-y-0;
+  }
 }
 
 @layer utilities {
