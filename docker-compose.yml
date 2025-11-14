@@ -1,0 +1,38 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: netanya_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: netanya_user
+      POSTGRES_PASSWORD: netanya_password_dev
+      POSTGRES_DB: netanya_local
+    ports:
+      - '5433:5432'  # Map to 5433 to avoid conflict with local PostgreSQL
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U netanya_user -d netanya_local']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: netanya_redis
+    restart: unless-stopped
+    ports:
+      - '6380:6379'  # Map to 6380 to avoid conflict with local Redis
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
