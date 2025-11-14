@@ -1,0 +1,298 @@
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  // directUrl = env("DIRECT_URL") // Uncomment if using Vercel Postgres
+}
+
+// ============================================================================
+// CORE ENTITIES
+// ============================================================================
+
+model City {
+  id          String         @id @default(cuid())
+  name_he     String         @unique // "נתניה"
+  name_ru     String         @unique // "Нетания"
+  slug        String         @unique // "netanya"
+  is_active   Boolean        @default(true)
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+
+  neighborhoods Neighborhood[]
+  businesses    Business[]     @relation("business_city")
+
+  @@map("cities")
+}
+
+model Neighborhood {
+  id          String         @id @default(cuid())
+  city_id     String
+  name_he     String         // "מרכז", "צפון", "דרום", "מזרח העיר"
+  name_ru     String         // "Центр", "Север", "Юг", "Восток города"
+  slug        String         // "merkaz", "tsafon", "darom", "mizrah-hair"
+  description_he String?     @db.Text
+  description_ru String?     @db.Text
+  is_active   Boolean        @default(true)
+  display_order Int          @default(0) // For admin sorting
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+
+  city        City           @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  businesses  Business[]
+  pending_businesses PendingBusiness[]
+
+  @@unique([city_id, slug])
+  @@index([city_id, is_active])
+  @@map("neighborhoods")
+}
+
+model Category {
+  id          String         @id @default(cuid())
+  name_he     String         @unique // "חשמלאים"
+  name_ru     String         @unique // "Электрики"
+  slug        String         @unique // "electricians"
+  icon_name   String?        // "bolt" (for icon library)
+  description_he String?     @db.Text
+  description_ru String?     @db.Text
+  is_active   Boolean        @default(true)
+  is_popular  Boolean        @default(false) // For "Popular Categories" section
+  display_order Int          @default(0)
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+
+  businesses  Business[]
+  pending_businesses PendingBusiness[]
+
+  @@index([is_active, is_popular])
+  @@map("categories")
+}
+
+// ============================================================================
+// BUSINESS ENTITIES
+// ============================================================================
+
+model Business {
+  id              String         @id @default(cuid())
+
+  // Basic Info (Bilingual)
+  name_he         String
+  name_ru         String?
+  slug_he         String         @unique
+  slug_ru         String?        @unique
+  description_he  String?        @db.Text
+  description_ru  String?        @db.Text
+
+  // Location
+  city_id         String         // Always "נתניה" for now
+  neighborhood_id String
+  address_he      String?
+  address_ru      String?
+  latitude        Decimal?       @db.Decimal(10, 8) // For future map features
+  longitude       Decimal?       @db.Decimal(11, 8)
+
+  // Contact (Validation: At least one of phone OR whatsapp_number required)
+  phone           String?        // International format: +972501234567
+  whatsapp_number String?        // International format: +972501234567
+  website_url     String?        @db.VarChar(500)
+  email           String?        @db.VarChar(255)
+
+  // Operating Hours (JSON or structured text)
+  opening_hours_he String?       @db.Text // "א׳-ה׳: 08:00-17:00, ו׳: 08:00-13:00"
+  opening_hours_ru String?       @db.Text
+
+  // Admin Flags
+  is_visible      Boolean        @default(true)  // Hide from search
+  is_verified     Boolean        @default(false) // Blue checkmark badge
+  is_pinned       Boolean        @default(false) // Top X results
+  pinned_order    Int?           // Order within pinned (1, 2, 3...)
+
+  // Relationships
+  category_id     String
+  category        Category       @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  neighborhood    Neighborhood   @relation(fields: [neighborhood_id], references: [id], onDelete: Restrict)
+  city_id_fk      City           @relation(fields: [city_id], references: [id], name: "business_city", onDelete: Restrict)
+
+  // Child entities
+  reviews         Review[]
+
+  // Metadata
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+  deleted_at      DateTime?      // Soft delete
+
+  @@index([category_id, neighborhood_id, is_visible, is_pinned]) // Main search query
+  @@index([slug_he])
+  @@index([slug_ru])
+  @@index([is_pinned, pinned_order]) // Top X logic
+  @@index([neighborhood_id])
+  @@index([deleted_at]) // Filter out soft-deleted
+  @@map("businesses")
+}
+
+model PendingBusiness {
+  id              String         @id @default(cuid())
+
+  // Submitted Info (Bilingual optional - user chooses language)
+  name            String
+  description     String?        @db.Text
+  language        String         @default("he") // "he" or "ru"
+
+  // Location
+  neighborhood_id String
+  address         String?
+
+  // Contact (Validation: At least one required)
+  phone           String?
+  whatsapp_number String?
+  website_url     String?
+  email           String?
+
+  // Operating Hours
+  opening_hours   String?        @db.Text
+
+  // Category
+  category_id     String
+  category        Category       @relation(fields: [category_id], references: [id])
+  neighborhood    Neighborhood   @relation(fields: [neighborhood_id], references: [id])
+
+  // Submission metadata
+  submitter_name  String?        // Optional: Who submitted
+  submitter_email String?        // For follow-up
+  submitter_phone String?
+
+  // Admin workflow
+  status          PendingStatus  @default(PENDING)
+  admin_notes     String?        @db.Text
+  reviewed_at     DateTime?
+
+  // Metadata
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  @@index([status, created_at])
+  @@index([category_id])
+  @@map("pending_businesses")
+}
+
+enum PendingStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// ============================================================================
+// REVIEWS & RATINGS
+// ============================================================================
+
+model Review {
+  id              String         @id @default(cuid())
+  business_id     String
+
+  // Rating & Content
+  rating          Int            // 1-5 stars (validated at app level)
+  comment_he      String?        @db.Text
+  comment_ru      String?        @db.Text
+  language        String         @default("he") // Which comment field to display
+
+  // Author (Anonymous allowed)
+  author_name     String?        // "יוסי כהן" or null (shows "אנונימי")
+  author_user_id  String?        // For future user system
+  author_ip_hash  String?        // Hashed IP for spam prevention
+
+  // Moderation
+  is_approved     Boolean        @default(true) // Can add approval workflow later
+  is_flagged      Boolean        @default(false)
+
+  // Relationships
+  business        Business       @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  // Metadata
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  @@index([business_id, is_approved, created_at])
+  @@index([created_at])
+  @@map("reviews")
+}
+
+// ============================================================================
+// ANALYTICS & EVENTS
+// ============================================================================
+
+model Event {
+  id              String         @id @default(cuid())
+
+  // Event details
+  type            EventType
+  properties      Json           // Flexible payload for different event types
+
+  // Session tracking
+  session_id      String?        // Browser session ID
+  user_agent      String?        @db.Text
+  ip_hash         String?        // Hashed for privacy
+  language        String?        // "he" or "ru"
+
+  // Related entities (optional)
+  business_id     String?
+  category_id     String?
+  neighborhood_id String?
+
+  // Metadata
+  created_at      DateTime       @default(now())
+
+  @@index([type, created_at])
+  @@index([created_at])
+  @@index([business_id])
+  @@map("events")
+}
+
+enum EventType {
+  SEARCH_PERFORMED
+  BUSINESS_VIEWED
+  CTA_CLICKED
+  REVIEW_SUBMITTED
+  BUSINESS_SUBMITTED
+  PWA_INSTALLED
+  SEARCH_ALL_CITY_CLICKED
+  LANGUAGE_CHANGED
+  ACCESSIBILITY_OPENED
+  ACCESSIBILITY_FONT_CHANGED
+  ACCESSIBILITY_CONTRAST_TOGGLED
+}
+
+// ============================================================================
+// ADMIN & SETTINGS
+// ============================================================================
+
+model AdminSettings {
+  id                  String         @id @default(cuid())
+  key                 String         @unique // "top_pinned_count"
+  value               String         // "4"
+  description         String?        @db.Text
+  updated_at          DateTime       @updatedAt
+
+  @@map("admin_settings")
+}
+
+model AdminUser {
+  id              String         @id @default(cuid())
+  email           String         @unique
+  password_hash   String         // bcrypt hash (NOT plain text!)
+  name            String
+  role            AdminRole      @default(SUPERADMIN)
+  is_active       Boolean        @default(true)
+  last_login_at   DateTime?
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  @@map("admin_users")
+}
+
+enum AdminRole {
+  SUPERADMIN
+  // Future: MODERATOR, VIEWER
+}
