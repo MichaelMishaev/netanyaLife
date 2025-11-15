@@ -1,6 +1,4 @@
 import { getTranslations } from 'next-intl/server'
-import { getSession } from '@/lib/auth'
-import { redirect } from 'next/navigation'
 import AdminLoginForm from '@/components/client/AdminLoginForm'
 
 interface AdminLoginPageProps {
@@ -12,12 +10,6 @@ interface AdminLoginPageProps {
 export default async function AdminLoginPage({
   params: { locale },
 }: AdminLoginPageProps) {
-  // Redirect if already logged in
-  const session = await getSession()
-  if (session) {
-    redirect(`/${locale}/admin`)
-  }
-
   const t = await getTranslations('admin.login')
 
   return (

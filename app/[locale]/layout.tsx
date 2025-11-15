@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
+import { headers } from 'next/headers'
 import { locales } from '@/i18n/request'
 import { AccessibilityProvider } from '@/contexts/AccessibilityContext'
 import { AnalyticsProvider } from '@/contexts/AnalyticsContext'
@@ -49,6 +50,11 @@ export default async function LocaleLayout({
   // Determine text direction
   const dir = locale === 'he' ? 'rtl' : 'ltr'
 
+  // Check if this is an admin route
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') || ''
+  const isAdminRoute = pathname.includes('/admin')
+
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
@@ -69,18 +75,24 @@ export default async function LocaleLayout({
               <PWAInstaller />
 
               {/* Skip Link */}
-              <a href="#main-content" className="skip-link">
-                {locale === 'he' ? 'דלג לתוכן' : 'Перейти к содержимому'}
-              </a>
+              {!isAdminRoute && (
+                <a href="#main-content" className="skip-link">
+                  {locale === 'he' ? 'דלג לתוכן' : 'Перейти к содержимому'}
+                </a>
+              )}
 
-              <Header />
-              <main id="main-content" className="flex-1">
-                {children}
-              </main>
-              <Footer />
+              {!isAdminRoute && <Header />}
+              {isAdminRoute ? (
+                children
+              ) : (
+                <main id="main-content" className="flex-1">
+                  {children}
+                </main>
+              )}
+              {!isAdminRoute && <Footer />}
 
               {/* Accessibility Panel */}
-              <AccessibilityPanel />
+              {!isAdminRoute && <AccessibilityPanel />}
             </AccessibilityProvider>
           </AnalyticsProvider>
         </NextIntlClientProvider>
