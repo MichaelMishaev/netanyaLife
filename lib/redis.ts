@@ -21,38 +21,50 @@ const getRedisUrl = () => {
   return url
 }
 
-// Create Redis client singleton
-const redis = new Redis(getRedisUrl(), {
-  maxRetriesPerRequest: 3,
-  retryStrategy: (times) => {
-    const delay = Math.min(times * 50, 2000)
-    return delay
-  },
-  reconnectOnError: (err) => {
-    const targetErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT']
-    if (targetErrors.some((targetError) => err.message.includes(targetError))) {
-      return true // Reconnect
-    }
-    return false
-  },
-})
+// Lazy-initialized Redis client singleton
+let redisClient: Redis | null = null
 
-// Handle connection events
-redis.on('connect', () => {
-  console.log('✅ Redis connected')
-})
+/**
+ * Get Redis client instance (lazy initialization)
+ * Only initializes when actually needed, not during build time
+ */
+const getRedisClient = (): Redis => {
+  if (!redisClient) {
+    redisClient = new Redis(getRedisUrl(), {
+      maxRetriesPerRequest: 3,
+      retryStrategy: (times) => {
+        const delay = Math.min(times * 50, 2000)
+        return delay
+      },
+      reconnectOnError: (err) => {
+        const targetErrors = ['READONLY', 'ECONNRESET', 'ETIMEDOUT']
+        if (targetErrors.some((targetError) => err.message.includes(targetError))) {
+          return true // Reconnect
+        }
+        return false
+      },
+    })
 
-redis.on('error', (err) => {
-  console.error('❌ Redis connection error:', err)
-})
+    // Handle connection events
+    redisClient.on('connect', () => {
+      console.log('✅ Redis connected')
+    })
 
-redis.on('ready', () => {
-  console.log('✅ Redis ready')
-})
+    redisClient.on('error', (err) => {
+      console.error('❌ Redis connection error:', err)
+    })
 
-redis.on('close', () => {
-  console.log('⚠️  Redis connection closed')
-})
+    redisClient.on('ready', () => {
+      console.log('✅ Redis ready')
+    })
+
+    redisClient.on('close', () => {
+      console.log('⚠️  Redis connection closed')
+    })
+  }
+
+  return redisClient
+}
 
 /**
  * Cache Helper Functions
@@ -64,6 +76,7 @@ export const cache = {
    */
   async get<T>(key: string): Promise<T | null> {
     try {
+      const redis = getRedisClient()
       const value = await redis.get(key)
       if (!value) return null
       return JSON.parse(value) as T
@@ -78,6 +91,7 @@ export const cache = {
    */
   async set(key: string, value: unknown, ttl?: number): Promise<boolean> {
     try {
+      const redis = getRedisClient()
       const serialized = JSON.stringify(value)
       if (ttl) {
         await redis.setex(key, ttl, serialized)
@@ -96,6 +110,7 @@ export const cache = {
    */
   async del(key: string): Promise<boolean> {
     try {
+      const redis = getRedisClient()
       await redis.del(key)
       return true
     } catch (error) {
@@ -109,6 +124,7 @@ export const cache = {
    */
   async delPattern(pattern: string): Promise<number> {
     try {
+      const redis = getRedisClient()
       const keys = await redis.keys(pattern)
       if (keys.length === 0) return 0
       await redis.del(...keys)
@@ -142,6 +158,7 @@ export const bugTracking = {
    */
   async getPendingBugs(): Promise<UserMessage[]> {
     try {
+      const redis = getRedisClient()
       const messages = await redis.lrange('user_messages', 0, -1)
       const parsed = messages.map((msg) => JSON.parse(msg) as UserMessage)
       // Filter for pending bugs only
@@ -162,6 +179,7 @@ export const bugTracking = {
     commitHash: string
   ): Promise<boolean> {
     try {
+      const redis = getRedisClient()
       const message = await redis.lindex('user_messages', index)
       if (!message) return false
 
@@ -183,6 +201,7 @@ export const bugTracking = {
    */
   async addMessage(message: UserMessage): Promise<boolean> {
     try {
+      const redis = getRedisClient()
       await redis.rpush('user_messages', JSON.stringify(message))
       return true
     } catch (error) {
@@ -207,6 +226,7 @@ export const rateLimit = {
     windowSeconds: number
   ): Promise<boolean> {
     try {
+      const redis = getRedisClient()
       const current = await redis.incr(key)
       if (current === 1) {
         // First request, set expiry
@@ -228,6 +248,7 @@ export const rateLimit = {
     maxRequests: number
   ): Promise<number> {
     try {
+      const redis = getRedisClient()
       const current = await redis.get(key)
       if (!current) return maxRequests
       const used = parseInt(current, 10)
@@ -239,5 +260,5 @@ export const rateLimit = {
   },
 }
 
-// Export Redis client for direct access if needed
-export default redis
+// Export lazy-loaded Redis client for direct access if needed
+export default getRedisClient

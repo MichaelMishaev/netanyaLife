@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 import {
   toggleBusinessVisibility,
   toggleBusinessVerification,
+  toggleBusinessPinned,
   deleteBusiness,
 } from '@/lib/actions/admin'
 
@@ -40,6 +41,12 @@ export default function BusinessManagementCard({
   const handleToggleVerification = async () => {
     setIsUpdating(true)
     await toggleBusinessVerification(business.id, locale)
+    setIsUpdating(false)
+  }
+
+  const handleTogglePinned = async () => {
+    setIsUpdating(true)
+    await toggleBusinessPinned(business.id, locale)
     setIsUpdating(false)
   }
 
@@ -147,6 +154,27 @@ export default function BusinessManagementCard({
             }
           >
             ✓
+          </button>
+
+          <button
+            onClick={handleTogglePinned}
+            disabled={isUpdating}
+            className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              business.is_pinned
+                ? 'border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100'
+                : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+            }`}
+            title={
+              business.is_pinned
+                ? locale === 'he'
+                  ? 'בטל הצמדה'
+                  : 'Открепить'
+                : locale === 'he'
+                  ? 'הצמד'
+                  : 'Закрепить'
+            }
+          >
+            📌
           </button>
 
           <button

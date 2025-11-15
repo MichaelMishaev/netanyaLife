@@ -7,10 +7,12 @@
 import { config } from 'dotenv'
 config({ path: '.env.local' })
 
-import redis, { cache, bugTracking, rateLimit } from './redis'
+import getRedisClient, { cache, bugTracking, rateLimit } from './redis'
 
 async function testRedis() {
   console.log('🔍 Testing Redis connection...\n')
+
+  const redis = getRedisClient()
 
   try {
     // 1. Basic connection test

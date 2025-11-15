@@ -204,6 +204,68 @@ export async function deleteBusiness(businessId: string, locale: string) {
 }
 
 /**
+ * Toggle business pinning (for featured results)
+ */
+export async function toggleBusinessPinned(
+  businessId: string,
+  locale: string
+) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: { is_pinned: true, pinned_order: true },
+    })
+
+    if (!business) {
+      return { success: false, error: 'Business not found' }
+    }
+
+    if (!business.is_pinned) {
+      // Pin it: Get max pinned_order and add 1
+      const maxPinned = await prisma.business.findFirst({
+        where: { is_pinned: true },
+        orderBy: { pinned_order: 'desc' },
+        select: { pinned_order: true },
+      })
+
+      const nextOrder = (maxPinned?.pinned_order || 0) + 1
+
+      await prisma.business.update({
+        where: { id: businessId },
+        data: {
+          is_pinned: true,
+          pinned_order: nextOrder,
+        },
+      })
+    } else {
+      // Unpin it
+      await prisma.business.update({
+        where: { id: businessId },
+        data: {
+          is_pinned: false,
+          pinned_order: null,
+        },
+      })
+    }
+
+    revalidatePath(`/${locale}/admin/businesses`)
+    revalidatePath(`/${locale}/admin`)
+    // Revalidate search pages since pinning affects ordering
+    revalidatePath(`/${locale}/search`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error toggling business pinning:', error)
+    return { success: false, error: 'Failed to update business' }
+  }
+}
+
+/**
  * Update admin settings
  */
 export async function updateAdminSetting(

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import redis from '@/lib/redis'
+import getRedisClient from '@/lib/redis'
 
 /**
  * Rate limiting: 100 events per minute per IP
  */
 async function checkRateLimit(ip: string): Promise<boolean> {
   try {
+    const redis = getRedisClient()
     const key = `rate-limit:events:${ip}`
     const current = await redis.get(key)
 
