@@ -10,6 +10,16 @@ const bundleAnalyzer = withBundleAnalyzer({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  webpack: (config, { dev, isServer }) => {
+    if (dev && !isServer) {
+      // Fix HMR issues in development
+      config.watchOptions = {
+        ...config.watchOptions,
+        ignored: /node_modules/,
+      }
+    }
+    return config
+  },
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',

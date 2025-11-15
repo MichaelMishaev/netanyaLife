@@ -266,6 +266,325 @@ export async function toggleBusinessPinned(
 }
 
 /**
+ * Create category
+ */
+export async function createCategory(data: {
+  name_he: string
+  name_ru: string
+  slug: string
+  icon_name?: string
+  description_he?: string
+  description_ru?: string
+  is_popular?: boolean
+  display_order: number
+  locale: string
+}) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    await prisma.category.create({
+      data: {
+        name_he: data.name_he,
+        name_ru: data.name_ru,
+        slug: data.slug,
+        icon_name: data.icon_name || null,
+        description_he: data.description_he || null,
+        description_ru: data.description_ru || null,
+        is_popular: data.is_popular || false,
+        is_active: true,
+        display_order: data.display_order,
+      },
+    })
+
+    revalidatePath(`/${data.locale}/admin/categories`)
+    revalidatePath(`/${data.locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error creating category:', error)
+    return { success: false, error: 'Failed to create category' }
+  }
+}
+
+/**
+ * Update category
+ */
+export async function updateCategory(
+  categoryId: string,
+  data: {
+    name_he: string
+    name_ru: string
+    slug: string
+    icon_name?: string
+    description_he?: string
+    description_ru?: string
+    is_popular?: boolean
+    display_order: number
+    locale: string
+  }
+) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    await prisma.category.update({
+      where: { id: categoryId },
+      data: {
+        name_he: data.name_he,
+        name_ru: data.name_ru,
+        slug: data.slug,
+        icon_name: data.icon_name || null,
+        description_he: data.description_he || null,
+        description_ru: data.description_ru || null,
+        is_popular: data.is_popular || false,
+        display_order: data.display_order,
+      },
+    })
+
+    revalidatePath(`/${data.locale}/admin/categories`)
+    revalidatePath(`/${data.locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating category:', error)
+    return { success: false, error: 'Failed to update category' }
+  }
+}
+
+/**
+ * Toggle category active status
+ */
+export async function toggleCategoryActive(categoryId: string, locale: string) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const category = await prisma.category.findUnique({
+      where: { id: categoryId },
+      select: { is_active: true },
+    })
+
+    if (!category) {
+      return { success: false, error: 'Category not found' }
+    }
+
+    await prisma.category.update({
+      where: { id: categoryId },
+      data: { is_active: !category.is_active },
+    })
+
+    revalidatePath(`/${locale}/admin/categories`)
+    revalidatePath(`/${locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error toggling category:', error)
+    return { success: false, error: 'Failed to update category' }
+  }
+}
+
+/**
+ * Delete category
+ */
+export async function deleteCategory(categoryId: string, locale: string) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    // Check if category has businesses
+    const count = await prisma.business.count({
+      where: { category_id: categoryId },
+    })
+
+    if (count > 0) {
+      return {
+        success: false,
+        error: `Cannot delete category with ${count} businesses`,
+      }
+    }
+
+    await prisma.category.delete({
+      where: { id: categoryId },
+    })
+
+    revalidatePath(`/${locale}/admin/categories`)
+    revalidatePath(`/${locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting category:', error)
+    return { success: false, error: 'Failed to delete category' }
+  }
+}
+
+/**
+ * Create neighborhood
+ */
+export async function createNeighborhood(data: {
+  city_id: string
+  name_he: string
+  name_ru: string
+  slug: string
+  description_he?: string
+  description_ru?: string
+  display_order: number
+  locale: string
+}) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    await prisma.neighborhood.create({
+      data: {
+        city_id: data.city_id,
+        name_he: data.name_he,
+        name_ru: data.name_ru,
+        slug: data.slug,
+        description_he: data.description_he || null,
+        description_ru: data.description_ru || null,
+        is_active: true,
+        display_order: data.display_order,
+      },
+    })
+
+    revalidatePath(`/${data.locale}/admin/neighborhoods`)
+    revalidatePath(`/${data.locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error creating neighborhood:', error)
+    return { success: false, error: 'Failed to create neighborhood' }
+  }
+}
+
+/**
+ * Update neighborhood
+ */
+export async function updateNeighborhood(
+  neighborhoodId: string,
+  data: {
+    name_he: string
+    name_ru: string
+    slug: string
+    description_he?: string
+    description_ru?: string
+    display_order: number
+    locale: string
+  }
+) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    await prisma.neighborhood.update({
+      where: { id: neighborhoodId },
+      data: {
+        name_he: data.name_he,
+        name_ru: data.name_ru,
+        slug: data.slug,
+        description_he: data.description_he || null,
+        description_ru: data.description_ru || null,
+        display_order: data.display_order,
+      },
+    })
+
+    revalidatePath(`/${data.locale}/admin/neighborhoods`)
+    revalidatePath(`/${data.locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating neighborhood:', error)
+    return { success: false, error: 'Failed to update neighborhood' }
+  }
+}
+
+/**
+ * Toggle neighborhood active status
+ */
+export async function toggleNeighborhoodActive(
+  neighborhoodId: string,
+  locale: string
+) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const neighborhood = await prisma.neighborhood.findUnique({
+      where: { id: neighborhoodId },
+      select: { is_active: true },
+    })
+
+    if (!neighborhood) {
+      return { success: false, error: 'Neighborhood not found' }
+    }
+
+    await prisma.neighborhood.update({
+      where: { id: neighborhoodId },
+      data: { is_active: !neighborhood.is_active },
+    })
+
+    revalidatePath(`/${locale}/admin/neighborhoods`)
+    revalidatePath(`/${locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error toggling neighborhood:', error)
+    return { success: false, error: 'Failed to update neighborhood' }
+  }
+}
+
+/**
+ * Delete neighborhood
+ */
+export async function deleteNeighborhood(neighborhoodId: string, locale: string) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    // Check if neighborhood has businesses
+    const count = await prisma.business.count({
+      where: { neighborhood_id: neighborhoodId },
+    })
+
+    if (count > 0) {
+      return {
+        success: false,
+        error: `Cannot delete neighborhood with ${count} businesses`,
+      }
+    }
+
+    await prisma.neighborhood.delete({
+      where: { id: neighborhoodId },
+    })
+
+    revalidatePath(`/${locale}/admin/neighborhoods`)
+    revalidatePath(`/${locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting neighborhood:', error)
+    return { success: false, error: 'Failed to delete neighborhood' }
+  }
+}
+
+/**
  * Update admin settings
  */
 export async function updateAdminSetting(

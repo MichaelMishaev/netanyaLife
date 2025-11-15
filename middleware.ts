@@ -1,17 +1,8 @@
 import createMiddleware from 'next-intl/middleware'
-import { locales } from './i18n/request'
-import { NextRequest, NextResponse } from 'next/server'
+import { routing } from './i18n/routing'
+import { NextRequest } from 'next/server'
 
-const intlMiddleware = createMiddleware({
-  // A list of all locales that are supported
-  locales,
-
-  // Used when no locale matches
-  defaultLocale: 'he',
-
-  // Always use locale prefix for all paths
-  localePrefix: 'always',
-})
+const intlMiddleware = createMiddleware(routing)
 
 export default function middleware(request: NextRequest) {
   // Add pathname header for layout detection
