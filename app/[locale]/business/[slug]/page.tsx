@@ -138,7 +138,7 @@ export default async function BusinessDetailPage({
       {/* Track business view */}
       <BusinessViewTracker
         businessId={business.id}
-        businessSlug={business.slug}
+        businessSlug={slug}
         businessNameHe={business.name_he}
         businessNameRu={business.name_ru}
         categorySlug={business.category.slug}
