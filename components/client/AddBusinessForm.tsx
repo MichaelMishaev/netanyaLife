@@ -222,30 +222,35 @@ export default function AddBusinessForm({
     )
   }
 
+  const hasErrors = Object.keys(fieldErrors).length > 0
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Validation Error Summary */}
-      {Object.keys(fieldErrors).length > 0 && (
-        <div className="rounded-lg bg-red-50 border border-red-200 p-4" role="alert">
-          <h3 className="font-bold text-red-800 mb-2">
-            {t('error')}
-          </h3>
-          <ul className="list-disc list-inside space-y-1 text-red-700">
-            {fieldErrors.name && (
-              <li>{t('form.name')}: {fieldErrors.name}</li>
-            )}
-            {fieldErrors.categoryId && (
-              <li>{t('form.category')}: {fieldErrors.categoryId}</li>
-            )}
-            {fieldErrors.neighborhoodId && (
-              <li>{t('form.neighborhood')}: {fieldErrors.neighborhoodId}</li>
-            )}
-            {fieldErrors.contact && (
-              <li>{fieldErrors.contact}</li>
-            )}
-          </ul>
-        </div>
-      )}
+      <div
+        className={`rounded-lg bg-red-50 border border-red-200 p-4 transition-all ${
+          hasErrors ? 'block' : 'hidden'
+        }`}
+        role={hasErrors ? 'alert' : undefined}
+      >
+        <h3 className="font-bold text-red-800 mb-2">
+          {t('error')}
+        </h3>
+        <ul className="list-disc list-inside space-y-1 text-red-700">
+          {fieldErrors.name && (
+            <li>{t('form.name')}: {fieldErrors.name}</li>
+          )}
+          {fieldErrors.categoryId && (
+            <li>{t('form.category')}: {fieldErrors.categoryId}</li>
+          )}
+          {fieldErrors.neighborhoodId && (
+            <li>{t('form.neighborhood')}: {fieldErrors.neighborhoodId}</li>
+          )}
+          {fieldErrors.contact && (
+            <li>{fieldErrors.contact}</li>
+          )}
+        </ul>
+      </div>
 
       {/* Business Name */}
       <div>
@@ -578,29 +583,6 @@ export default function AddBusinessForm({
       {error && (
         <div className="rounded-lg bg-red-50 p-4 text-red-800" role="alert">
           {error}
-        </div>
-      )}
-
-      {/* Validation Error Summary (before submit) */}
-      {Object.keys(fieldErrors).length > 0 && (
-        <div className="rounded-lg bg-red-50 border-2 border-red-300 p-4 shadow-md" role="alert">
-          <h3 className="font-bold text-red-900 mb-3 text-lg">
-            {t('validationError')}
-          </h3>
-          <ul className="list-disc list-inside space-y-2 text-red-800">
-            {fieldErrors.name && (
-              <li className="font-medium">{t('form.name')}: {fieldErrors.name}</li>
-            )}
-            {fieldErrors.categoryId && (
-              <li className="font-medium">{t('form.category')}: {fieldErrors.categoryId}</li>
-            )}
-            {fieldErrors.neighborhoodId && (
-              <li className="font-medium">{t('form.neighborhood')}: {fieldErrors.neighborhoodId}</li>
-            )}
-            {fieldErrors.contact && (
-              <li className="font-medium">{fieldErrors.contact}</li>
-            )}
-          </ul>
         </div>
       )}
 

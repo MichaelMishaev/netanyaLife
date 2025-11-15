@@ -8,8 +8,8 @@ export const addBusinessSchema = z
   .object({
     // Business Info
     name: z.string().min(2, 'שם העסק חייב להכיל לפחות 2 תווים'),
-    categoryId: z.string().uuid('יש לבחור קטגוריה'),
-    neighborhoodId: z.string().uuid('יש לבחור שכונה'),
+    categoryId: z.string().min(1, 'יש לבחור קטגוריה').uuid('יש לבחור קטגוריה'),
+    neighborhoodId: z.string().min(1, 'יש לבחור שכונה').uuid('יש לבחור שכונה'),
     description: z.string().optional(),
 
     // Contact Info

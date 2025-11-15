@@ -30,6 +30,11 @@ export default async function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/accessibility" className="text-gray-600 hover:text-gray-900">
+                  {t('accessibility')}
+                </Link>
+              </li>
+              <li>
                 <Link href="/contact" className="text-gray-600 hover:text-gray-900">
                   {t('contact')}
                 </Link>
