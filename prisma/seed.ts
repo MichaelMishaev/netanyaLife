@@ -392,8 +392,10 @@ async function main() {
   ]
 
   for (const biz of businesses) {
-    const created = await prisma.business.create({
-      data: biz,
+    const created = await prisma.business.upsert({
+      where: { slug_he: biz.slug_he },
+      update: {},
+      create: biz,
     })
     console.log(`✅ Business: ${created.name_he} (${created.slug_he})`)
   }
@@ -442,18 +444,30 @@ async function main() {
   for (const review of reviewsData) {
     const business = allBusinesses.find(b => b.slug_he === review.business_slug)
     if (business) {
-      await prisma.review.create({
-        data: {
+      // Check if review already exists for this business by same author
+      const existingReview = await prisma.review.findFirst({
+        where: {
           business_id: business.id,
-          rating: review.rating,
-          comment_he: review.comment_he || null,
-          comment_ru: review.comment_ru || null,
           author_name: review.author_name,
-          language: review.language,
-          is_approved: true,
         },
       })
-      console.log(`✅ Review for: ${business.name_he} (${review.rating}⭐)`)
+
+      if (!existingReview) {
+        await prisma.review.create({
+          data: {
+            business_id: business.id,
+            rating: review.rating,
+            comment_he: review.comment_he || null,
+            comment_ru: review.comment_ru || null,
+            author_name: review.author_name,
+            language: review.language,
+            is_approved: true,
+          },
+        })
+        console.log(`✅ Review for: ${business.name_he} (${review.rating}⭐)`)
+      } else {
+        console.log(`⏭️  Review already exists for: ${business.name_he} by ${review.author_name}`)
+      }
     }
   }
 
