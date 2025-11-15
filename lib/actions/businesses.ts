@@ -12,13 +12,12 @@ export async function submitPendingBusiness(locale: string, data: any) {
     // Create pending business
     await prisma.pendingBusiness.create({
       data: {
-        // Business Info (bilingual)
-        name_he: locale === 'he' ? validated.name : null,
-        name_ru: locale === 'ru' ? validated.name : null,
+        // Business Info
+        name: validated.name,
+        description: validated.description || null,
+        language: locale, // 'he' or 'ru'
         category_id: validated.categoryId,
         neighborhood_id: validated.neighborhoodId,
-        description_he: locale === 'he' ? validated.description || null : null,
-        description_ru: locale === 'ru' ? validated.description || null : null,
 
         // Contact Info
         phone: validated.phone || null,
@@ -26,20 +25,16 @@ export async function submitPendingBusiness(locale: string, data: any) {
         website_url: validated.websiteUrl || null,
         email: validated.email || null,
 
-        // Location Info (bilingual)
-        address_he: locale === 'he' ? validated.address || null : null,
-        address_ru: locale === 'ru' ? validated.address || null : null,
-        opening_hours_he:
-          locale === 'he' ? validated.openingHours || null : null,
-        opening_hours_ru:
-          locale === 'ru' ? validated.openingHours || null : null,
+        // Location Info
+        address: validated.address || null,
+        opening_hours: validated.openingHours || null,
 
         // Submitter Info
         submitter_name: validated.submitterName || null,
         submitter_email: validated.submitterEmail || null,
 
         // Status
-        status: 'pending',
+        status: 'PENDING',
       },
     })
 

@@ -1,7 +1,7 @@
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { getCategories } from '@/lib/queries/categories'
-import { getNeighborhoods } from '@/lib/queries/neighborhoods'
+import { getNeighborhoods, getNetanyaCity } from '@/lib/queries/neighborhoods'
 import AddBusinessForm from '@/components/client/AddBusinessForm'
 
 interface AddBusinessPageProps {
@@ -17,9 +17,10 @@ export default async function AddBusinessPage({
   const tCommon = await getTranslations('common')
 
   // Fetch categories and neighborhoods for the form
+  const city = await getNetanyaCity()
   const [categories, neighborhoods] = await Promise.all([
     getCategories(),
-    getNeighborhoods(),
+    getNeighborhoods(city!.id),
   ])
 
   return (

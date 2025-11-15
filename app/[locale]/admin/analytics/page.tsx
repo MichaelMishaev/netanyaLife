@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import {
   getAnalyticsSummary,
   getTopCategories,
@@ -17,7 +17,7 @@ interface AdminAnalyticsPageProps {
 export default async function AdminAnalyticsPage({
   params: { locale },
 }: AdminAnalyticsPageProps) {
-  const t = useTranslations('admin.analytics')
+  const t = await getTranslations('admin.analytics')
 
   // Get last 7 days
   const endDate = new Date()

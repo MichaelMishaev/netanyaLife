@@ -16,7 +16,7 @@ export default async function AdminPendingPage({
   // Get pending businesses
   const pending = await prisma.pendingBusiness.findMany({
     where: {
-      status: 'pending',
+      status: 'PENDING',
     },
     include: {
       category: true,

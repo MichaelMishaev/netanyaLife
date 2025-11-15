@@ -44,25 +44,25 @@ export const getAnalyticsSummary = cache(
     ] = await Promise.all([
       prisma.event.count({
         where: {
-          type: 'search_performed',
+          type: 'SEARCH_PERFORMED',
           created_at: { gte: startDate, lte: endDate },
         },
       }),
       prisma.event.count({
         where: {
-          type: 'business_viewed',
+          type: 'BUSINESS_VIEWED',
           created_at: { gte: startDate, lte: endDate },
         },
       }),
       prisma.event.count({
         where: {
-          type: 'review_submitted',
+          type: 'REVIEW_SUBMITTED',
           created_at: { gte: startDate, lte: endDate },
         },
       }),
       prisma.event.count({
         where: {
-          type: 'cta_clicked',
+          type: 'CTA_CLICKED',
           created_at: { gte: startDate, lte: endDate },
         },
       }),
@@ -84,7 +84,7 @@ export const getTopCategories = cache(
   async (startDate: Date, endDate: Date, limit = 10): Promise<TopItem[]> => {
     const events = await prisma.event.findMany({
       where: {
-        type: 'search_performed',
+        type: 'SEARCH_PERFORMED',
         created_at: { gte: startDate, lte: endDate },
       },
       select: {
@@ -119,7 +119,7 @@ export const getTopNeighborhoods = cache(
   async (startDate: Date, endDate: Date, limit = 10): Promise<TopItem[]> => {
     const events = await prisma.event.findMany({
       where: {
-        type: 'search_performed',
+        type: 'SEARCH_PERFORMED',
         created_at: { gte: startDate, lte: endDate },
       },
       select: {
@@ -157,7 +157,7 @@ export const getCTADistribution = cache(
   async (startDate: Date, endDate: Date): Promise<CTADistribution> => {
     const events = await prisma.event.findMany({
       where: {
-        type: 'cta_clicked',
+        type: 'CTA_CLICKED',
         created_at: { gte: startDate, lte: endDate },
       },
       select: {
@@ -190,7 +190,7 @@ export const getLanguageDistribution = cache(
   async (startDate: Date, endDate: Date): Promise<LanguageDistribution> => {
     const events = await prisma.event.findMany({
       where: {
-        type: 'search_performed',
+        type: 'SEARCH_PERFORMED',
         created_at: { gte: startDate, lte: endDate },
       },
       select: {
@@ -221,19 +221,19 @@ export const getAccessibilityUsage = cache(
     const [opened, fontChanged, contrastToggled] = await Promise.all([
       prisma.event.count({
         where: {
-          type: 'accessibility_opened',
+          type: 'ACCESSIBILITY_OPENED',
           created_at: { gte: startDate, lte: endDate },
         },
       }),
       prisma.event.count({
         where: {
-          type: 'accessibility_font_changed',
+          type: 'ACCESSIBILITY_FONT_CHANGED',
           created_at: { gte: startDate, lte: endDate },
         },
       }),
       prisma.event.count({
         where: {
-          type: 'accessibility_contrast_toggled',
+          type: 'ACCESSIBILITY_CONTRAST_TOGGLED',
           created_at: { gte: startDate, lte: endDate },
         },
       }),

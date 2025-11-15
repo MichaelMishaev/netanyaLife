@@ -17,35 +17,47 @@ export async function approvePendingBusiness(pendingId: string, locale: string) 
   try {
     const pending = await prisma.pendingBusiness.findUnique({
       where: { id: pendingId },
+      include: {
+        neighborhood: {
+          select: {
+            city_id: true,
+          },
+        },
+      },
     })
 
     if (!pending) {
       return { success: false, error: 'Pending business not found' }
     }
 
-    // Create the business
+    // Create the business - map language-specific fields
     await prisma.business.create({
       data: {
-        name_he: pending.name_he,
-        name_ru: pending.name_ru,
-        slug_he: pending.name_he
-          ? pending.name_he.toLowerCase().replace(/\s+/g, '-')
-          : null,
-        slug_ru: pending.name_ru
-          ? pending.name_ru.toLowerCase().replace(/\s+/g, '-')
-          : null,
+        name_he: pending.language === 'he' ? pending.name : '',
+        name_ru: pending.language === 'ru' ? pending.name : null,
+        slug_he:
+          pending.language === 'he'
+            ? pending.name.toLowerCase().replace(/\s+/g, '-')
+            : pending.name.toLowerCase().replace(/\s+/g, '-'),
+        slug_ru:
+          pending.language === 'ru'
+            ? pending.name.toLowerCase().replace(/\s+/g, '-')
+            : null,
+        city_id: pending.neighborhood.city_id,
         category_id: pending.category_id,
         neighborhood_id: pending.neighborhood_id,
-        description_he: pending.description_he,
-        description_ru: pending.description_ru,
+        description_he: pending.language === 'he' ? pending.description : null,
+        description_ru: pending.language === 'ru' ? pending.description : null,
         phone: pending.phone,
         whatsapp_number: pending.whatsapp_number,
         website_url: pending.website_url,
         email: pending.email,
-        address_he: pending.address_he,
-        address_ru: pending.address_ru,
-        opening_hours_he: pending.opening_hours_he,
-        opening_hours_ru: pending.opening_hours_ru,
+        address_he: pending.language === 'he' ? pending.address : null,
+        address_ru: pending.language === 'ru' ? pending.address : null,
+        opening_hours_he:
+          pending.language === 'he' ? pending.opening_hours : null,
+        opening_hours_ru:
+          pending.language === 'ru' ? pending.opening_hours : null,
         is_visible: true,
         is_verified: false,
         is_pinned: false,
@@ -55,7 +67,7 @@ export async function approvePendingBusiness(pendingId: string, locale: string) 
     // Update pending status
     await prisma.pendingBusiness.update({
       where: { id: pendingId },
-      data: { status: 'approved' },
+      data: { status: 'APPROVED' },
     })
 
     revalidatePath(`/${locale}/admin/pending`)
@@ -81,7 +93,7 @@ export async function rejectPendingBusiness(pendingId: string, locale: string) {
   try {
     await prisma.pendingBusiness.update({
       where: { id: pendingId },
-      data: { status: 'rejected' },
+      data: { status: 'REJECTED' },
     })
 
     revalidatePath(`/${locale}/admin/pending`)

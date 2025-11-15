@@ -23,7 +23,7 @@ export default async function AdminDashboard({
     verifiedBusinesses,
   ] = await Promise.all([
     prisma.business.count(),
-    prisma.pendingBusiness.count({ where: { status: 'pending' } }),
+    prisma.pendingBusiness.count({ where: { status: 'PENDING' } }),
     prisma.category.count({ where: { is_active: true } }),
     prisma.review.count(),
     prisma.business.count({ where: { is_visible: true } }),

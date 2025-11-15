@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { redis } from '@/lib/redis'
+import redis from '@/lib/redis'
 
 /**
  * Rate limiting: 100 events per minute per IP
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       data: {
         type: event_type.toUpperCase(),
         properties: properties || {},
-        ip_address: ip,
+        ip_hash: ip,
       },
     })
 
