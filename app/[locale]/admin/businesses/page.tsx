@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
 import BusinessManagementCard from '@/components/client/BusinessManagementCard'
 
@@ -11,7 +11,7 @@ interface AdminBusinessesPageProps {
 export default async function AdminBusinessesPage({
   params: { locale },
 }: AdminBusinessesPageProps) {
-  const t = useTranslations('admin.businesses')
+  const t = await getTranslations('admin.businesses')
 
   // Get all businesses (excluding soft-deleted)
   const businesses = await prisma.business.findMany({

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { getBusinessBySlug } from '@/lib/queries/businesses'
 import ReviewForm from '@/components/client/ReviewForm'
@@ -14,7 +14,7 @@ interface WriteReviewPageProps {
 export default async function WriteReviewPage({
   params: { locale, slug },
 }: WriteReviewPageProps) {
-  const t = useTranslations('reviews')
+  const t = await getTranslations('reviews')
 
   const business = await getBusinessBySlug(slug, locale)
   if (!business) notFound()
@@ -23,7 +23,7 @@ export default async function WriteReviewPage({
     locale === 'he' ? business.name_he : business.name_ru || business.name_he
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       {/* Back Link */}
       <Link
         href={`/${locale}/business/${slug}`}
@@ -46,6 +46,6 @@ export default async function WriteReviewPage({
           businessSlug={slug}
         />
       </div>
-    </main>
+    </div>
   )
 }

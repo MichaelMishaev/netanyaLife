@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 
@@ -11,7 +11,7 @@ interface AdminDashboardProps {
 export default async function AdminDashboard({
   params: { locale },
 }: AdminDashboardProps) {
-  const t = useTranslations('admin.dashboard')
+  const t = await getTranslations('admin.dashboard')
 
   // Get statistics
   const [

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { getBusinessBySlug } from '@/lib/queries/businesses'
 
@@ -13,7 +13,7 @@ interface BusinessDetailPageProps {
 export default async function BusinessDetailPage({
   params: { locale, slug },
 }: BusinessDetailPageProps) {
-  const t = useTranslations('business')
+  const t = await getTranslations('business')
 
   const business = await getBusinessBySlug(slug, locale)
   if (!business) notFound()
@@ -33,7 +33,7 @@ export default async function BusinessDetailPage({
       : 0
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       {/* Back Link */}
       <Link
         href={`/${locale}/search/${business.category.slug}/${business.neighborhood.slug}`}
@@ -180,6 +180,6 @@ export default async function BusinessDetailPage({
           </div>
         )}
       </div>
-    </main>
+    </div>
   )
 }

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { getSearchResults, getSearchResultsCount } from '@/lib/queries/businesses'
 import { getCategoryBySlug } from '@/lib/queries/categories'
@@ -17,7 +17,7 @@ interface SearchResultsPageProps {
 export default async function SearchResultsPage({
   params: { locale, category: categorySlug, neighborhood: neighborhoodSlug },
 }: SearchResultsPageProps) {
-  const t = useTranslations('results')
+  const t = await getTranslations('results')
 
   // Get city (Netanya)
   const city = await getNetanyaCity()
@@ -60,7 +60,7 @@ export default async function SearchResultsPage({
     : 'Вся Нетания'
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <div className="mb-8">
         <Link
@@ -104,6 +104,6 @@ export default async function SearchResultsPage({
           ))}
         </div>
       )}
-    </main>
+    </div>
   )
 }

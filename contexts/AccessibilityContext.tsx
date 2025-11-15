@@ -27,14 +27,16 @@ export function AccessibilityProvider({
 }: {
   children: React.ReactNode
 }) {
+  const [mounted, setMounted] = useState(false)
   const [settings, setSettings] = useState<AccessibilitySettings>({
     fontSize: 'normal',
     highContrast: false,
     underlineLinks: false,
   })
 
-  // Load settings from localStorage on mount
+  // Set mounted state and load settings from localStorage
   useEffect(() => {
+    setMounted(true)
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
       try {
@@ -45,8 +47,10 @@ export function AccessibilityProvider({
     }
   }, [])
 
-  // Save settings to localStorage whenever they change
+  // Save settings to localStorage and apply to DOM (only after mount)
   useEffect(() => {
+    if (!mounted) return
+
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings))
 
     // Apply settings to document
@@ -74,7 +78,7 @@ export function AccessibilityProvider({
     } else {
       root.classList.remove('underline-links')
     }
-  }, [settings])
+  }, [mounted, settings])
 
   const setFontSize = (size: FontSize) => {
     setSettings((prev) => ({ ...prev, fontSize: size }))

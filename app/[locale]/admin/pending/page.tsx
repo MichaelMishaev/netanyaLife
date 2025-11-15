@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
 import PendingBusinessCard from '@/components/client/PendingBusinessCard'
 
@@ -11,7 +11,7 @@ interface AdminPendingPageProps {
 export default async function AdminPendingPage({
   params: { locale },
 }: AdminPendingPageProps) {
-  const t = useTranslations('admin.pending')
+  const t = await getTranslations('admin.pending')
 
   // Get pending businesses
   const pending = await prisma.pendingBusiness.findMany({

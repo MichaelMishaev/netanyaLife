@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { getCategories } from '@/lib/queries/categories'
 import { getNeighborhoods } from '@/lib/queries/neighborhoods'
@@ -13,8 +13,8 @@ interface AddBusinessPageProps {
 export default async function AddBusinessPage({
   params: { locale },
 }: AddBusinessPageProps) {
-  const t = useTranslations('addBusiness')
-  const tCommon = useTranslations('common')
+  const t = await getTranslations('addBusiness')
+  const tCommon = await getTranslations('common')
 
   // Fetch categories and neighborhoods for the form
   const [categories, neighborhoods] = await Promise.all([
@@ -23,7 +23,7 @@ export default async function AddBusinessPage({
   ])
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8">
       {/* Back Link */}
       <Link
         href={`/${locale}`}
@@ -46,6 +46,6 @@ export default async function AddBusinessPage({
           locale={locale}
         />
       </div>
-    </main>
+    </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
 import AdminSettingsForm from '@/components/client/AdminSettingsForm'
 
@@ -11,7 +11,7 @@ interface AdminSettingsPageProps {
 export default async function AdminSettingsPage({
   params: { locale },
 }: AdminSettingsPageProps) {
-  const t = useTranslations('admin.settings')
+  const t = await getTranslations('admin.settings')
 
   // Get current settings
   const topPinnedCountSetting = await prisma.adminSettings.findUnique({

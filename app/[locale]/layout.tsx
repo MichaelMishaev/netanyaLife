@@ -40,7 +40,7 @@ export default async function LocaleLayout({
   const dir = locale === 'he' ? 'rtl' : 'ltr'
 
   return (
-    <html lang={locale} dir={dir}>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="theme-color" content="#2563eb" />
@@ -51,7 +51,7 @@ export default async function LocaleLayout({
         />
         <meta name="apple-mobile-web-app-title" content="Netanya Local" />
       </head>
-      <body className="flex min-h-screen flex-col">
+      <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         <NextIntlClientProvider messages={messages}>
           <AnalyticsProvider>
             <AccessibilityProvider>

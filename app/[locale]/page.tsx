@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { getCategories } from '@/lib/queries/categories'
 import { getNeighborhoods, getNetanyaCity } from '@/lib/queries/neighborhoods'
 import SearchForm from '@/components/client/SearchForm'
@@ -8,7 +8,7 @@ export default async function Home({
 }: {
   params: { locale: string }
 }) {
-  const t = useTranslations('home')
+  const t = await getTranslations('home')
 
   // Fetch data for search form
   const city = await getNetanyaCity()
@@ -18,7 +18,7 @@ export default async function Home({
   ])
 
   return (
-    <main className="container mx-auto px-4 py-12">
+    <div className="container mx-auto px-4 py-12">
       {/* Hero Section */}
       <section className="mb-12 text-center">
         <h1 className="mb-4 text-4xl font-bold md:text-5xl">
@@ -44,6 +44,6 @@ export default async function Home({
           Popular categories coming soon...
         </p>
       </section>
-    </main>
+    </div>
   )
 }

@@ -1,9 +1,9 @@
 import Link from 'next/link'
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import LanguageSwitcher from '../client/LanguageSwitcher'
 
-export default function Header() {
-  const t = useTranslations('nav')
+export default async function Header() {
+  const t = await getTranslations('nav')
 
   return (
     <header className="border-b bg-white">

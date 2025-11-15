@@ -1,4 +1,4 @@
-import { useTranslations } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import AdminLoginForm from '@/components/client/AdminLoginForm'
@@ -18,7 +18,7 @@ export default async function AdminLoginPage({
     redirect(`/${locale}/admin`)
   }
 
-  const t = useTranslations('admin.login')
+  const t = await getTranslations('admin.login')
 
   return (
     <main className="container mx-auto flex min-h-[70vh] items-center justify-center px-4 py-8">

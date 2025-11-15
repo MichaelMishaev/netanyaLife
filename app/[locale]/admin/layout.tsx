@@ -1,6 +1,5 @@
 import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import AdminLogoutButton from '@/components/client/AdminLogoutButton'
 
@@ -46,6 +45,12 @@ export default async function AdminLayout({
                 className="text-gray-600 hover:text-primary-600"
               >
                 {locale === 'he' ? 'עסקים' : 'Предприятия'}
+              </Link>
+              <Link
+                href={`/${locale}/admin/analytics`}
+                className="text-gray-600 hover:text-primary-600"
+              >
+                {locale === 'he' ? 'ניתוח נתונים' : 'Аналитика'}
               </Link>
               <Link
                 href={`/${locale}/admin/settings`}
