@@ -6,7 +6,7 @@
     "dev": "next dev -p 4700",
     "build": "next build",
     "build:analyze": "ANALYZE=true next build",
-    "start": "next start -p 4700",
+    "start": "next start -p ${PORT:-4700}",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md}\"",
