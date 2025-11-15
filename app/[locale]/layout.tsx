@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
+import { Assistant } from 'next/font/google'
 import { locales } from '@/i18n/request'
 import { AccessibilityProvider } from '@/contexts/AccessibilityContext'
 import { AnalyticsProvider } from '@/contexts/AnalyticsContext'
@@ -11,6 +12,13 @@ import { RecentlyViewedProvider } from '@/contexts/RecentlyViewedContext'
 import Header from '@/components/server/Header'
 import Footer from '@/components/server/Footer'
 import '../globals.css'
+
+// Load Assistant font (optimized for Hebrew - used by Zap.co.il)
+const assistant = Assistant({
+  subsets: ['hebrew', 'latin'],
+  weight: ['400', '500', '600', '700'],
+  display: 'swap',
+})
 
 // Lazy load non-critical components
 const AccessibilityPanel = dynamic(
@@ -68,7 +76,10 @@ export default async function LocaleLayout({
         />
         <meta name="apple-mobile-web-app-title" content="Netanya Local" />
       </head>
-      <body className="flex min-h-screen flex-col" suppressHydrationWarning>
+      <body
+        className={`${assistant.className} flex min-h-screen flex-col`}
+        suppressHydrationWarning
+      >
         <NextIntlClientProvider messages={messages}>
           <AnalyticsProvider>
             <AccessibilityProvider>
