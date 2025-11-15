@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import dynamic from 'next/dynamic'
+import dynamicImport from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
@@ -21,12 +21,12 @@ const assistant = Assistant({
 })
 
 // Lazy load non-critical components
-const AccessibilityPanel = dynamic(
+const AccessibilityPanel = dynamicImport(
   () => import('@/components/client/AccessibilityPanel'),
   { ssr: false }
 )
 
-const PWAInstaller = dynamic(
+const PWAInstaller = dynamicImport(
   () => import('@/components/client/PWAInstaller'),
   { ssr: false }
 )
@@ -36,6 +36,9 @@ export const metadata: Metadata = {
   description:
     'מדריך עסקים מקומיים בנתניה - Local business directory for Netanya residents',
 }
+
+// Force dynamic rendering for all pages (required for client contexts)
+export const dynamic = 'force-dynamic'
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
@@ -65,7 +68,12 @@ export default async function LocaleLayout({
   const isAdminRoute = pathname.includes('/admin')
 
   return (
-    <html lang={locale} dir={dir} suppressHydrationWarning>
+    <html
+      lang={locale}
+      dir={dir}
+      suppressHydrationWarning
+      className={assistant.className}
+    >
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
         <meta name="theme-color" content="#2563eb" />
@@ -76,10 +84,7 @@ export default async function LocaleLayout({
         />
         <meta name="apple-mobile-web-app-title" content="Netanya Local" />
       </head>
-      <body
-        className={`${assistant.className} flex min-h-screen flex-col`}
-        suppressHydrationWarning
-      >
+      <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         <NextIntlClientProvider messages={messages}>
           <AnalyticsProvider>
             <AccessibilityProvider>
