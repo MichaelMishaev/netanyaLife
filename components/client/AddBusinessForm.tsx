@@ -56,17 +56,54 @@ export default function AddBusinessForm({
 
   // Set custom validation messages in the selected language
   useEffect(() => {
-    if (categoryRef.current) {
-      categoryRef.current.setCustomValidity(
-        formData.categoryId ? '' : t('form.categoryPlaceholder')
-      )
+    const categoryEl = categoryRef.current
+    const neighborhoodEl = neighborhoodRef.current
+
+    const handleCategoryInvalid = () => {
+      if (categoryEl) {
+        categoryEl.setCustomValidity(t('form.categoryPlaceholder'))
+      }
     }
-    if (neighborhoodRef.current) {
-      neighborhoodRef.current.setCustomValidity(
-        formData.neighborhoodId ? '' : t('form.neighborhoodPlaceholder')
-      )
+
+    const handleNeighborhoodInvalid = () => {
+      if (neighborhoodEl) {
+        neighborhoodEl.setCustomValidity(t('form.neighborhoodPlaceholder'))
+      }
     }
-  }, [formData.categoryId, formData.neighborhoodId, t])
+
+    const handleCategoryChange = () => {
+      if (categoryEl) {
+        categoryEl.setCustomValidity('')
+      }
+    }
+
+    const handleNeighborhoodChange = () => {
+      if (neighborhoodEl) {
+        neighborhoodEl.setCustomValidity('')
+      }
+    }
+
+    if (categoryEl) {
+      categoryEl.addEventListener('invalid', handleCategoryInvalid)
+      categoryEl.addEventListener('change', handleCategoryChange)
+    }
+
+    if (neighborhoodEl) {
+      neighborhoodEl.addEventListener('invalid', handleNeighborhoodInvalid)
+      neighborhoodEl.addEventListener('change', handleNeighborhoodChange)
+    }
+
+    return () => {
+      if (categoryEl) {
+        categoryEl.removeEventListener('invalid', handleCategoryInvalid)
+        categoryEl.removeEventListener('change', handleCategoryChange)
+      }
+      if (neighborhoodEl) {
+        neighborhoodEl.removeEventListener('invalid', handleNeighborhoodInvalid)
+        neighborhoodEl.removeEventListener('change', handleNeighborhoodChange)
+      }
+    }
+  }, [t])
 
   const handleChange = (
     e: React.ChangeEvent<
