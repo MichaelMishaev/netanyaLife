@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { submitReview } from '@/lib/actions/reviews'
 import { useRouter } from 'next/navigation'
+import { useAnalytics } from '@/contexts/AnalyticsContext'
 
 interface ReviewFormProps {
   businessId: string
@@ -20,6 +21,7 @@ export default function ReviewForm({
 }: ReviewFormProps) {
   const t = useTranslations('reviews')
   const router = useRouter()
+  const { trackEvent } = useAnalytics()
   const [rating, setRating] = useState(0)
   const [hoveredRating, setHoveredRating] = useState(0)
   const [comment, setComment] = useState('')
@@ -46,6 +48,12 @@ export default function ReviewForm({
       })
 
       if (result.success) {
+        // Track review submitted
+        await trackEvent('review_submitted', {
+          business_id: businessId,
+          rating,
+        })
+
         // Redirect back to business page
         router.push(`/${locale}/business/${businessSlug}`)
       } else {

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { submitPendingBusiness } from '@/lib/actions/businesses'
 import { useRouter } from 'next/navigation'
+import { useAnalytics } from '@/contexts/AnalyticsContext'
 
 interface AddBusinessFormProps {
   categories: Array<{
@@ -27,6 +28,7 @@ export default function AddBusinessForm({
   const t = useTranslations('addBusiness')
   const tCommon = useTranslations('common')
   const router = useRouter()
+  const { trackEvent } = useAnalytics()
 
   // Form State
   const [formData, setFormData] = useState({
@@ -75,6 +77,12 @@ export default function AddBusinessForm({
       const result = await submitPendingBusiness(locale, formData)
 
       if (result.success) {
+        // Track business submitted
+        await trackEvent('business_submitted', {
+          category_id: formData.categoryId,
+          neighborhood_id: formData.neighborhoodId,
+        })
+
         setSuccess(true)
         // Redirect to home after 3 seconds
         setTimeout(() => {

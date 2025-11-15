@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAccessibility } from '@/contexts/AccessibilityContext'
+import { useAnalytics } from '@/contexts/AnalyticsContext'
 
 export default function AccessibilityPanel() {
   const t = useTranslations('accessibility')
+  const { trackEvent } = useAnalytics()
   const [isOpen, setIsOpen] = useState(false)
   const {
     fontSize,
@@ -16,11 +18,30 @@ export default function AccessibilityPanel() {
     toggleUnderlineLinks,
   } = useAccessibility()
 
+  const handleOpen = () => {
+    setIsOpen(true)
+    trackEvent('accessibility_opened')
+  }
+
+  const handleFontSizeChange = (size: 'normal' | 'medium' | 'large') => {
+    setFontSize(size)
+    trackEvent('accessibility_font_changed', { size })
+  }
+
+  const handleContrastToggle = () => {
+    toggleHighContrast()
+    trackEvent('accessibility_contrast_toggled', { enabled: !highContrast })
+  }
+
+  const handleUnderlineToggle = () => {
+    toggleUnderlineLinks()
+  }
+
   return (
     <>
       {/* Toggle Button - Fixed bottom-right */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleOpen}
         className="fixed bottom-6 end-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg transition hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-500 focus:ring-offset-2"
         aria-label={t('title')}
         aria-expanded={isOpen}
@@ -68,7 +89,7 @@ export default function AccessibilityPanel() {
               </label>
               <div className="flex gap-2">
                 <button
-                  onClick={() => setFontSize('normal')}
+                  onClick={() => handleFontSizeChange('normal')}
                   className={`flex-1 rounded-lg border px-4 py-2 transition ${
                     fontSize === 'normal'
                       ? 'border-primary-600 bg-primary-50 text-primary-700'
@@ -79,7 +100,7 @@ export default function AccessibilityPanel() {
                   {t('fontSizes.normal')}
                 </button>
                 <button
-                  onClick={() => setFontSize('medium')}
+                  onClick={() => handleFontSizeChange('medium')}
                   className={`flex-1 rounded-lg border px-4 py-2 transition ${
                     fontSize === 'medium'
                       ? 'border-primary-600 bg-primary-50 text-primary-700'
@@ -90,7 +111,7 @@ export default function AccessibilityPanel() {
                   {t('fontSizes.medium')}
                 </button>
                 <button
-                  onClick={() => setFontSize('large')}
+                  onClick={() => handleFontSizeChange('large')}
                   className={`flex-1 rounded-lg border px-4 py-2 transition ${
                     fontSize === 'large'
                       ? 'border-primary-600 bg-primary-50 text-primary-700'
@@ -110,7 +131,7 @@ export default function AccessibilityPanel() {
                   {t('contrast')}
                 </span>
                 <button
-                  onClick={toggleHighContrast}
+                  onClick={handleContrastToggle}
                   role="switch"
                   aria-checked={highContrast}
                   className={`relative h-6 w-11 rounded-full transition ${

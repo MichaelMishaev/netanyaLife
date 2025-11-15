@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useAnalytics } from '@/contexts/AnalyticsContext'
 
 interface SearchFormProps {
   categories: Array<{
@@ -27,11 +28,12 @@ export default function SearchForm({
 }: SearchFormProps) {
   const t = useTranslations('home.search')
   const router = useRouter()
+  const { trackEvent } = useAnalytics()
   const [categorySlug, setCategorySlug] = useState('')
   const [neighborhoodSlug, setNeighborhoodSlug] = useState('')
   const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
@@ -39,6 +41,13 @@ export default function SearchForm({
       setError(t('requiredFields'))
       return
     }
+
+    // Track search event
+    await trackEvent('search_performed', {
+      category: categorySlug,
+      neighborhood: neighborhoodSlug,
+      language: locale,
+    })
 
     // Navigate to results page
     const url = `/${locale}/search/${categorySlug}/${neighborhoodSlug}`
