@@ -80,3 +80,67 @@
     margin-inline-end: auto;
   }
 }
+
+/* Print Stylesheet */
+@media print {
+  /* Hide navigation and interactive elements */
+  header,
+  footer,
+  nav,
+  .accessibility-button,
+  .share-button,
+  button,
+  .language-switcher,
+  .admin-logout-button,
+  .cta-button,
+  .filter-button {
+    display: none !important;
+  }
+
+  /* Show only essential content */
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  /* Business detail page optimizations */
+  .business-detail {
+    page-break-after: always;
+  }
+
+  .business-detail:after {
+    content: '\A\A מקור: Netanya Local - netanyalocal.com';
+    white-space: pre;
+    display: block;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ccc;
+    font-size: 10pt;
+    color: #666;
+  }
+
+  /* Clean up links for print */
+  a {
+    text-decoration: underline;
+    color: black !important;
+  }
+
+  a[href]:after {
+    content: ' (' attr(href) ')';
+    font-size: 9pt;
+    color: #666;
+  }
+
+  /* Avoid page breaks in important elements */
+  .business-card,
+  .review-card {
+    page-break-inside: avoid;
+  }
+
+  /* Optimize images for print */
+  img {
+    max-width: 100% !important;
+    page-break-inside: avoid;
+  }
+}

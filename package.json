@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev -p 4700",
     "build": "next build",
+    "build:analyze": "ANALYZE=true next build",
     "start": "next start -p 4700",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
@@ -18,6 +19,7 @@
     "test:all": "npm run test:unit && npm run test:integration && npm run test:e2e",
     "test:coverage": "vitest run --coverage",
     "lighthouse": "lighthouse http://localhost:4700 --view",
+    "lighthouse:all": "./scripts/run-lighthouse.sh",
     "prisma:studio": "prisma studio",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
@@ -45,6 +47,7 @@
     "zod": "^3.23.0"
   },
   "devDependencies": {
+    "@next/bundle-analyzer": "^16.0.3",
     "@playwright/test": "^1.47.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.0",
@@ -62,6 +65,7 @@
     "eslint": "^8",
     "eslint-config-next": "^14.2.0",
     "jsdom": "^25.0.0",
+    "lighthouse": "^12.8.2",
     "postcss": "^8",
     "prettier": "^3.3.0",
     "prettier-plugin-tailwindcss": "^0.6.0",

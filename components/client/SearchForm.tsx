@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAnalytics } from '@/contexts/AnalyticsContext'
 
@@ -32,6 +32,59 @@ export default function SearchForm({
   const [categorySlug, setCategorySlug] = useState('')
   const [neighborhoodSlug, setNeighborhoodSlug] = useState('')
   const [error, setError] = useState('')
+  const categoryRef = useRef<HTMLSelectElement>(null)
+  const neighborhoodRef = useRef<HTMLSelectElement>(null)
+
+  // Set custom validation messages in the selected language
+  useEffect(() => {
+    const categoryEl = categoryRef.current
+    const neighborhoodEl = neighborhoodRef.current
+
+    const handleCategoryInvalid = () => {
+      if (categoryEl) {
+        categoryEl.setCustomValidity(t('categoryPlaceholder'))
+      }
+    }
+
+    const handleNeighborhoodInvalid = () => {
+      if (neighborhoodEl) {
+        neighborhoodEl.setCustomValidity(t('neighborhoodPlaceholder'))
+      }
+    }
+
+    const handleCategoryChange = () => {
+      if (categoryEl) {
+        categoryEl.setCustomValidity('')
+      }
+    }
+
+    const handleNeighborhoodChange = () => {
+      if (neighborhoodEl) {
+        neighborhoodEl.setCustomValidity('')
+      }
+    }
+
+    if (categoryEl) {
+      categoryEl.addEventListener('invalid', handleCategoryInvalid)
+      categoryEl.addEventListener('change', handleCategoryChange)
+    }
+
+    if (neighborhoodEl) {
+      neighborhoodEl.addEventListener('invalid', handleNeighborhoodInvalid)
+      neighborhoodEl.addEventListener('change', handleNeighborhoodChange)
+    }
+
+    return () => {
+      if (categoryEl) {
+        categoryEl.removeEventListener('invalid', handleCategoryInvalid)
+        categoryEl.removeEventListener('change', handleCategoryChange)
+      }
+      if (neighborhoodEl) {
+        neighborhoodEl.removeEventListener('invalid', handleNeighborhoodInvalid)
+        neighborhoodEl.removeEventListener('change', handleNeighborhoodChange)
+      }
+    }
+  }, [t])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,6 +120,7 @@ export default function SearchForm({
           </label>
           <select
             id="category"
+            ref={categoryRef}
             value={categorySlug}
             onChange={(e) => setCategorySlug(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -91,6 +145,7 @@ export default function SearchForm({
           </label>
           <select
             id="neighborhood"
+            ref={neighborhoodRef}
             value={neighborhoodSlug}
             onChange={(e) => setNeighborhoodSlug(e.target.value)}
             className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"

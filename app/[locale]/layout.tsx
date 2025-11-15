@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import dynamic from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
@@ -7,9 +8,18 @@ import { AccessibilityProvider } from '@/contexts/AccessibilityContext'
 import { AnalyticsProvider } from '@/contexts/AnalyticsContext'
 import Header from '@/components/server/Header'
 import Footer from '@/components/server/Footer'
-import AccessibilityPanel from '@/components/client/AccessibilityPanel'
-import PWAInstaller from '@/components/client/PWAInstaller'
 import '../globals.css'
+
+// Lazy load non-critical components
+const AccessibilityPanel = dynamic(
+  () => import('@/components/client/AccessibilityPanel'),
+  { ssr: false }
+)
+
+const PWAInstaller = dynamic(
+  () => import('@/components/client/PWAInstaller'),
+  { ssr: false }
+)
 
 export const metadata: Metadata = {
   title: 'Netanya Local - נתניה לוקל',

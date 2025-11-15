@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import { submitPendingBusiness } from '@/lib/actions/businesses'
 import { useRouter } from 'next/navigation'
@@ -49,6 +49,24 @@ export default function AddBusinessForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+
+  // Refs for validation
+  const categoryRef = useRef<HTMLSelectElement>(null)
+  const neighborhoodRef = useRef<HTMLSelectElement>(null)
+
+  // Set custom validation messages in the selected language
+  useEffect(() => {
+    if (categoryRef.current) {
+      categoryRef.current.setCustomValidity(
+        formData.categoryId ? '' : t('form.categoryPlaceholder')
+      )
+    }
+    if (neighborhoodRef.current) {
+      neighborhoodRef.current.setCustomValidity(
+        formData.neighborhoodId ? '' : t('form.neighborhoodPlaceholder')
+      )
+    }
+  }, [formData.categoryId, formData.neighborhoodId, t])
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -142,6 +160,7 @@ export default function AddBusinessForm({
         <select
           id="categoryId"
           name="categoryId"
+          ref={categoryRef}
           value={formData.categoryId}
           onChange={handleChange}
           required
@@ -167,6 +186,7 @@ export default function AddBusinessForm({
         <select
           id="neighborhoodId"
           name="neighborhoodId"
+          ref={neighborhoodRef}
           value={formData.neighborhoodId}
           onChange={handleChange}
           required

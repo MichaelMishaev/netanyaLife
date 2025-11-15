@@ -64,3 +64,5 @@ dump.rdb
 # Logs
 logs/
 *.log
+lighthouse-reports/
+lighthouse-test.json
