@@ -4,6 +4,7 @@ import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
 import { locales } from '@/i18n/request'
 import { AccessibilityProvider } from '@/contexts/AccessibilityContext'
+import { AnalyticsProvider } from '@/contexts/AnalyticsContext'
 import Header from '@/components/server/Header'
 import Footer from '@/components/server/Footer'
 import AccessibilityPanel from '@/components/client/AccessibilityPanel'
@@ -52,24 +53,26 @@ export default async function LocaleLayout({
       </head>
       <body className="flex min-h-screen flex-col">
         <NextIntlClientProvider messages={messages}>
-          <AccessibilityProvider>
-            {/* PWA Service Worker */}
-            <PWAInstaller />
+          <AnalyticsProvider>
+            <AccessibilityProvider>
+              {/* PWA Service Worker */}
+              <PWAInstaller />
 
-            {/* Skip Link */}
-            <a href="#main-content" className="skip-link">
-              {locale === 'he' ? 'דלג לתוכן' : 'Перейти к содержимому'}
-            </a>
+              {/* Skip Link */}
+              <a href="#main-content" className="skip-link">
+                {locale === 'he' ? 'דלג לתוכן' : 'Перейти к содержимому'}
+              </a>
 
-            <Header />
-            <main id="main-content" className="flex-1">
-              {children}
-            </main>
-            <Footer />
+              <Header />
+              <main id="main-content" className="flex-1">
+                {children}
+              </main>
+              <Footer />
 
-            {/* Accessibility Panel */}
-            <AccessibilityPanel />
-          </AccessibilityProvider>
+              {/* Accessibility Panel */}
+              <AccessibilityPanel />
+            </AccessibilityProvider>
+          </AnalyticsProvider>
         </NextIntlClientProvider>
       </body>
     </html>
