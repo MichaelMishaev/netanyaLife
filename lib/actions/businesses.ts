@@ -9,6 +9,76 @@ export async function submitPendingBusiness(locale: string, data: any) {
     // Validate input
     const validated = addBusinessSchema.parse(data)
 
+    // Check for duplicates by name and phone/whatsapp
+    const phoneToCheck = validated.phone || validated.whatsappNumber
+
+    if (phoneToCheck) {
+      // Check in existing businesses
+      const existingBusiness = await prisma.business.findFirst({
+        where: {
+          AND: [
+            {
+              OR: [
+                {
+                  name_he: {
+                    equals: validated.name,
+                    mode: 'insensitive',
+                  },
+                },
+                {
+                  name_ru: {
+                    equals: validated.name,
+                    mode: 'insensitive',
+                  },
+                },
+              ],
+            },
+            {
+              OR: [
+                { phone: phoneToCheck },
+                { whatsapp_number: phoneToCheck },
+              ],
+            },
+          ],
+        },
+      })
+
+      if (existingBusiness) {
+        return {
+          success: false,
+          error:
+            locale === 'he'
+              ? 'עסק זה כבר קיים במערכת'
+              : 'Этот бизнес уже существует в системе',
+        }
+      }
+
+      // Check in pending businesses
+      const existingPending = await prisma.pendingBusiness.findFirst({
+        where: {
+          name: {
+            equals: validated.name,
+            mode: 'insensitive',
+          },
+          status: 'PENDING',
+          OR: [
+            { phone: phoneToCheck },
+            { whatsapp_number: phoneToCheck },
+          ],
+        },
+      })
+
+      if (existingPending) {
+        return {
+          success: false,
+          error:
+            locale === 'he'
+              ? 'עסק זה כבר ממתין לאישור במערכת'
+              : 'Этот бизнес уже ожидает одобрения в системе',
+        }
+      }
+    }
+
     // Create pending business
     await prisma.pendingBusiness.create({
       data: {
@@ -28,6 +98,9 @@ export async function submitPendingBusiness(locale: string, data: any) {
         // Location Info
         address: validated.address || null,
         opening_hours: validated.openingHours || null,
+
+        // Service Area
+        serves_all_city: validated.servesAllCity || false,
 
         // Submitter Info
         submitter_name: validated.submitterName || null,

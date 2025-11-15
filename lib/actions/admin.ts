@@ -61,6 +61,7 @@ export async function approvePendingBusiness(pendingId: string, locale: string) 
         is_visible: true,
         is_verified: false,
         is_pinned: false,
+        serves_all_city: pending.serves_all_city || false,
       },
     })
 
@@ -610,5 +611,86 @@ export async function updateAdminSetting(
   } catch (error) {
     console.error('Error updating admin setting:', error)
     return { success: false, error: 'Failed to update setting' }
+  }
+}
+
+/**
+ * Create business directly (admin only - bypasses pending queue)
+ */
+export async function createBusiness(locale: string, data: any) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    // Validate required fields
+    if (!data.name || !data.categoryId || !data.neighborhoodId) {
+      return { success: false, error: 'Missing required fields' }
+    }
+
+    // At least phone or whatsapp required
+    if (!data.phone && !data.whatsappNumber) {
+      return {
+        success: false,
+        error:
+          locale === 'he'
+            ? 'חובה למלא טלפון או מספר ווטסאפ אחד לפחות'
+            : 'Требуется телефон или WhatsApp',
+      }
+    }
+
+    // Get neighborhood to get city_id
+    const neighborhood = await prisma.neighborhood.findUnique({
+      where: { id: data.neighborhoodId },
+      select: { city_id: true },
+    })
+
+    if (!neighborhood) {
+      return { success: false, error: 'Neighborhood not found' }
+    }
+
+    // Generate slug from name
+    const slug = data.name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w\-]+/g, '')
+
+    // Create the business
+    await prisma.business.create({
+      data: {
+        name_he: locale === 'he' ? data.name : '',
+        name_ru: locale === 'ru' ? data.name : null,
+        slug_he: locale === 'he' ? slug : slug,
+        slug_ru: locale === 'ru' ? slug : null,
+        city_id: neighborhood.city_id,
+        category_id: data.categoryId,
+        neighborhood_id: data.neighborhoodId,
+        description_he: locale === 'he' && data.description ? data.description : null,
+        description_ru: locale === 'ru' && data.description ? data.description : null,
+        phone: data.phone || null,
+        whatsapp_number: data.whatsappNumber || null,
+        website_url: data.websiteUrl || null,
+        email: data.email || null,
+        address_he: locale === 'he' && data.address ? data.address : null,
+        address_ru: locale === 'ru' && data.address ? data.address : null,
+        opening_hours_he:
+          locale === 'he' && data.openingHours ? data.openingHours : null,
+        opening_hours_ru:
+          locale === 'ru' && data.openingHours ? data.openingHours : null,
+        is_visible: data.isVisible !== undefined ? data.isVisible : true,
+        is_verified: data.isVerified !== undefined ? data.isVerified : false,
+        is_pinned: data.isPinned !== undefined ? data.isPinned : false,
+      },
+    })
+
+    revalidatePath(`/${locale}/admin/businesses`)
+    revalidatePath(`/${locale}/admin`)
+    revalidatePath(`/${locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error creating business:', error)
+    return { success: false, error: 'Failed to create business' }
   }
 }

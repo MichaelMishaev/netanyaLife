@@ -1,6 +1,5 @@
 import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import Link from 'next/link'
 import AdminLogoutButton from '@/components/client/AdminLogoutButton'
 
@@ -11,22 +10,12 @@ export default async function AdminLayout({
   children: React.ReactNode
   params: { locale: string }
 }) {
-  // Check if this is the login page
-  const headersList = await headers()
-  const pathname = headersList.get('x-pathname') || ''
-  const isLoginPage = pathname.endsWith('/admin/login')
-
-  // For login page, just render children without admin layout
-  if (isLoginPage) {
-    return <>{children}</>
-  }
-
-  // For authenticated pages, check session
+  // Check authentication - login page is now in (auth) route group so bypasses this layout
   const session = await getSession()
 
   // Redirect to login if not authenticated
   if (!session) {
-    redirect(`/${locale}/admin/login`)
+    redirect(`/${locale}/admin-login`)
   }
 
   // Render full admin layout for authenticated pages

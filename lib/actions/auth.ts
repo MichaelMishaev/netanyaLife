@@ -32,5 +32,5 @@ export async function adminLogin(locale: string, formData: FormData) {
 
 export async function adminLogout(locale: string) {
   await deleteSessionCookie()
-  redirect(`/${locale}/admin/login`)
+  redirect(`/${locale}/admin-login`)
 }

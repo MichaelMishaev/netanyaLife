@@ -68,11 +68,129 @@ export default function BusinessManagementCard({
 
   return (
     <div
-      className={`rounded-lg border bg-white p-6 shadow-sm ${
+      className={`rounded-lg border bg-white p-4 shadow-sm md:p-6 ${
         !business.is_visible ? 'opacity-60' : ''
       }`}
     >
-      <div className="flex items-start justify-between">
+      {/* Mobile Layout */}
+      <div className="md:hidden">
+        {/* Business Info */}
+        <div className="mb-4">
+          <h3 className="mb-2 text-lg font-bold text-gray-900">{name}</h3>
+
+          {/* Status Badges */}
+          <div className="mb-3 flex flex-wrap gap-2">
+            {business.is_verified && (
+              <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-800">
+                ✓ {locale === 'he' ? 'מאומת' : 'Проверено'}
+              </span>
+            )}
+            {business.is_pinned && (
+              <span className="rounded-full bg-purple-100 px-2.5 py-1 text-xs font-medium text-purple-800">
+                📌 {locale === 'he' ? 'מוצמד' : 'Закреплено'}
+              </span>
+            )}
+            {!business.is_visible && (
+              <span className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-600">
+                🚫 {locale === 'he' ? 'מוסתר' : 'Скрыто'}
+              </span>
+            )}
+          </div>
+
+          {/* Meta Info */}
+          <div className="flex flex-wrap gap-2 text-sm text-gray-600">
+            <span>{categoryName}</span>
+            <span>•</span>
+            <span>{neighborhoodName}</span>
+            <span>•</span>
+            <span>
+              {business._count.reviews}{' '}
+              {locale === 'he' ? 'ביקורות' : 'отзывов'}
+            </span>
+          </div>
+        </div>
+
+        {/* Action Buttons - Mobile Grid */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={handleToggleVisibility}
+            disabled={isUpdating}
+            className={`rounded-lg border px-4 py-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              business.is_visible
+                ? 'border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+                : 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100 active:bg-green-200'
+            }`}
+          >
+            {business.is_visible
+              ? locale === 'he'
+                ? 'הסתר'
+                : 'Скрыть'
+              : locale === 'he'
+                ? 'הצג'
+                : 'Показать'}
+          </button>
+
+          <button
+            onClick={handleToggleVerification}
+            disabled={isUpdating}
+            className={`rounded-lg border px-4 py-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              business.is_verified
+                ? 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 active:bg-blue-200'
+                : 'border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+            }`}
+          >
+            <span className="flex items-center justify-center gap-1">
+              ✓
+              <span>
+                {business.is_verified
+                  ? locale === 'he'
+                    ? 'בטל אימות'
+                    : 'Снять'
+                  : locale === 'he'
+                    ? 'אמת'
+                    : 'Проверить'}
+              </span>
+            </span>
+          </button>
+
+          <button
+            onClick={handleTogglePinned}
+            disabled={isUpdating}
+            className={`rounded-lg border px-4 py-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              business.is_pinned
+                ? 'border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 active:bg-purple-200'
+                : 'border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+            }`}
+          >
+            <span className="flex items-center justify-center gap-1">
+              📌
+              <span>
+                {business.is_pinned
+                  ? locale === 'he'
+                    ? 'בטל'
+                    : 'Открепить'
+                  : locale === 'he'
+                    ? 'הצמד'
+                    : 'Закрепить'}
+              </span>
+            </span>
+          </button>
+
+          <button
+            onClick={handleDelete}
+            disabled={isUpdating}
+            className="rounded-lg border border-red-300 px-4 py-3 text-sm font-medium text-red-700 transition hover:bg-red-50 active:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <span className="flex items-center justify-center gap-1">
+              🗑️
+              <span>{locale === 'he' ? 'מחק' : 'Удалить'}</span>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Desktop Layout */}
+      <div className="hidden md:flex md:items-start md:justify-between">
         {/* Info */}
         <div className="flex-1">
           <div className="mb-2 flex items-center gap-3">
@@ -106,7 +224,7 @@ export default function BusinessManagementCard({
           </div>
         </div>
 
-        {/* Actions */}
+        {/* Actions - Desktop */}
         <div className="flex gap-2">
           <button
             onClick={handleToggleVisibility}

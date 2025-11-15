@@ -24,8 +24,14 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        hebrew: ['var(--font-heebo)', 'system-ui', 'sans-serif'],
+        sans: [
+          'var(--font-assistant)',
+          '-apple-system',
+          'BlinkMacSystemFont',
+          'Segoe UI',
+          'Arial',
+          'sans-serif',
+        ],
       },
     },
   },

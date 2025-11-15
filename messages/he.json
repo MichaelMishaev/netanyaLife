@@ -70,6 +70,7 @@
     "searchAllCity": "חיפוש בכל נתניה",
     "pinned": "עסקים מומלצים",
     "verified": "מאומת",
+    "servesAllCity": "🏙️ משרת את כל נתניה",
     "viewDetails": "צפה בפרטים",
     "callNow": "התקשר עכשיו",
     "whatsapp": "WhatsApp",
@@ -187,11 +188,14 @@
       "submitterNamePlaceholder": "אופציונלי",
       "submitterEmail": "הדוא״ל שלך",
       "submitterEmailPlaceholder": "אופציונלי - ליצירת קשר",
-      "contactRequired": "חובה למלא טלפון או מספר WhatsApp אחד לפחות"
+      "contactRequired": "חובה למלא טלפון או מספר WhatsApp אחד לפחות",
+      "servesAllCity": "משרת את כל נתניה",
+      "servesAllCityDescription": "סמן אם העסק שלך מספק שירותים בכל אזורי העיר"
     },
     "submit": "שלח לאישור",
     "success": "העסק נשלח לאישור בהצלחה",
     "error": "שגיאה בשליחת העסק",
+    "validationError": "אנא תקן את השגיאות המסומנות בטופס",
     "pending": "העסק שלך ממתין לאישור מנהל"
   },
   "accessibility": {

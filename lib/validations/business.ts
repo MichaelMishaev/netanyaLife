@@ -22,6 +22,9 @@ export const addBusinessSchema = z
     address: z.string().optional(),
     openingHours: z.string().optional(),
 
+    // Service Area
+    servesAllCity: z.boolean().optional().default(false),
+
     // Submitter Info (optional)
     submitterName: z.string().optional(),
     submitterEmail: z

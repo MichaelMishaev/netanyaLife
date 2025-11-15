@@ -16,6 +16,7 @@ interface BusinessCardProps {
     whatsapp_number: string | null
     is_verified: boolean
     is_pinned: boolean
+    serves_all_city: boolean
     neighborhood: {
       name_he: string
       name_ru: string
@@ -29,6 +30,7 @@ interface BusinessCardProps {
 
 export default function BusinessCard({ business, locale }: BusinessCardProps) {
   const t = useTranslations('business')
+  const tResults = useTranslations('results')
 
   const name = locale === 'he' ? business.name_he : (business.name_ru || business.name_he)
   const description = locale === 'he' ? business.description_he : (business.description_ru || business.description_he)
@@ -61,6 +63,15 @@ export default function BusinessCard({ business, locale }: BusinessCardProps) {
 
       {/* Neighborhood */}
       <p className="mb-2 text-sm text-gray-600">{neighborhoodName}</p>
+
+      {/* Serves All City Badge */}
+      {business.serves_all_city && (
+        <div className="mb-3">
+          <span className="inline-block rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+            {tResults('servesAllCity')}
+          </span>
+        </div>
+      )}
 
       {/* Description Preview */}
       {description && (

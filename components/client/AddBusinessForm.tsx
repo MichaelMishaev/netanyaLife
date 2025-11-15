@@ -44,11 +44,18 @@ export default function AddBusinessForm({
     openingHours: '',
     submitterName: '',
     submitterEmail: '',
+    servesAllCity: false,
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string
+    categoryId?: string
+    neighborhoodId?: string
+    contact?: string
+  }>({})
 
   // Refs for validation
   const categoryRef = useRef<HTMLSelectElement>(null)
@@ -110,19 +117,68 @@ export default function AddBusinessForm({
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
   ) => {
+    const fieldName = e.target.name
+    const value = e.target.type === 'checkbox'
+      ? (e.target as HTMLInputElement).checked
+      : e.target.value
+
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [fieldName]: value,
     }))
+
+    // Clear field error when user starts typing
+    if (fieldErrors[fieldName as keyof typeof fieldErrors]) {
+      setFieldErrors((prev) => {
+        const newErrors = { ...prev }
+        delete newErrors[fieldName as keyof typeof fieldErrors]
+        return newErrors
+      })
+    }
+
+    // Clear contact error when either phone or whatsapp is filled
+    if ((fieldName === 'phone' || fieldName === 'whatsappNumber') && fieldErrors.contact) {
+      if (e.target.value || formData.phone || formData.whatsappNumber) {
+        setFieldErrors((prev) => {
+          const newErrors = { ...prev }
+          delete newErrors.contact
+          return newErrors
+        })
+      }
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
+    setFieldErrors({})
 
-    // Client-side validation: At least phone or whatsapp required
+    // Client-side validation
+    const errors: typeof fieldErrors = {}
+
+    if (!formData.name.trim()) {
+      errors.name = tCommon('required')
+    }
+
+    if (!formData.categoryId) {
+      errors.categoryId = tCommon('required')
+    }
+
+    if (!formData.neighborhoodId) {
+      errors.neighborhoodId = tCommon('required')
+    }
+
+    // At least phone or whatsapp required
     if (!formData.phone && !formData.whatsappNumber) {
-      setError(t('form.contactRequired'))
+      errors.contact = t('form.contactRequired')
+    }
+
+    // If there are errors, show them and don't submit
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors)
+      setError(t('validationError'))
+      // Scroll to top to show error message
+      window.scrollTo({ top: 0, behavior: 'smooth' })
       return
     }
 
@@ -168,6 +224,29 @@ export default function AddBusinessForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Validation Error Summary */}
+      {Object.keys(fieldErrors).length > 0 && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-4" role="alert">
+          <h3 className="font-bold text-red-800 mb-2">
+            {t('error')}
+          </h3>
+          <ul className="list-disc list-inside space-y-1 text-red-700">
+            {fieldErrors.name && (
+              <li>{t('form.name')}: {fieldErrors.name}</li>
+            )}
+            {fieldErrors.categoryId && (
+              <li>{t('form.category')}: {fieldErrors.categoryId}</li>
+            )}
+            {fieldErrors.neighborhoodId && (
+              <li>{t('form.neighborhood')}: {fieldErrors.neighborhoodId}</li>
+            )}
+            {fieldErrors.contact && (
+              <li>{fieldErrors.contact}</li>
+            )}
+          </ul>
+        </div>
+      )}
+
       {/* Business Name */}
       <div>
         <label htmlFor="name" className="mb-2 block font-medium text-gray-700">
@@ -180,10 +259,17 @@ export default function AddBusinessForm({
           value={formData.name}
           onChange={handleChange}
           required
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${
+            fieldErrors.name
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
+          }`}
           placeholder={t('form.namePlaceholder')}
           dir={locale === 'he' ? 'rtl' : 'ltr'}
         />
+        {fieldErrors.name && (
+          <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
+        )}
       </div>
 
       {/* Category */}
@@ -201,7 +287,11 @@ export default function AddBusinessForm({
           value={formData.categoryId}
           onChange={handleChange}
           required
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${
+            fieldErrors.categoryId
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
+          }`}
         >
           <option value="">{t('form.categoryPlaceholder')}</option>
           {categories.map((category) => (
@@ -210,6 +300,9 @@ export default function AddBusinessForm({
             </option>
           ))}
         </select>
+        {fieldErrors.categoryId && (
+          <p className="mt-1 text-sm text-red-600">{fieldErrors.categoryId}</p>
+        )}
       </div>
 
       {/* Neighborhood */}
@@ -227,7 +320,11 @@ export default function AddBusinessForm({
           value={formData.neighborhoodId}
           onChange={handleChange}
           required
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${
+            fieldErrors.neighborhoodId
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
+          }`}
         >
           <option value="">{t('form.neighborhoodPlaceholder')}</option>
           {neighborhoods.map((neighborhood) => (
@@ -238,6 +335,31 @@ export default function AddBusinessForm({
             </option>
           ))}
         </select>
+        {fieldErrors.neighborhoodId && (
+          <p className="mt-1 text-sm text-red-600">
+            {fieldErrors.neighborhoodId}
+          </p>
+        )}
+      </div>
+
+      {/* Serves All City Checkbox */}
+      <div className="rounded-lg border border-gray-200 bg-blue-50 p-4">
+        <label htmlFor="servesAllCity" className="flex items-center gap-3 cursor-pointer">
+          <input
+            type="checkbox"
+            id="servesAllCity"
+            name="servesAllCity"
+            checked={formData.servesAllCity}
+            onChange={handleChange}
+            className="h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-2 focus:ring-primary-500"
+          />
+          <span className="font-medium text-gray-900">
+            {t('form.servesAllCity')}
+          </span>
+        </label>
+        <p className="mt-2 ms-8 text-sm text-gray-600">
+          {t('form.servesAllCityDescription')}
+        </p>
       </div>
 
       {/* Description */}
@@ -261,9 +383,15 @@ export default function AddBusinessForm({
       </div>
 
       {/* Contact Info Section */}
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+      <div
+        className={`rounded-lg border p-4 ${
+          fieldErrors.contact
+            ? 'border-red-500 bg-red-50'
+            : 'border-gray-200 bg-gray-50'
+        }`}
+      >
         <h3 className="mb-4 font-bold text-gray-900">
-          {t('form.contactRequired')}
+          {t('form.contactRequired')} <span className="text-red-500">*</span>
         </h3>
 
         <div className="space-y-4">
@@ -307,6 +435,11 @@ export default function AddBusinessForm({
             />
           </div>
         </div>
+        {fieldErrors.contact && (
+          <p className="mt-4 text-sm text-red-600 font-medium">
+            {fieldErrors.contact}
+          </p>
+        )}
       </div>
 
       {/* Website */}
@@ -445,6 +578,29 @@ export default function AddBusinessForm({
       {error && (
         <div className="rounded-lg bg-red-50 p-4 text-red-800" role="alert">
           {error}
+        </div>
+      )}
+
+      {/* Validation Error Summary (before submit) */}
+      {Object.keys(fieldErrors).length > 0 && (
+        <div className="rounded-lg bg-red-50 border-2 border-red-300 p-4 shadow-md" role="alert">
+          <h3 className="font-bold text-red-900 mb-3 text-lg">
+            {t('validationError')}
+          </h3>
+          <ul className="list-disc list-inside space-y-2 text-red-800">
+            {fieldErrors.name && (
+              <li className="font-medium">{t('form.name')}: {fieldErrors.name}</li>
+            )}
+            {fieldErrors.categoryId && (
+              <li className="font-medium">{t('form.category')}: {fieldErrors.categoryId}</li>
+            )}
+            {fieldErrors.neighborhoodId && (
+              <li className="font-medium">{t('form.neighborhood')}: {fieldErrors.neighborhoodId}</li>
+            )}
+            {fieldErrors.contact && (
+              <li className="font-medium">{fieldErrors.contact}</li>
+            )}
+          </ul>
         </div>
       )}
 

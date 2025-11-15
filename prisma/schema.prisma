@@ -109,6 +109,7 @@ model Business {
   is_verified     Boolean        @default(false) // Blue checkmark badge
   is_pinned       Boolean        @default(false) // Top X results
   pinned_order    Int?           // Order within pinned (1, 2, 3...)
+  serves_all_city Boolean        @default(false) // Informational: Business serves all Netanya
 
   // Relationships
   category_id     String
@@ -153,6 +154,9 @@ model PendingBusiness {
 
   // Operating Hours
   opening_hours   String?        @db.Text
+
+  // Service Area
+  serves_all_city Boolean        @default(false) // Informational: Business serves all Netanya
 
   // Category
   category_id     String
