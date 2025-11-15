@@ -53,9 +53,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Save event to database
+    // Convert lowercase event_type to uppercase to match Prisma enum
     await prisma.event.create({
       data: {
-        type: event_type,
+        type: event_type.toUpperCase(),
         properties: properties || {},
         ip_address: ip,
       },

@@ -9,13 +9,11 @@ export type EventType =
   | 'review_submitted'
   | 'business_submitted'
   | 'pwa_installed'
+  | 'search_all_city_clicked'
+  | 'language_changed'
   | 'accessibility_opened'
   | 'accessibility_font_changed'
   | 'accessibility_contrast_toggled'
-  | 'share_clicked'
-  | 'recently_viewed_clicked'
-  | 'search_all_city_clicked'
-  | 'language_changed'
 
 export interface EventProperties {
   [key: string]: string | number | boolean | null | undefined
