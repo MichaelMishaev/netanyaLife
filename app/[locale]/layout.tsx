@@ -7,6 +7,7 @@ import { headers } from 'next/headers'
 import { locales } from '@/i18n/request'
 import { AccessibilityProvider } from '@/contexts/AccessibilityContext'
 import { AnalyticsProvider } from '@/contexts/AnalyticsContext'
+import { RecentlyViewedProvider } from '@/contexts/RecentlyViewedContext'
 import Header from '@/components/server/Header'
 import Footer from '@/components/server/Footer'
 import '../globals.css'
@@ -71,28 +72,30 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <AnalyticsProvider>
             <AccessibilityProvider>
-              {/* PWA Service Worker */}
-              <PWAInstaller />
+              <RecentlyViewedProvider>
+                {/* PWA Service Worker */}
+                <PWAInstaller />
 
-              {/* Skip Link */}
-              {!isAdminRoute && (
-                <a href="#main-content" className="skip-link">
-                  {locale === 'he' ? 'דלג לתוכן' : 'Перейти к содержимому'}
-                </a>
-              )}
+                {/* Skip Link */}
+                {!isAdminRoute && (
+                  <a href="#main-content" className="skip-link">
+                    {locale === 'he' ? 'דלג לתוכן' : 'Перейти к содержимому'}
+                  </a>
+                )}
 
-              {!isAdminRoute && <Header />}
-              {isAdminRoute ? (
-                children
-              ) : (
-                <main id="main-content" className="flex-1">
-                  {children}
-                </main>
-              )}
-              {!isAdminRoute && <Footer />}
+                {!isAdminRoute && <Header />}
+                {isAdminRoute ? (
+                  children
+                ) : (
+                  <main id="main-content" className="flex-1">
+                    {children}
+                  </main>
+                )}
+                {!isAdminRoute && <Footer />}
 
-              {/* Accessibility Panel */}
-              {!isAdminRoute && <AccessibilityPanel />}
+                {/* Accessibility Panel */}
+                {!isAdminRoute && <AccessibilityPanel />}
+              </RecentlyViewedProvider>
             </AccessibilityProvider>
           </AnalyticsProvider>
         </NextIntlClientProvider>

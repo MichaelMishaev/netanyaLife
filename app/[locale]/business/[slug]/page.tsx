@@ -1,12 +1,90 @@
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
+import { Metadata } from 'next'
 import { getBusinessBySlug } from '@/lib/queries/businesses'
+import ShareButton from '@/components/client/ShareButton'
+import Breadcrumbs from '@/components/server/Breadcrumbs'
+import BusinessViewTracker from '@/components/client/BusinessViewTracker'
 
 interface BusinessDetailPageProps {
   params: {
     locale: string
     slug: string
+  }
+}
+
+export async function generateMetadata({
+  params: { locale, slug },
+}: BusinessDetailPageProps): Promise<Metadata> {
+  const business = await getBusinessBySlug(slug, locale)
+
+  if (!business) {
+    return {
+      title: 'Business Not Found',
+    }
+  }
+
+  const name = locale === 'he' ? business.name_he : (business.name_ru || business.name_he)
+  const description = locale === 'he'
+    ? business.description_he
+    : (business.description_ru || business.description_he)
+  const categoryName = locale === 'he' ? business.category.name_he : business.category.name_ru
+  const neighborhoodName = locale === 'he' ? business.neighborhood.name_he : business.neighborhood.name_ru
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://netanyalocal.com'
+  const url = `${baseUrl}/${locale}/business/${slug}`
+
+  // Calculate average rating
+  const ratings = business.reviews.map((r) => r.rating)
+  const avgRating = ratings.length > 0
+    ? ratings.reduce((a, b) => a + b, 0) / ratings.length
+    : 0
+
+  const title = locale === 'he'
+    ? `${name} - ${categoryName} ב${neighborhoodName}, נתניה`
+    : `${name} - ${categoryName} в ${neighborhoodName}, Нетания`
+
+  const metaDescription = description
+    ? description.substring(0, 160)
+    : locale === 'he'
+      ? `${categoryName} באיכות גבוהה ב${neighborhoodName}, נתניה. ${ratings.length} ביקורות${avgRating > 0 ? `, דירוג ממוצע ${avgRating.toFixed(1)}` : ''}.`
+      : `Качественный ${categoryName} в ${neighborhoodName}, Нетания. ${ratings.length} отзывов${avgRating > 0 ? `, средний рейтинг ${avgRating.toFixed(1)}` : ''}.`
+
+  return {
+    title,
+    description: metaDescription,
+    alternates: {
+      canonical: url,
+      languages: {
+        he: `${baseUrl}/he/business/${slug}`,
+        ru: `${baseUrl}/ru/business/${slug}`,
+        'x-default': `${baseUrl}/he/business/${slug}`,
+      },
+    },
+    openGraph: {
+      title,
+      description: metaDescription,
+      url,
+      siteName: 'Netanya Local',
+      locale: locale === 'he' ? 'he_IL' : 'ru_RU',
+      alternateLocale: locale === 'he' ? 'ru_RU' : 'he_IL',
+      type: 'website',
+      images: [
+        {
+          url: `${baseUrl}/og-image-business.png`,
+          width: 1200,
+          height: 630,
+          alt: name,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description: metaDescription,
+      images: [`${baseUrl}/og-image-business.png`],
+    },
   }
 }
 
@@ -32,8 +110,44 @@ export default async function BusinessDetailPage({
       ? ratings.reduce((a, b) => a + b, 0) / ratings.length
       : 0
 
+  // Construct full business URL
+  const businessUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://netanyalocal.com'}/${locale}/business/${slug}`
+
+  // Breadcrumb items
+  const breadcrumbItems = [
+    {
+      label: locale === 'he' ? 'בית' : 'Главная',
+      href: `/${locale}`,
+    },
+    {
+      label: categoryName,
+      href: `/${locale}/search/${business.category.slug}/${business.neighborhood.slug}`,
+    },
+    {
+      label: neighborhoodName,
+      href: `/${locale}/search/${business.category.slug}/${business.neighborhood.slug}`,
+    },
+    {
+      label: name,
+      href: `/${locale}/business/${slug}`,
+    },
+  ]
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Track business view */}
+      <BusinessViewTracker
+        businessId={business.id}
+        businessSlug={business.slug}
+        businessNameHe={business.name_he}
+        businessNameRu={business.name_ru}
+        categorySlug={business.category.slug}
+        neighborhoodSlug={business.neighborhood.slug}
+      />
+
+      {/* Breadcrumbs */}
+      <Breadcrumbs items={breadcrumbItems} locale={locale} />
+
       {/* Back Link */}
       <Link
         href={`/${locale}/search/${business.category.slug}/${business.neighborhood.slug}`}
@@ -68,6 +182,15 @@ export default async function BusinessDetailPage({
               </div>
             </>
           )}
+        </div>
+
+        {/* Share Button */}
+        <div className="mb-6">
+          <ShareButton
+            businessName={name}
+            businessUrl={businessUrl}
+            locale={locale}
+          />
         </div>
 
         {/* Description */}

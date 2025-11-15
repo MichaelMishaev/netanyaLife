@@ -1,16 +1,97 @@
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
+import { Metadata } from 'next'
 import { getSearchResults, getSearchResultsCount } from '@/lib/queries/businesses'
 import { getCategoryBySlug } from '@/lib/queries/categories'
 import { getNeighborhoodBySlug, getNetanyaCity } from '@/lib/queries/neighborhoods'
-import BusinessCard from '@/components/client/BusinessCard'
+import SearchResultsClient from '@/components/client/SearchResultsClient'
+import Breadcrumbs from '@/components/server/Breadcrumbs'
 
 interface SearchResultsPageProps {
   params: {
     locale: string
     category: string
     neighborhood: string
+  }
+}
+
+export async function generateMetadata({
+  params: { locale, category: categorySlug, neighborhood: neighborhoodSlug },
+}: SearchResultsPageProps): Promise<Metadata> {
+  const city = await getNetanyaCity()
+  const category = await getCategoryBySlug(categorySlug)
+  const neighborhood =
+    neighborhoodSlug === 'all'
+      ? null
+      : await getNeighborhoodBySlug('netanya', neighborhoodSlug)
+
+  if (!city || !category) {
+    return {
+      title: 'Search Results',
+    }
+  }
+
+  const categoryName = locale === 'he' ? category.name_he : category.name_ru
+  const neighborhoodName = neighborhood
+    ? locale === 'he'
+      ? neighborhood.name_he
+      : neighborhood.name_ru
+    : locale === 'he'
+      ? 'כל נתניה'
+      : 'Вся Нетания'
+
+  const totalCount = await getSearchResultsCount({
+    categoryId: category.id,
+    neighborhoodId: neighborhood?.id,
+    cityId: city.id,
+  })
+
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://netanyalocal.com'
+  const url = `${baseUrl}/${locale}/search/${categorySlug}/${neighborhoodSlug}`
+
+  const title = locale === 'he'
+    ? `${categoryName} ב${neighborhoodName} - ${totalCount} תוצאות`
+    : `${categoryName} в ${neighborhoodName} - ${totalCount} результатов`
+
+  const description = locale === 'he'
+    ? `מצא את ה${categoryName} הכי טובים ב${neighborhoodName}, נתניה. ${totalCount} עסקים מומלצים עם ביקורות אמיתיות.`
+    : `Найдите лучших ${categoryName} в ${neighborhoodName}, Нетания. ${totalCount} рекомендуемых предприятий с настоящими отзывами.`
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: url,
+      languages: {
+        he: `${baseUrl}/he/search/${categorySlug}/${neighborhoodSlug}`,
+        ru: `${baseUrl}/ru/search/${categorySlug}/${neighborhoodSlug}`,
+        'x-default': `${baseUrl}/he/search/${categorySlug}/${neighborhoodSlug}`,
+      },
+    },
+    openGraph: {
+      title,
+      description,
+      url,
+      siteName: 'Netanya Local',
+      locale: locale === 'he' ? 'he_IL' : 'ru_RU',
+      alternateLocale: locale === 'he' ? 'ru_RU' : 'he_IL',
+      type: 'website',
+      images: [
+        {
+          url: `${baseUrl}/og-image.png`,
+          width: 1200,
+          height: 630,
+          alt: 'Netanya Local',
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [`${baseUrl}/og-image.png`],
+    },
   }
 }
 
@@ -59,8 +140,31 @@ export default async function SearchResultsPage({
     ? 'כל נתניה'
     : 'Вся Нетания'
 
+  // Breadcrumb items
+  const breadcrumbItems = [
+    {
+      label: locale === 'he' ? 'בית' : 'Главная',
+      href: `/${locale}`,
+    },
+    {
+      label: categoryName,
+      href: `/${locale}/search/${categorySlug}/${neighborhoodSlug}`,
+    },
+    ...(neighborhood
+      ? [
+          {
+            label: neighborhoodName,
+            href: `/${locale}/search/${categorySlug}/${neighborhoodSlug}`,
+          },
+        ]
+      : []),
+  ]
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Breadcrumbs */}
+      <Breadcrumbs items={breadcrumbItems} locale={locale} />
+
       {/* Header */}
       <div className="mb-8">
         <Link
@@ -92,17 +196,9 @@ export default async function SearchResultsPage({
         </div>
       )}
 
-      {/* Results Grid */}
+      {/* Results with Filtering/Sorting */}
       {businesses.length > 0 && (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {businesses.map((business) => (
-            <BusinessCard
-              key={business.id}
-              business={business}
-              locale={locale}
-            />
-          ))}
-        </div>
+        <SearchResultsClient businesses={businesses} locale={locale} />
       )}
     </div>
   )

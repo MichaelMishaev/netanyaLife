@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import { getCategories } from '@/lib/queries/categories'
 import { getNeighborhoods, getNetanyaCity } from '@/lib/queries/neighborhoods'
 import SearchForm from '@/components/client/SearchForm'
+import RecentlyViewed from '@/components/client/RecentlyViewed'
 
 export default async function Home({
   params: { locale },
@@ -37,6 +38,9 @@ export default async function Home({
           locale={locale}
         />
       </section>
+
+      {/* Recently Viewed */}
+      <RecentlyViewed locale={locale} />
 
       {/* Popular Categories - TODO: Add in next iteration */}
       <section className="text-center">
