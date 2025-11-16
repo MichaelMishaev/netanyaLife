@@ -177,18 +177,59 @@ export default async function SearchResultsPage({
         </p>
       </div>
 
-      {/* No Results */}
+      {/* No Results - Improved Empty State */}
       {businesses.length === 0 && (
-        <div className="rounded-lg bg-gray-50 p-8 text-center">
-          <p className="mb-4 text-lg text-gray-600">{t('noResults')}</p>
-          {neighborhood && (
-            <Link
-              href={`/${locale}/search/${categorySlug}/all`}
-              className="inline-block rounded-lg bg-primary-600 px-6 py-2 text-white hover:bg-primary-700"
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 py-12 text-center sm:p-12 sm:py-16">
+          {/* Icon */}
+          <div className="mb-6 rounded-full bg-gray-100 p-6">
+            <svg
+              className="h-16 w-16 text-gray-400 sm:h-20 sm:w-20"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="1.5"
             >
-              {t('searchAllCity')}
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6"
+              />
+            </svg>
+          </div>
+
+          {/* Message */}
+          <h3 className="mb-2 text-xl font-bold text-gray-900 sm:text-2xl">
+            {t('noResults')}
+          </h3>
+          <p className="mb-6 max-w-md text-sm text-gray-600 sm:text-base">
+            {locale === 'he'
+              ? `לא מצאנו ${categoryName.toLowerCase()} ב${neighborhoodName}. נסה לחפש בכל העיר או לבחור קטגוריה אחרת.`
+              : `Мы не нашли ${categoryName.toLowerCase()} в ${neighborhoodName}. Попробуйте поискать по всему городу или выберите другую категорию.`}
+          </p>
+
+          {/* Actions */}
+          <div className="flex flex-col gap-3 sm:flex-row">
+            {neighborhood && (
+              <Link
+                href={`/${locale}/search/${categorySlug}/all`}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white shadow-sm transition hover:bg-primary-700 active:scale-[0.98]"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                <span>{t('searchAllCity')}</span>
+              </Link>
+            )}
+            <Link
+              href={`/${locale}`}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50 active:scale-[0.98]"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+              </svg>
+              <span>{locale === 'he' ? 'חזור לעמוד הבית' : 'Вернуться на главную'}</span>
             </Link>
-          )}
+          </div>
         </div>
       )}
 

@@ -178,20 +178,48 @@ export default function SearchResultsClient({
           ))}
         </div>
       ) : (
-        <div className="rounded-lg bg-gray-50 p-8 text-center">
-          <p className="text-lg text-gray-600">
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 py-12 text-center">
+          {/* Icon */}
+          <div className="mb-6 rounded-full bg-gray-100 p-6">
+            <svg
+              className="h-16 w-16 text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth="1.5"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+              />
+            </svg>
+          </div>
+
+          {/* Message */}
+          <h3 className="mb-2 text-xl font-bold text-gray-900">
             {locale === 'he'
               ? 'לא נמצאו תוצאות עם הסינונים שנבחרו'
               : 'Результаты с выбранными фильтрами не найдены'}
+          </h3>
+          <p className="mb-6 max-w-md text-sm text-gray-600">
+            {locale === 'he'
+              ? 'נסה להסיר כמה סינונים או לאפס את הכל כדי לראות יותר תוצאות.'
+              : 'Попробуйте удалить некоторые фильтры или сбросить все, чтобы увидеть больше результатов.'}
           </p>
+
+          {/* Reset Button */}
           <button
             onClick={() => {
               setSortOption('rating-high')
               setFilters({ verifiedOnly: false, hasReviewsOnly: false })
             }}
-            className="mt-4 text-blue-600 hover:text-blue-700"
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white shadow-sm transition hover:bg-primary-700 active:scale-[0.98]"
           >
-            {locale === 'he' ? 'אפס סינונים' : 'Сбросить фильтры'}
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+            </svg>
+            <span>{locale === 'he' ? 'אפס הכל' : 'Сбросить все'}</span>
           </button>
         </div>
       )}
