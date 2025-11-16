@@ -39,7 +39,6 @@ export default function AddBusinessForm({
     phone: '',
     whatsappNumber: '',
     websiteUrl: '',
-    email: '',
     address: '',
     openingHours: '',
     submitterName: '',
@@ -153,28 +152,43 @@ export default function AddBusinessForm({
     setError(null)
     setFieldErrors({})
 
+    // Debug: Log form data
+    console.log('🔍 Form submission attempt:', {
+      name: formData.name,
+      categoryId: formData.categoryId,
+      neighborhoodId: formData.neighborhoodId,
+      phone: formData.phone,
+      whatsappNumber: formData.whatsappNumber,
+      servesAllCity: formData.servesAllCity,
+    })
+
     // Client-side validation
     const errors: typeof fieldErrors = {}
 
     if (!formData.name.trim()) {
       errors.name = tCommon('required')
+      console.log('❌ Validation error: name is empty')
     }
 
     if (!formData.categoryId) {
       errors.categoryId = tCommon('required')
+      console.log('❌ Validation error: categoryId is empty')
     }
 
     if (!formData.neighborhoodId) {
       errors.neighborhoodId = tCommon('required')
+      console.log('❌ Validation error: neighborhoodId is empty')
     }
 
     // At least phone or whatsapp required
     if (!formData.phone && !formData.whatsappNumber) {
       errors.contact = t('form.contactRequired')
+      console.log('❌ Validation error: no contact method provided')
     }
 
     // If there are errors, show them and don't submit
     if (Object.keys(errors).length > 0) {
+      console.log('🚫 Form submission BLOCKED. Errors:', errors)
       setFieldErrors(errors)
       setError(t('validationError'))
       // Scroll to top to show error message
@@ -182,6 +196,7 @@ export default function AddBusinessForm({
       return
     }
 
+    console.log('✅ Validation passed. Submitting to server...')
     setIsSubmitting(true)
 
     try {
@@ -463,26 +478,6 @@ export default function AddBusinessForm({
           onChange={handleChange}
           className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
           placeholder={t('form.websitePlaceholder')}
-          dir="ltr"
-        />
-      </div>
-
-      {/* Email */}
-      <div>
-        <label
-          htmlFor="email"
-          className="mb-2 block font-medium text-gray-700"
-        >
-          {t('form.email')}
-        </label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          placeholder={t('form.emailPlaceholder')}
           dir="ltr"
         />
       </div>

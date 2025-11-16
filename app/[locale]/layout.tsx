@@ -6,9 +6,7 @@ import { notFound } from 'next/navigation'
 import { headers } from 'next/headers'
 import { Assistant } from 'next/font/google'
 import { locales } from '@/i18n/request'
-import { AccessibilityProvider } from '@/contexts/AccessibilityContext'
-import { AnalyticsProvider } from '@/contexts/AnalyticsContext'
-import { RecentlyViewedProvider } from '@/contexts/RecentlyViewedContext'
+import { ClientProviders } from '@/components/providers/ClientProviders'
 import Header from '@/components/server/Header'
 import Footer from '@/components/server/Footer'
 import '../globals.css'
@@ -32,7 +30,7 @@ const PWAInstaller = dynamicImport(
 )
 
 export const metadata: Metadata = {
-  title: 'Netanya Local - נתניה לוקל',
+  title: 'Netanya Local - קהילת נתניה',
   description:
     'מדריך עסקים מקומיים בנתניה - Local business directory for Netanya residents',
 }
@@ -86,34 +84,30 @@ export default async function LocaleLayout({
       </head>
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         <NextIntlClientProvider messages={messages}>
-          <AnalyticsProvider>
-            <AccessibilityProvider>
-              <RecentlyViewedProvider>
-                {/* PWA Service Worker */}
-                <PWAInstaller />
+          <ClientProviders>
+            {/* PWA Service Worker */}
+            <PWAInstaller />
 
-                {/* Skip Link */}
-                {!isAdminRoute && (
-                  <a href="#main-content" className="skip-link">
-                    {locale === 'he' ? 'דלג לתוכן' : 'Перейти к содержимому'}
-                  </a>
-                )}
+            {/* Skip Link */}
+            {!isAdminRoute && (
+              <a href="#main-content" className="skip-link">
+                {locale === 'he' ? 'דלג לתוכן' : 'Перейти к содержимому'}
+              </a>
+            )}
 
-                {!isAdminRoute && <Header />}
-                {isAdminRoute ? (
-                  children
-                ) : (
-                  <main id="main-content" className="flex-1">
-                    {children}
-                  </main>
-                )}
-                {!isAdminRoute && <Footer />}
+            {!isAdminRoute && <Header />}
+            {isAdminRoute ? (
+              children
+            ) : (
+              <main id="main-content" className="flex-1">
+                {children}
+              </main>
+            )}
+            {!isAdminRoute && <Footer />}
 
-                {/* Accessibility Panel */}
-                {!isAdminRoute && <AccessibilityPanel />}
-              </RecentlyViewedProvider>
-            </AccessibilityProvider>
-          </AnalyticsProvider>
+            {/* Accessibility Panel */}
+            {!isAdminRoute && <AccessibilityPanel />}
+          </ClientProviders>
         </NextIntlClientProvider>
       </body>
     </html>

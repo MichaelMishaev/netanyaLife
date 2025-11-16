@@ -8,7 +8,11 @@ interface RecentlyViewedBusiness {
   name_he: string
   name_ru: string | null
   category_slug: string
+  category_name_he: string
+  category_name_ru: string
   neighborhood_slug: string
+  neighborhood_name_he: string
+  neighborhood_name_ru: string
   viewedAt: string
 }
 

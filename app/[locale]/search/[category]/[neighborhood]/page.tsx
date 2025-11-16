@@ -7,6 +7,7 @@ import { getCategoryBySlug } from '@/lib/queries/categories'
 import { getNeighborhoodBySlug, getNetanyaCity } from '@/lib/queries/neighborhoods'
 import SearchResultsClient from '@/components/client/SearchResultsClient'
 import Breadcrumbs from '@/components/server/Breadcrumbs'
+import BackButton from '@/components/client/BackButton'
 
 interface SearchResultsPageProps {
   params: {
@@ -167,12 +168,7 @@ export default async function SearchResultsPage({
 
       {/* Header */}
       <div className="mb-8">
-        <Link
-          href={`/${locale}`}
-          className="mb-4 inline-block text-primary-600 hover:text-primary-700"
-        >
-          ← {t('back')}
-        </Link>
+        <BackButton href={`/${locale}`} locale={locale} label={t('back')} />
         <h1 className="mb-2 text-3xl font-bold">
           {categoryName} {locale === 'he' ? 'ב' : 'в '}{neighborhoodName}
         </h1>

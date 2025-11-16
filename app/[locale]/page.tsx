@@ -41,13 +41,6 @@ export default async function Home({
 
       {/* Recently Viewed */}
       <RecentlyViewed locale={locale} />
-
-      {/* Popular Categories - TODO: Add in next iteration */}
-      <section className="text-center">
-        <p className="text-sm text-gray-500">
-          Popular categories coming soon...
-        </p>
-      </section>
     </div>
   )
 }

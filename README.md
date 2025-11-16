@@ -1,4 +1,4 @@
-# Netanya Local - נתניה לוקל
+# Netanya Local - קהילת נתניה
 
 **Status**: 🚧 In Development (Day 1/47 Complete)
 **Version**: 0.1.0

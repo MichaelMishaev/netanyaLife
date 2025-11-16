@@ -10,7 +10,7 @@ interface BreadcrumbsProps {
 
 export default function Breadcrumbs({ items, locale }: BreadcrumbsProps) {
   const isRTL = locale === 'he'
-  const chevron = isRTL ? '←' : '→'
+  const chevron = isRTL ? '→' : '←'
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://netanyalocal.com'
 
   // Generate structured data for breadcrumbs

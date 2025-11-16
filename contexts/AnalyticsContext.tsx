@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, ReactNode } from 'react'
+import { createContext, useContext, ReactNode, useRef } from 'react'
 
 export type EventType =
   | 'search_performed'
@@ -28,12 +28,32 @@ const AnalyticsContext = createContext<AnalyticsContextType | undefined>(
 )
 
 export function AnalyticsProvider({ children }: { children: ReactNode }) {
+  const lastEventTime = useRef<number>(0)
+  const eventQueue = useRef<Set<string>>(new Set())
+
   const trackEvent = async (
     eventType: EventType,
     properties: EventProperties = {}
   ) => {
     try {
-      await fetch('/api/events', {
+      // Debounce: Don't send same event more than once per second
+      const eventKey = `${eventType}:${JSON.stringify(properties)}`
+      const now = Date.now()
+
+      if (eventQueue.current.has(eventKey) && now - lastEventTime.current < 1000) {
+        console.log('Analytics: Event debounced', eventType)
+        return
+      }
+
+      eventQueue.current.add(eventKey)
+      lastEventTime.current = now
+
+      // Clear event from queue after 1 second
+      setTimeout(() => {
+        eventQueue.current.delete(eventKey)
+      }, 1000)
+
+      const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -43,6 +63,11 @@ export function AnalyticsProvider({ children }: { children: ReactNode }) {
           properties,
         }),
       })
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({ error: 'Unknown error' }))
+        console.warn('Analytics tracking failed:', response.status, error)
+      }
     } catch (error) {
       // Silently fail - don't block user experience
       console.error('Failed to track event:', error)

@@ -17,6 +17,18 @@ const nextConfig = {
         ...config.watchOptions,
         ignored: /node_modules/,
       }
+
+      // Fix webpack HMR errors with originalFactory
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'deterministic',
+      }
+
+      // Ensure clean module resolution
+      config.snapshot = {
+        ...config.snapshot,
+        managedPaths: [],
+      }
     }
     return config
   },

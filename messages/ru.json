@@ -42,7 +42,6 @@
       "title": "Что вы ищете?",
       "categoryPlaceholder": "Выберите категорию",
       "neighborhoodPlaceholder": "Выберите район",
-      "allNetanya": "Вся Нетания",
       "searchButton": "Найти",
       "requiredFields": "Необходимо выбрать категорию и район"
     },
@@ -59,7 +58,14 @@
     },
     "recentlyViewed": {
       "title": "Недавно просмотренные",
-      "empty": "Нет недавно просмотренных предприятий"
+      "empty": "Нет недавно просмотренных предприятий",
+      "clearHistory": "Очистить историю",
+      "clearHistoryConfirmTitle": "Удалить историю?",
+      "clearHistoryConfirmMessage": "Это действие удалит все предприятия, которые вы просмотрели. Это действие нельзя отменить.",
+      "confirmClear": "Да, удалить все",
+      "cancelClear": "Отмена",
+      "viewedAt": "Просмотрено",
+      "viewBusiness": "Посмотреть предприятие"
     }
   },
   "results": {
@@ -99,6 +105,7 @@
     }
   },
   "business": {
+    "back": "Назад",
     "details": "Детали",
     "reviews": "Отзывы",
     "writeReview": "Написать отзыв",

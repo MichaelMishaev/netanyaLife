@@ -1,8 +1,8 @@
 import { getTranslations } from 'next-intl/server'
-import Link from 'next/link'
 import { getCategories } from '@/lib/queries/categories'
 import { getNeighborhoods, getNetanyaCity } from '@/lib/queries/neighborhoods'
 import AddBusinessForm from '@/components/client/AddBusinessForm'
+import BackButton from '@/components/client/BackButton'
 
 interface AddBusinessPageProps {
   params: {
@@ -26,12 +26,7 @@ export default async function AddBusinessPage({
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Back Link */}
-      <Link
-        href={`/${locale}`}
-        className="mb-4 inline-block text-primary-600 hover:text-primary-700"
-      >
-        ← {tCommon('back')}
-      </Link>
+      <BackButton href={`/${locale}`} locale={locale} label={tCommon('back')} />
 
       {/* Page Header */}
       <div className="mb-8">

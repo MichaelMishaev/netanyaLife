@@ -9,7 +9,7 @@
 
 | Aspect | Details |
 |--------|---------|
-| **Name** | Netanya Local - נתניה לוקל |
+| **Name** | Netanya Local - קהילת נתניה |
 | **Type** | Hyper-local business directory PWA |
 | **Users** | Netanya residents only |
 | **Languages** | Hebrew (RTL) + Russian (LTR) |

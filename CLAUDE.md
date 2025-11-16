@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## ⚠️ CRITICAL RULES
+
+**DO NOT CHANGE THE FOOTER** (`components/server/Footer.tsx`) unless explicitly instructed by the user.
+
 ## Project Overview
 
 **Netanya Local** - Hyper-local business directory exclusively for Netanya residents, divided by neighborhoods.

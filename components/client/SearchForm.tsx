@@ -35,6 +35,21 @@ export default function SearchForm({
   const categoryRef = useRef<HTMLSelectElement>(null)
   const neighborhoodRef = useRef<HTMLSelectElement>(null)
 
+  // Load previously selected values from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedCategory = localStorage.getItem('lastSearchCategory')
+      const savedNeighborhood = localStorage.getItem('lastSearchNeighborhood')
+      
+      if (savedCategory && categories.some((cat) => cat.slug === savedCategory)) {
+        setCategorySlug(savedCategory)
+      }
+      if (savedNeighborhood && neighborhoods.some((hood) => hood.slug === savedNeighborhood)) {
+        setNeighborhoodSlug(savedNeighborhood)
+      }
+    }
+  }, [categories, neighborhoods])
+
   // Set custom validation messages in the selected language
   useEffect(() => {
     const categoryEl = categoryRef.current
@@ -95,6 +110,12 @@ export default function SearchForm({
       return
     }
 
+    // Save selected values to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lastSearchCategory', categorySlug)
+      localStorage.setItem('lastSearchNeighborhood', neighborhoodSlug)
+    }
+
     // Track search event
     await trackEvent('search_performed', {
       category: categorySlug,
@@ -118,21 +139,28 @@ export default function SearchForm({
           >
             {t('categoryPlaceholder')}
           </label>
-          <select
-            id="category"
-            ref={categoryRef}
-            value={categorySlug}
-            onChange={(e) => setCategorySlug(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            required
-          >
-            <option value="">{t('categoryPlaceholder')}</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.slug}>
-                {locale === 'he' ? cat.name_he : cat.name_ru}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+              <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <select
+              id="category"
+              ref={categoryRef}
+              value={categorySlug}
+              onChange={(e) => setCategorySlug(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              required
+            >
+              <option value="">{t('categoryPlaceholder')}</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.slug}>
+                  {locale === 'he' ? cat.name_he : cat.name_ru}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Neighborhood Select */}
@@ -143,22 +171,29 @@ export default function SearchForm({
           >
             {t('neighborhoodPlaceholder')}
           </label>
-          <select
-            id="neighborhood"
-            ref={neighborhoodRef}
-            value={neighborhoodSlug}
-            onChange={(e) => setNeighborhoodSlug(e.target.value)}
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            required
-          >
-            <option value="">{t('neighborhoodPlaceholder')}</option>
-            <option value="all">{t('allNetanya')}</option>
-            {neighborhoods.map((hood) => (
-              <option key={hood.id} value={hood.slug}>
-                {locale === 'he' ? hood.name_he : hood.name_ru}
-              </option>
-            ))}
-          </select>
+          <div className="relative">
+            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+              <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <select
+              id="neighborhood"
+              ref={neighborhoodRef}
+              value={neighborhoodSlug}
+              onChange={(e) => setNeighborhoodSlug(e.target.value)}
+              className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              required
+            >
+              <option value="">{t('neighborhoodPlaceholder')}</option>
+              {neighborhoods.map((hood) => (
+                <option key={hood.id} value={hood.slug}>
+                  {locale === 'he' ? hood.name_he : hood.name_ru}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Error Message */}

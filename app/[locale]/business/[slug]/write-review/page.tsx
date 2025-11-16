@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
-import Link from 'next/link'
 import { getBusinessBySlug } from '@/lib/queries/businesses'
 import ReviewForm from '@/components/client/ReviewForm'
+import BackButton from '@/components/client/BackButton'
 
 interface WriteReviewPageProps {
   params: {
@@ -25,12 +25,11 @@ export default async function WriteReviewPage({
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Back Link */}
-      <Link
+      <BackButton
         href={`/${locale}/business/${slug}`}
-        className="mb-4 inline-block text-primary-600 hover:text-primary-700"
-      >
-        ← {t('cancel')}
-      </Link>
+        locale={locale}
+        label={t('cancel')}
+      />
 
       {/* Page Title */}
       <div className="mb-8">

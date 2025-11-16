@@ -31,11 +31,6 @@ export default function ShareButton({
     setTimeout(() => setShowToast(false), 3000)
   }
 
-  const handleWhatsAppShare = () => {
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`
-    window.open(whatsappUrl, '_blank')
-  }
-
   const handleCopyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(shareText)
@@ -81,40 +76,32 @@ export default function ShareButton({
   return (
     <>
       <div className={`flex gap-2 ${className}`}>
-        {/* WhatsApp Share Button */}
-        <button
-          onClick={handleWhatsAppShare}
-          className="flex items-center gap-2 rounded-lg border border-green-300 bg-green-50 px-4 py-2 text-sm font-medium text-green-700 transition hover:bg-green-100"
-          title={
-            locale === 'he' ? 'שתף בווטסאפ' : 'Поделиться в WhatsApp'
-          }
-        >
-          <span>💬</span>
-          <span className="hidden sm:inline">
-            {locale === 'he' ? 'שתף בווטסאפ' : 'WhatsApp'}
-          </span>
-        </button>
-
-        {/* Copy/Native Share Button */}
+        {/* Share Button */}
         <button
           onClick={handleNativeShare}
           className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
           title={locale === 'he' ? 'שיתוף' : 'Поделиться'}
         >
-          <span>📤</span>
+          {/* Share Icon */}
+          <svg
+            className="h-5 w-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
           <span className="hidden sm:inline">
             {locale === 'he' ? 'שיתוף' : 'Поделиться'}
           </span>
-        </button>
-
-        {/* Copy to Clipboard (Desktop) */}
-        <button
-          onClick={handleCopyToClipboard}
-          className="hidden items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 sm:flex"
-          title={locale === 'he' ? 'העתק קישור' : 'Копировать ссылку'}
-        >
-          <span>📋</span>
-          <span>{locale === 'he' ? 'העתק' : 'Копировать'}</span>
         </button>
       </div>
 

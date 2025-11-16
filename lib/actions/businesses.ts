@@ -6,6 +6,16 @@ import { revalidatePath } from 'next/cache'
 
 export async function submitPendingBusiness(locale: string, data: any) {
   try {
+    // Debug: Log received data
+    console.log('🔍 SERVER received data:', {
+      name: data.name,
+      categoryId: data.categoryId,
+      neighborhoodId: data.neighborhoodId,
+      phone: data.phone,
+      whatsappNumber: data.whatsappNumber,
+      servesAllCity: data.servesAllCity,
+    })
+
     // Validate input
     const validated = addBusinessSchema.parse(data)
 
@@ -93,7 +103,6 @@ export async function submitPendingBusiness(locale: string, data: any) {
         phone: validated.phone || null,
         whatsapp_number: validated.whatsappNumber || null,
         website_url: validated.websiteUrl || null,
-        email: validated.email || null,
 
         // Location Info
         address: validated.address || null,
