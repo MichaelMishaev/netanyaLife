@@ -1,8 +1,10 @@
-import { getTranslations } from 'next-intl/server'
+import { getTranslations, getLocale } from 'next-intl/server'
 import Link from 'next/link'
 
 export default async function Footer() {
   const t = await getTranslations('footer')
+  const tNav = await getTranslations('nav')
+  const locale = await getLocale()
   const currentYear = new Date().getFullYear()
 
   return (
@@ -21,6 +23,15 @@ export default async function Footer() {
           </div>
           <div className="mt-2 text-center text-xs text-gray-500">
             {t('copyright', { year: currentYear })}
+          </div>
+          <div className="mt-2 text-center">
+            <Link
+              href={`/${locale}/admin`}
+              className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
+              title={tNav('admin')}
+            >
+              ⚙️ <span>{tNav('admin')}</span>
+            </Link>
           </div>
         </div>
 
@@ -68,8 +79,19 @@ export default async function Footer() {
             </div>
           </div>
 
-          <div className="mt-8 border-t pt-8 text-center text-sm text-gray-600">
-            {t('copyright', { year: currentYear })}
+          <div className="mt-8 border-t pt-8 text-center">
+            <div className="mb-3">
+              <Link
+                href={`/${locale}/admin`}
+                className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
+                title={tNav('admin')}
+              >
+                ⚙️ <span>{tNav('admin')}</span>
+              </Link>
+            </div>
+            <div className="text-sm text-gray-600">
+              {t('copyright', { year: currentYear })}
+            </div>
           </div>
         </div>
       </div>

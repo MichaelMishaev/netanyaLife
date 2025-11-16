@@ -21,7 +21,7 @@ export default function LanguageSwitcher() {
       className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium hover:bg-gray-200"
       aria-label={locale === 'he' ? 'Switch to Russian' : 'Switch to Hebrew'}
     >
-      {locale === 'he' ? 'Русский' : 'עברית'}
+      {locale === 'he' ? 'ru' : 'he'}
     </button>
   )
 }

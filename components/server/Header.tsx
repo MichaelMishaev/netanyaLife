@@ -21,14 +21,6 @@ export default async function Header() {
           >
             {t('addBusiness')}
           </Link>
-          <Link
-            href={`/${locale}/admin`}
-            className="rounded-md bg-gray-100 px-3 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-200"
-            title={t('admin')}
-          >
-            <span className="hidden sm:inline">{t('admin')}</span>
-            <span className="sm:hidden">⚙️</span>
-          </Link>
           <PWAInstallButton />
           <LanguageSwitcher />
         </nav>
