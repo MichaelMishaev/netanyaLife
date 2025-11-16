@@ -27,8 +27,8 @@ export default function Breadcrumbs({ items, locale }: BreadcrumbsProps) {
 
   return (
     <>
-      {/* Breadcrumb Navigation */}
-      <nav aria-label="Breadcrumb" className="mb-4">
+      {/* Breadcrumb Navigation - Hidden on mobile */}
+      <nav aria-label="Breadcrumb" className="mb-4 hidden md:block">
         <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
           {items.map((item, index) => (
             <li key={index} className="flex items-center gap-2">

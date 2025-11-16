@@ -166,13 +166,13 @@ export default async function SearchResultsPage({
       {/* Breadcrumbs */}
       <Breadcrumbs items={breadcrumbItems} locale={locale} />
 
-      {/* Header */}
-      <div className="mb-8">
+      {/* Header - Compact on mobile */}
+      <div className="mb-4 md:mb-8">
         <BackButton href={`/${locale}`} locale={locale} label={t('back')} />
-        <h1 className="mb-2 text-3xl font-bold">
+        <h1 className="mb-1 text-2xl font-bold md:mb-2 md:text-3xl">
           {categoryName} {locale === 'he' ? 'ב' : 'в '}{neighborhoodName}
         </h1>
-        <p className="text-gray-600">
+        <p className="text-sm text-gray-600 md:text-base">
           {totalCount} {t('results', { count: totalCount })}
         </p>
       </div>
