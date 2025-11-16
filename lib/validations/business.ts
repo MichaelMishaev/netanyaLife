@@ -8,14 +8,20 @@ export const addBusinessSchema = z
   .object({
     // Business Info
     name: z.string().min(2, 'שם העסק חייב להכיל לפחות 2 תווים'),
-    categoryId: z.string().min(1, 'יש לבחור קטגוריה').cuid('יש לבחור קטגוריה'),
-    neighborhoodId: z.string().min(1, 'יש לבחור שכונה').cuid('יש לבחור שכונה'),
+    categoryId: z.string().min(1, 'יש לבחור קטגוריה'),
+    neighborhoodId: z.string().min(1, 'יש לבחור שכונה'),
     description: z.string().optional(),
 
     // Contact Info
     phone: z.string().optional(),
     whatsappNumber: z.string().optional(),
-    websiteUrl: z.string().url('כתובת האתר אינה תקינה').optional().or(z.literal('')),
+    websiteUrl: z
+      .string()
+      .url('כתובת האתר אינה תקינה')
+      .optional()
+      .or(z.literal(''))
+      .nullable()
+      .transform(val => val === '' ? undefined : val),
 
     // Location Info
     address: z.string().optional(),
@@ -30,7 +36,9 @@ export const addBusinessSchema = z
       .string()
       .email('כתובת הדוא״ל אינה תקינה')
       .optional()
-      .or(z.literal('')),
+      .or(z.literal(''))
+      .nullable()
+      .transform(val => val === '' ? undefined : val),
   })
   .refine((data) => data.phone || data.whatsappNumber, {
     message: 'חובה למלא טלפון או מספר ווטסאפ אחד לפחות',
