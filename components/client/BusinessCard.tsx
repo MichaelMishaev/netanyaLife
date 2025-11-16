@@ -93,12 +93,12 @@ export default function BusinessCard({ business, locale }: BusinessCardProps) {
           </h3>
           {business.is_verified && (
             <span
-              className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-blue-600 px-2.5 py-1 text-[11px] font-bold text-white shadow-md ring-2 ring-blue-400/30 transition-all group-hover:scale-110 group-hover:shadow-lg sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-sm"
+              className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-blue-500 px-3 py-1.5 text-xs font-extrabold text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] ring-2 ring-blue-300/60 transition-all group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.7)] sm:gap-1.5 sm:px-3.5 sm:py-2 sm:text-sm"
               role="status"
               aria-label={locale === 'he' ? 'עסק מאומת על ידי המערכת' : 'Бизнес проверен системой'}
             >
               <svg
-                className="h-3.5 w-3.5 drop-shadow-sm sm:h-4 sm:w-4"
+                className="h-4 w-4 drop-shadow-md sm:h-4.5 sm:w-4.5"
                 viewBox="0 0 20 20"
                 fill="currentColor"
                 aria-hidden="true"
