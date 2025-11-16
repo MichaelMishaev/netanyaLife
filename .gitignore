@@ -66,3 +66,6 @@ logs/
 *.log
 lighthouse-reports/
 lighthouse-test.json
+
+# 3rd Party API Docs (sensitive)
+docs/3rdParty/ideogram.md

@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **DO NOT CHANGE THE FOOTER** (`components/server/Footer.tsx`) unless explicitly instructed by the user.
 
+**IMAGE GENERATION**: For all image generation tasks, use instructions from `/Users/michaelmishayev/Desktop/Projects/netanyaBusiness/docs/3rdParty/ideogram.md`
+
 ## Project Overview
 
 **Netanya Local** - Hyper-local business directory exclusively for Netanya residents, divided by neighborhoods.
