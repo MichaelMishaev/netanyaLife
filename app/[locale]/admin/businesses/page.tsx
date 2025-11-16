@@ -1,23 +1,40 @@
 import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
 import BusinessManagementCard from '@/components/client/BusinessManagementCard'
+import BusinessFilters from '@/components/client/BusinessFilters'
 
 interface AdminBusinessesPageProps {
   params: {
     locale: string
   }
+  searchParams: {
+    neighborhood?: string
+    category?: string
+  }
 }
 
 export default async function AdminBusinessesPage({
   params: { locale },
+  searchParams,
 }: AdminBusinessesPageProps) {
   const t = await getTranslations('admin.businesses')
 
-  // Get all businesses (excluding soft-deleted)
+  // Build filter conditions
+  const whereConditions: any = {
+    deleted_at: null,
+  }
+
+  if (searchParams?.neighborhood) {
+    whereConditions.neighborhood_id = searchParams.neighborhood
+  }
+
+  if (searchParams?.category) {
+    whereConditions.category_id = searchParams.category
+  }
+
+  // Get filtered businesses
   const businesses = await prisma.business.findMany({
-    where: {
-      deleted_at: null,
-    },
+    where: whereConditions,
     include: {
       category: true,
       neighborhood: true,
@@ -31,6 +48,28 @@ export default async function AdminBusinessesPage({
       created_at: 'desc',
     },
   })
+
+  // Get all neighborhoods and categories for filters
+  const [neighborhoods, categories] = await Promise.all([
+    prisma.neighborhood.findMany({
+      where: { is_active: true },
+      select: {
+        id: true,
+        name_he: true,
+        name_ru: true,
+      },
+      orderBy: { display_order: 'asc' },
+    }),
+    prisma.category.findMany({
+      where: { is_active: true },
+      select: {
+        id: true,
+        name_he: true,
+        name_ru: true,
+      },
+      orderBy: { display_order: 'asc' },
+    }),
+  ])
 
   return (
     <div className="relative pb-20">
@@ -50,6 +89,13 @@ export default async function AdminBusinessesPage({
           </a>
         </div>
       </div>
+
+      {/* Filters */}
+      <BusinessFilters
+        locale={locale}
+        neighborhoods={neighborhoods}
+        categories={categories}
+      />
 
       {/* Business List */}
       {businesses.length === 0 ? (

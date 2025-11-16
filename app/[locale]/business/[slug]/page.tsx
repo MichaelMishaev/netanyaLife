@@ -165,8 +165,24 @@ export default async function BusinessDetailPage({
         <div className="mb-4 flex items-start justify-between">
           <h1 className="text-3xl font-bold">{name}</h1>
           {business.is_verified && (
-            <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800">
-              ✓ {t('verified')}
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white shadow-md ring-1 ring-blue-800/20"
+              role="status"
+              aria-label={locale === 'he' ? 'עסק מאומת על ידי המערכת' : 'Бизнес проверен системой'}
+            >
+              <svg
+                className="h-4 w-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span>{t('verified')}</span>
             </span>
           )}
         </div>

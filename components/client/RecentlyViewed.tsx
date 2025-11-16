@@ -41,8 +41,16 @@ export default function RecentlyViewed({ locale }: RecentlyViewedProps) {
               {t('title')}
             </h2>
             <p className="mt-1 text-xs text-gray-500 sm:text-sm">
-              {recentlyViewed.length}{' '}
-              {locale === 'he' ? 'עסקים נצפו לאחרונה' : 'недавно просмотренных'}
+              {/* Mobile: show count of displayed items (max 3) */}
+              <span className="md:hidden">
+                {Math.min(recentlyViewed.length, 3)}{' '}
+                {locale === 'he' ? 'עסקים נצפו לאחרונה' : 'недавно просмотренных'}
+              </span>
+              {/* Desktop: show total count */}
+              <span className="hidden md:inline">
+                {recentlyViewed.length}{' '}
+                {locale === 'he' ? 'עסקים נצפו לאחרונה' : 'недавно просмотренных'}
+              </span>
             </p>
           </div>
 

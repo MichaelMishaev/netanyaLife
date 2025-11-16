@@ -471,7 +471,7 @@ export default function AddBusinessForm({
           {t('form.website')}
         </label>
         <input
-          type="url"
+          type="text"
           id="websiteUrl"
           name="websiteUrl"
           value={formData.websiteUrl}

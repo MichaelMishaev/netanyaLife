@@ -355,13 +355,13 @@ export default function AdminBusinessForm({
             {locale === 'he' ? 'אתר אינטרנט' : 'Веб-сайт'}
           </label>
           <input
-            type="url"
+            type="text"
             id="websiteUrl"
             name="websiteUrl"
             value={formData.websiteUrl}
             onChange={handleChange}
             className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            placeholder="https://example.com"
+            placeholder="example.com"
             dir="ltr"
           />
         </div>
