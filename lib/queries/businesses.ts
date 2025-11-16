@@ -75,8 +75,23 @@ export async function getSearchResults(params: {
     return { ...biz, avgRating, reviewCount: ratings.length }
   })
 
-  // 3. Random 5 from non-pinned
-  const shuffled = [...businessesWithRatings].sort(() => Math.random() - 0.5)
+  // 3. Deterministic shuffle based on search params (prevents hydration errors)
+  // Create a seed from categoryId + neighborhoodId for consistent "random" ordering
+  const seed = `${categoryId}-${neighborhoodId || 'all'}`
+  const seededRandom = (str: string, index: number) => {
+    let hash = 0
+    for (let i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i) + index
+      hash = hash & hash // Convert to 32bit integer
+    }
+    return Math.abs(hash) / 2147483647 // Normalize to 0-1
+  }
+
+  const shuffled = [...businessesWithRatings].sort((a, b) => {
+    const hashA = seededRandom(seed + a.id, 0)
+    const hashB = seededRandom(seed + b.id, 0)
+    return hashA - hashB
+  })
   const random5 = shuffled.slice(0, 5)
   const rest = shuffled.slice(5)
 
