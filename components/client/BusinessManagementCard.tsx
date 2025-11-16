@@ -115,7 +115,7 @@ export default function BusinessManagementCard({
           <button
             onClick={handleToggleVisibility}
             disabled={isUpdating}
-            className={`rounded-lg border px-4 py-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`min-w-0 rounded-lg border px-2 py-2.5 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
               business.is_visible
                 ? 'border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100'
                 : 'border-green-300 bg-green-50 text-green-700 hover:bg-green-100 active:bg-green-200'
@@ -133,22 +133,22 @@ export default function BusinessManagementCard({
           <button
             onClick={handleToggleVerification}
             disabled={isUpdating}
-            className={`rounded-lg border px-4 py-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`min-w-0 rounded-lg border px-2 py-2.5 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
               business.is_verified
                 ? 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 active:bg-blue-200'
                 : 'border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100'
             }`}
           >
-            <span className="flex items-center justify-center gap-1">
-              ✓
-              <span>
+            <span className="flex items-center justify-center gap-0.5">
+              <span className="text-[10px]">✓</span>
+              <span className="truncate">
                 {business.is_verified
                   ? locale === 'he'
-                    ? 'בטל אימות'
+                    ? 'בטל'
                     : 'Снять'
                   : locale === 'he'
                     ? 'אמת'
-                    : 'Проверить'}
+                    : 'Верифицировать'}
               </span>
             </span>
           </button>
@@ -156,15 +156,15 @@ export default function BusinessManagementCard({
           <button
             onClick={handleTogglePinned}
             disabled={isUpdating}
-            className={`rounded-lg border px-4 py-3 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+            className={`min-w-0 rounded-lg border px-2 py-2.5 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
               business.is_pinned
                 ? 'border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 active:bg-purple-200'
                 : 'border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100'
             }`}
           >
-            <span className="flex items-center justify-center gap-1">
-              📌
-              <span>
+            <span className="flex items-center justify-center gap-0.5">
+              <span className="text-[10px]">📌</span>
+              <span className="truncate">
                 {business.is_pinned
                   ? locale === 'he'
                     ? 'בטל'
@@ -179,11 +179,11 @@ export default function BusinessManagementCard({
           <button
             onClick={handleDelete}
             disabled={isUpdating}
-            className="rounded-lg border border-red-300 px-4 py-3 text-sm font-medium text-red-700 transition hover:bg-red-50 active:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-w-0 rounded-lg border border-red-300 px-2 py-2.5 text-xs font-medium text-red-700 transition hover:bg-red-50 active:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <span className="flex items-center justify-center gap-1">
-              🗑️
-              <span>{locale === 'he' ? 'מחק' : 'Удалить'}</span>
+            <span className="flex items-center justify-center gap-0.5">
+              <span className="text-[10px]">🗑️</span>
+              <span className="truncate">{locale === 'he' ? 'מחק' : 'Удалить'}</span>
             </span>
           </button>
         </div>
