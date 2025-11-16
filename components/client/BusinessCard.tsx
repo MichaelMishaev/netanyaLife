@@ -85,7 +85,7 @@ export default function BusinessCard({ business, locale }: BusinessCardProps) {
       <div className={`h-full w-1 flex-shrink-0 bg-gradient-to-b ${accentColor} absolute left-0 top-0`} />
 
       {/* Clickable Card Content */}
-      <Link href={`/${locale}/business/${slug}`} className="block p-3 pe-3 ps-4 md:p-4 md:ps-5">
+      <Link href={`/${locale}/business/${slug}`} className={`block p-3 pe-3 ps-4 md:p-4 md:ps-5 ${business.is_pinned ? 'pt-8' : ''}`}>
         {/* Header Row */}
         <div className="mb-2 flex items-start justify-between gap-2">
           <h3 className="flex-1 text-sm font-semibold text-gray-900 md:text-base">
