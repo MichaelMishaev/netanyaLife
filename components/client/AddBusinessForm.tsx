@@ -54,6 +54,8 @@ export default function AddBusinessForm({
     categoryId?: string
     neighborhoodId?: string
     contact?: string
+    websiteUrl?: string
+    submitterEmail?: string
   }>({})
 
   // Refs for validation
@@ -215,9 +217,21 @@ export default function AddBusinessForm({
           router.push(`/${locale}`)
         }, 3000)
       } else {
+        console.log('❌ Server validation failed:', result)
+
+        // Set general error message
         setError(result.error || t('error'))
+
+        // Set field-specific errors if available
+        if (result.validationErrors) {
+          setFieldErrors(result.validationErrors as any)
+        }
+
+        // Scroll to top to show errors
+        window.scrollTo({ top: 0, behavior: 'smooth' })
       }
     } catch (err) {
+      console.error('❌ Form submission error:', err)
       setError(t('error'))
     } finally {
       setIsSubmitting(false)
@@ -476,10 +490,17 @@ export default function AddBusinessForm({
           name="websiteUrl"
           value={formData.websiteUrl}
           onChange={handleChange}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${
+            fieldErrors.websiteUrl
+              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+              : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
+          }`}
           placeholder={t('form.websitePlaceholder')}
           dir="ltr"
         />
+        {fieldErrors.websiteUrl && (
+          <p className="mt-1 text-sm text-red-600">{fieldErrors.websiteUrl}</p>
+        )}
       </div>
 
       {/* Address */}
@@ -566,10 +587,19 @@ export default function AddBusinessForm({
               name="submitterEmail"
               value={formData.submitterEmail}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${
+                fieldErrors.submitterEmail
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                  : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
+              }`}
               placeholder={t('form.submitterEmailPlaceholder')}
               dir="ltr"
             />
+            {fieldErrors.submitterEmail && (
+              <p className="mt-1 text-sm text-red-600">
+                {fieldErrors.submitterEmail}
+              </p>
+            )}
           </div>
         </div>
       </div>

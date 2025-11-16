@@ -17,11 +17,36 @@ export const addBusinessSchema = z
     whatsappNumber: z.string().optional(),
     websiteUrl: z
       .string()
-      .url('כתובת האתר אינה תקינה')
       .optional()
-      .or(z.literal(''))
-      .nullable()
-      .transform(val => val === '' ? undefined : val),
+      .transform((val) => {
+        // Handle empty strings
+        if (!val || val.trim() === '') return undefined
+
+        // Trim whitespace
+        const trimmed = val.trim()
+
+        // If already has protocol, return as-is
+        if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+          return trimmed
+        }
+
+        // Auto-prepend https:// for URLs without protocol
+        return `https://${trimmed}`
+      })
+      .refine(
+        (val) => {
+          if (!val) return true // Allow empty/undefined
+
+          // Validate URL format
+          try {
+            new URL(val)
+            return true
+          } catch {
+            return false
+          }
+        },
+        { message: 'כתובת האתר אינה תקינה' }
+      ),
 
     // Location Info
     address: z.string().optional(),
@@ -34,11 +59,16 @@ export const addBusinessSchema = z
     submitterName: z.string().optional(),
     submitterEmail: z
       .string()
-      .email('כתובת הדוא״ל אינה תקינה')
       .optional()
-      .or(z.literal(''))
-      .nullable()
-      .transform(val => val === '' ? undefined : val),
+      .transform((val) => (!val || val.trim() === '' ? undefined : val.trim()))
+      .refine(
+        (val) => {
+          if (!val) return true // Allow empty/undefined
+          // Simple email validation
+          return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)
+        },
+        { message: 'כתובת הדוא״ל אינה תקינה' }
+      ),
   })
   .refine((data) => data.phone || data.whatsappNumber, {
     message: 'חובה למלא טלפון או מספר ווטסאפ אחד לפחות',

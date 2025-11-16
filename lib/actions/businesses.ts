@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma'
 import { addBusinessSchema } from '@/lib/validations/business'
 import { revalidatePath } from 'next/cache'
+import { ZodError } from 'zod'
 
 export async function submitPendingBusiness(locale: string, data: any) {
   try {
@@ -125,17 +126,41 @@ export async function submitPendingBusiness(locale: string, data: any) {
 
     return { success: true }
   } catch (error) {
-    console.error('Error submitting pending business:', error)
+    console.error('❌ Error submitting pending business:', error)
 
-    // Return validation errors
-    if (error instanceof Error && error.name === 'ZodError') {
+    // Return detailed validation errors
+    if (error instanceof ZodError) {
+      console.log('📋 Validation errors:', error.issues)
+
+      // Format errors for user display
+      const fieldErrors = error.issues.map((issue) => {
+        const field = issue.path.join('.')
+        return `${field}: ${issue.message}`
+      })
+
       return {
         success: false,
-        error: 'Validation failed',
-        details: error.message,
+        error:
+          locale === 'he'
+            ? `שגיאות בטופס:\n${fieldErrors.join('\n')}`
+            : `Form errors:\n${fieldErrors.join('\n')}`,
+        validationErrors: error.issues.reduce(
+          (acc, issue) => {
+            const field = issue.path[0] as string
+            acc[field] = issue.message
+            return acc
+          },
+          {} as Record<string, string>
+        ),
       }
     }
 
-    return { success: false, error: 'Failed to submit business' }
+    return {
+      success: false,
+      error:
+        locale === 'he'
+          ? 'שגיאה בשליחת הטופס. נסה שוב.'
+          : 'Failed to submit business. Please try again.',
+    }
   }
 }
