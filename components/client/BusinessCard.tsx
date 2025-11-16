@@ -70,7 +70,7 @@ export default function BusinessCard({ business, locale }: BusinessCardProps) {
     : 'from-primary-500 to-primary-600'
 
   return (
-    <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
+    <div className="group relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
       {/* Pinned/Featured Badge - Top Right */}
       {business.is_pinned && (
         <div className="absolute right-0 top-0 z-10">
@@ -85,15 +85,31 @@ export default function BusinessCard({ business, locale }: BusinessCardProps) {
       <div className={`h-full w-1 flex-shrink-0 bg-gradient-to-b ${accentColor} absolute left-0 top-0`} />
 
       {/* Clickable Card Content */}
-      <Link href={`/${locale}/business/${slug}`} className={`block p-3 pe-3 ps-4 md:p-4 md:ps-5 ${business.is_pinned ? 'pt-8' : ''}`}>
+      <Link href={`/${locale}/business/${slug}`} className={`block flex-grow p-3 pe-3 ps-4 md:p-4 md:ps-5 ${business.is_pinned ? 'pt-8' : ''}`}>
         {/* Header Row */}
         <div className="mb-2 flex items-start justify-between gap-2">
           <h3 className="flex-1 text-sm font-semibold text-gray-900 md:text-base">
             {name}
           </h3>
           {business.is_verified && (
-            <span className="flex-shrink-0 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-              ✓
+            <span
+              className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-blue-700 px-2 py-0.5 text-[10px] font-semibold text-white shadow-sm ring-1 ring-blue-800/10 transition-transform group-hover:scale-105 sm:gap-1.5 sm:px-2.5 sm:py-1 sm:text-xs"
+              role="status"
+              aria-label={locale === 'he' ? 'עסק מאומת על ידי המערכת' : 'Бизнес проверен системой'}
+            >
+              <svg
+                className="h-3 w-3 sm:h-3.5 sm:w-3.5"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="hidden sm:inline">{locale === 'he' ? 'מאומת' : 'Проверено'}</span>
             </span>
           )}
         </div>

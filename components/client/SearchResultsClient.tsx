@@ -182,7 +182,7 @@ export default function SearchResultsClient({
           {filteredAndSortedBusinesses.map((business, index) => (
             <div
               key={business.id}
-              className="animate-fade-in-up"
+              className="h-full animate-fade-in-up"
               style={{
                 animationDelay: `${Math.min(index * 50, 300)}ms`,
                 animationFillMode: 'backwards',
