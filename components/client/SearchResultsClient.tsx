@@ -166,15 +166,23 @@ export default function SearchResultsClient({
         )}
       </div>
 
-      {/* Results Grid */}
+      {/* Results Grid - With fade-in animation */}
       {filteredAndSortedBusinesses.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredAndSortedBusinesses.map((business) => (
-            <BusinessCard
+          {filteredAndSortedBusinesses.map((business, index) => (
+            <div
               key={business.id}
-              business={business}
-              locale={locale}
-            />
+              className="animate-fade-in-up"
+              style={{
+                animationDelay: `${Math.min(index * 50, 300)}ms`,
+                animationFillMode: 'backwards',
+              }}
+            >
+              <BusinessCard
+                business={business}
+                locale={locale}
+              />
+            </div>
           ))}
         </div>
       ) : (
