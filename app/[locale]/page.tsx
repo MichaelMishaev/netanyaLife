@@ -19,28 +19,41 @@ export default async function Home({
   ])
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      {/* Hero Section */}
-      <section className="mb-12 text-center">
-        <h1 className="mb-4 text-4xl font-bold md:text-5xl">
-          {t('hero.title')}
-        </h1>
-        <p className="text-lg text-gray-600 md:text-xl">
-          {t('hero.subtitle')}
-        </p>
-      </section>
+    <>
+      {/* Hero Section with Gradient Background */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 animate-gradient">
+        {/* Decorative floating elements */}
+        <div className="absolute top-10 start-10 h-32 w-32 rounded-full bg-blue-200/30 blur-3xl animate-float" />
+        <div className="absolute bottom-20 end-20 h-40 w-40 rounded-full bg-purple-200/30 blur-3xl animate-float" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-1/2 start-1/2 h-36 w-36 -translate-x-1/2 -translate-y-1/2 rounded-full bg-pink-200/20 blur-3xl animate-float" style={{ animationDelay: '2s' }} />
 
-      {/* Search Section */}
-      <section className="mb-16 flex justify-center">
-        <SearchForm
-          categories={categories}
-          neighborhoods={neighborhoods}
-          locale={locale}
-        />
-      </section>
+        <div className="container relative mx-auto px-4 py-16 md:py-24">
+          <section className="mb-12 text-center animate-fade-in">
+            <h1 className="mb-4 text-4xl font-bold md:text-5xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              {t('hero.title')}
+            </h1>
+            <p className="text-lg text-gray-700 md:text-xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              {t('hero.subtitle')}
+            </p>
+          </section>
 
-      {/* Recently Viewed */}
-      <RecentlyViewed locale={locale} />
-    </div>
+          {/* Search Section with Card */}
+          <section className="mb-8 flex justify-center animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            <div className="w-full max-w-2xl rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl md:p-8">
+              <SearchForm
+                categories={categories}
+                neighborhoods={neighborhoods}
+                locale={locale}
+              />
+            </div>
+          </section>
+        </div>
+      </div>
+
+      {/* Recently Viewed Section */}
+      <div className="container mx-auto px-4 py-12">
+        <RecentlyViewed locale={locale} />
+      </div>
+    </>
   )
 }

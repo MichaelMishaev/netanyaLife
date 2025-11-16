@@ -150,7 +150,7 @@ export default function SearchForm({
               ref={categoryRef}
               value={categorySlug}
               onChange={(e) => setCategorySlug(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 transition-all duration-200 hover:border-primary-400 hover:shadow-md focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
             >
               <option value="">{t('categoryPlaceholder')}</option>
@@ -183,7 +183,7 @@ export default function SearchForm({
               ref={neighborhoodRef}
               value={neighborhoodSlug}
               onChange={(e) => setNeighborhoodSlug(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 transition-all duration-200 hover:border-primary-400 hover:shadow-md focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
             >
               <option value="">{t('neighborhoodPlaceholder')}</option>
@@ -206,7 +206,7 @@ export default function SearchForm({
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full rounded-lg bg-primary-600 px-6 py-3 font-medium text-white transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+          className="w-full rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-3 font-medium text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:from-primary-700 hover:to-primary-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-[0.98]"
         >
           {t('searchButton')}
         </button>
