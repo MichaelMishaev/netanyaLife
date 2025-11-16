@@ -18,10 +18,10 @@ export default function LanguageSwitcher() {
   return (
     <button
       onClick={switchLocale}
-      className="rounded-md bg-gray-100 px-3 py-1 text-sm font-medium hover:bg-gray-200"
+      className="rounded-md bg-gray-100 px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wider hover:bg-gray-200 sm:px-3 sm:py-1 sm:text-sm"
       aria-label={locale === 'he' ? 'Switch to Russian' : 'Switch to Hebrew'}
     >
-      {locale === 'he' ? 'ru' : 'he'}
+      {locale === 'he' ? 'RU' : 'HE'}
     </button>
   )
 }
