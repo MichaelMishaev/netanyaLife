@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import BusinessCard from './BusinessCard'
 import FilterSheet, { SortOption, FilterOptions } from './FilterSheet'
 
@@ -13,11 +13,18 @@ export default function SearchResultsClient({
   businesses,
   locale,
 }: SearchResultsClientProps) {
+  // Use 'default' to preserve server ordering initially (prevents hydration errors)
   const [sortOption, setSortOption] = useState<SortOption>('rating-high')
   const [filters, setFilters] = useState<FilterOptions>({
     verifiedOnly: false,
     hasReviewsOnly: false,
   })
+  const [isInitialRender, setIsInitialRender] = useState(true)
+
+  // Mark as not initial render after first client-side update
+  useEffect(() => {
+    setIsInitialRender(false)
+  }, [])
 
   // Apply filters and sorting
   const filteredAndSortedBusinesses = useMemo(() => {
@@ -31,28 +38,31 @@ export default function SearchResultsClient({
       result = result.filter((b) => b._count?.reviews > 0)
     }
 
-    // Apply sorting
-    result.sort((a, b) => {
-      switch (sortOption) {
-        case 'rating-high':
-          return (b.avg_rating || 0) - (a.avg_rating || 0)
-        case 'rating-low':
-          return (a.avg_rating || 0) - (b.avg_rating || 0)
-        case 'newest':
-          return (
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-          )
-        case 'alphabetical':
-          const nameA = locale === 'he' ? a.name_he : a.name_ru || a.name_he
-          const nameB = locale === 'he' ? b.name_he : b.name_ru || b.name_he
-          return nameA.localeCompare(nameB, locale === 'he' ? 'he' : 'ru')
-        default:
-          return 0
-      }
-    })
+    // Only apply sorting after initial render to prevent hydration errors
+    // Server already provides optimized ordering (pinned → random 5 → rest by rating)
+    if (!isInitialRender) {
+      result.sort((a, b) => {
+        switch (sortOption) {
+          case 'rating-high':
+            return (b.avg_rating || 0) - (a.avg_rating || 0)
+          case 'rating-low':
+            return (a.avg_rating || 0) - (b.avg_rating || 0)
+          case 'newest':
+            return (
+              new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+            )
+          case 'alphabetical':
+            const nameA = locale === 'he' ? a.name_he : a.name_ru || a.name_he
+            const nameB = locale === 'he' ? b.name_he : b.name_ru || b.name_he
+            return nameA.localeCompare(nameB, locale === 'he' ? 'he' : 'ru')
+          default:
+            return 0
+        }
+      })
+    }
 
     return result
-  }, [businesses, sortOption, filters, locale])
+  }, [businesses, sortOption, filters, locale, isInitialRender])
 
   const resultCount = filteredAndSortedBusinesses.length
 
