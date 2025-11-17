@@ -17,7 +17,7 @@ export default function AdminLogoutButton({ locale }: AdminLogoutButtonProps) {
   return (
     <button
       onClick={handleLogout}
-      className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+      className="whitespace-nowrap rounded-lg border border-gray-300 px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 sm:px-3 sm:py-2 sm:text-sm lg:px-4"
     >
       {t('logout')}
     </button>

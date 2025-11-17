@@ -1,0 +1,250 @@
+[
+  {
+    "categoryId": "0zo5Tpl6j5jj1lMgQkLI",
+    "categoryTitle": "⚖️ עורכי דין",
+    "subcategories": [
+      {
+        "name_he": "ייפוי כוח מתמשך",
+        "name_ru": "Постоянная доверенность",
+        "slug": "enduring-power-of-attorney"
+      },
+      {
+        "name_he": "גבייה",
+        "name_ru": "Взыскание долгов",
+        "slug": "debt-collection"
+      },
+      {
+        "name_he": "חוזים",
+        "name_ru": "Договоры",
+        "slug": "contracts"
+      },
+      {
+        "name_he": "אזרחי",
+        "name_ru": "Гражданское право",
+        "slug": "civil-law"
+      }
+    ]
+  },
+  {
+    "categoryId": "BKP5FbHhfVff4Lpwm4u0",
+    "categoryTitle": "💇‍♀️ עיצוב שיער, קוסמטיקה ויופי",
+    "subcategories": [
+      {
+        "name_he": "עיצוב שיער",
+        "name_ru": "Парикмахерские услуги",
+        "slug": "hair-styling"
+      },
+      {
+        "name_he": "קוסמטיקה",
+        "name_ru": "Косметика",
+        "slug": "cosmetics"
+      },
+      {
+        "name_he": "הדבקת ריסים",
+        "name_ru": "Наращивание ресниц",
+        "slug": "eyelash-extensions"
+      },
+      {
+        "name_he": "סדנאות איפור",
+        "name_ru": "Мастер-классы по макияжу",
+        "slug": "makeup-workshops"
+      }
+    ]
+  },
+  {
+    "categoryId": "Jh1UTargqIeM4VN8yYi1",
+    "categoryTitle": "🚗 רכב ,תחבורה, הובלות",
+    "subcategories": [
+      {
+        "name_he": "מוניות",
+        "name_ru": "Такси",
+        "slug": "taxis"
+      },
+      {
+        "name_he": "הסעות",
+        "name_ru": "Транспортные услуги",
+        "slug": "transportation"
+      },
+      {
+        "name_he": "הובלות",
+        "name_ru": "Переезды",
+        "slug": "moving-services"
+      }
+    ]
+  },
+  {
+    "categoryId": "PPDsljqE2vYoj3Qz8hKG",
+    "categoryTitle": "🏡 שירותים לבית",
+    "subcategories": [
+      {
+        "name_he": "אינסטלטורים",
+        "name_ru": "Сантехники",
+        "slug": "plumbers"
+      },
+      {
+        "name_he": "הנדימן",
+        "name_ru": "Мастер на все руки",
+        "slug": "handyman"
+      },
+      {
+        "name_he": "מנעולנים",
+        "name_ru": "Слесари",
+        "slug": "locksmiths"
+      },
+      {
+        "name_he": "מערכות מיגון לבית",
+        "name_ru": "Системы безопасности для дома",
+        "slug": "home-security-systems"
+      }
+    ]
+  },
+  {
+    "categoryId": "Ug2RJNQ12YuEJ7w6o42Z",
+    "categoryTitle": "🔌 שירותי אלקטרוניקה אישית",
+    "subcategories": [
+      {
+        "name_he": "טכנאי סלולר ותיקונים",
+        "name_ru": "Ремонт мобильных телефонов",
+        "slug": "mobile-repair"
+      },
+      {
+        "name_he": "מחשבים נייחים וניידים",
+        "name_ru": "Компьютеры настольные и ноутбуки",
+        "slug": "computers"
+      }
+    ]
+  },
+  {
+    "categoryId": "VB1Dlnt4scxy9Sl4BxCH",
+    "categoryTitle": "🧘 בריאות ורפואה משלימה",
+    "subcategories": [
+      {
+        "name_he": "עיסוי",
+        "name_ru": "Массаж",
+        "slug": "massage"
+      },
+      {
+        "name_he": "פסיכותרפיה",
+        "name_ru": "Психотерапия",
+        "slug": "psychotherapy"
+      },
+      {
+        "name_he": "טיפול רגשי ופסיכותרפיה",
+        "name_ru": "Эмоциональная терапия",
+        "slug": "emotional-therapy"
+      },
+      {
+        "name_he": "ליווי רגשי ונפשי",
+        "name_ru": "Эмоциональное сопровождение",
+        "slug": "emotional-support"
+      }
+    ]
+  },
+  {
+    "categoryId": "WOZ6UWYslxDJMLZ4cVuz",
+    "categoryTitle": "🌿 סביבה ובעלי חיים",
+    "subcategories": []
+  },
+  {
+    "categoryId": "X8ixdNxb8LmIAyXFqtXk",
+    "categoryTitle": "🧵 תופרות",
+    "subcategories": [
+      {
+        "name_he": "שמלות כלה",
+        "name_ru": "Свадебные платья",
+        "slug": "wedding-dresses"
+      }
+    ]
+  },
+  {
+    "categoryId": "XN0gYPmDMBi0WiTkmBhK",
+    "categoryTitle": "💰 ייעוץ אישי וכלכלי",
+    "subcategories": [
+      {
+        "name_he": "תכנון פנסיוני",
+        "name_ru": "Пенсионное планирование",
+        "slug": "pension-planning"
+      }
+    ]
+  },
+  {
+    "categoryId": "i2SzvkXQ6xJUXvmSedwk",
+    "categoryTitle": "🍽️ אוכל, 📸 צילום, 🎉 אירועים ו🥳 הפעלות",
+    "subcategories": [
+      {
+        "name_he": "סדנאות בישול ואפייה",
+        "name_ru": "Кулинарные мастер-классы",
+        "slug": "cooking-workshops"
+      },
+      {
+        "name_he": "עיצוב עוגות ומתוקים",
+        "name_ru": "Дизайн тортов и сладостей",
+        "slug": "cake-design"
+      },
+      {
+        "name_he": "עיצוב בלונים ופרחים",
+        "name_ru": "Оформление шарами и цветами",
+        "slug": "balloon-flower-design"
+      },
+      {
+        "name_he": "🥳 הפעלות לילדים",
+        "name_ru": "Детские развлечения",
+        "slug": "kids-entertainment"
+      }
+    ]
+  },
+  {
+    "categoryId": "iVwr6uazMN1IkCjMkEDZ",
+    "categoryTitle": "💼 שירותים לעסקים",
+    "subcategories": [
+      {
+        "name_he": "שירותי משרד",
+        "name_ru": "Офисные услуги",
+        "slug": "office-services"
+      },
+      {
+        "name_he": "בק אופיס",
+        "name_ru": "Бэк-офис",
+        "slug": "back-office"
+      },
+      {
+        "name_he": "מכבסה / שירותי כביסה",
+        "name_ru": "Прачечная",
+        "slug": "laundry-services"
+      }
+    ]
+  },
+  {
+    "categoryId": "k5SdzR2KuNswcqjyPxcx",
+    "categoryTitle": "🧑‍🎓 חינוך ,למידה, בייביסיטר",
+    "subcategories": [
+      {
+        "name_he": "מורים פרטיים",
+        "name_ru": "Частные преподаватели",
+        "slug": "private-tutors"
+      }
+    ]
+  },
+  {
+    "categoryId": "mEErFJeTNcbzY6G2hdVy",
+    "categoryTitle": "📱 ייעוץ דיגיטלי",
+    "subcategories": [
+      {
+        "name_he": "בניית אתרים",
+        "name_ru": "Создание сайтов",
+        "slug": "web-development"
+      }
+    ]
+  },
+  {
+    "categoryId": "zBV4wjQy901vALClpRyY",
+    "categoryTitle": "🏘️ נדל״ן",
+    "subcategories": [
+      {
+        "name_he": "ייעוץ נדל״ן",
+        "name_ru": "Консультации по недвижимости",
+        "slug": "real-estate-consulting"
+      }
+    ]
+  }
+]

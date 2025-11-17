@@ -93,23 +93,25 @@ export default function BusinessCard({ business, locale }: BusinessCardProps) {
           </h3>
           {business.is_verified && (
             <span
-              className="inline-flex flex-shrink-0 items-center gap-1 rounded-full bg-blue-500 px-3 py-1.5 text-xs font-extrabold text-white shadow-[0_0_15px_rgba(59,130,246,0.5)] ring-2 ring-blue-300/60 transition-all group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.7)] sm:gap-1.5 sm:px-3.5 sm:py-2 sm:text-sm"
+              className="relative inline-flex flex-shrink-0 items-center gap-1.5 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 px-2.5 py-1.5 text-xs font-bold text-white shadow-lg shadow-green-500/40 ring-2 ring-white transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl group-hover:shadow-green-500/60 sm:px-3 sm:py-2 sm:text-sm"
               role="status"
               aria-label={locale === 'he' ? 'עסק מאומת על ידי המערכת' : 'Бизнес проверен системой'}
             >
+              {/* Animated glow effect */}
+              <span className="absolute inset-0 rounded-full bg-green-400/30 blur-md animate-pulse" />
+              
+              {/* Shield with checkmark icon - Twitter/X style */}
               <svg
-                className="h-4 w-4 drop-shadow-md sm:h-4.5 sm:w-4.5"
-                viewBox="0 0 20 20"
+                className="relative z-10 h-4 w-4 drop-shadow-lg sm:h-5 sm:w-5"
+                viewBox="0 0 24 24"
                 fill="currentColor"
                 aria-hidden="true"
               >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
+                <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm-1 14.59l-3.29-3.3 1.41-1.41L11 13.76l5.88-5.88 1.41 1.41L11 16.59z"/>
               </svg>
-              <span className="hidden sm:inline">{locale === 'he' ? 'מאומת' : 'Проверено'}</span>
+              <span className="relative z-10 hidden font-extrabold tracking-wide sm:inline">
+                {locale === 'he' ? 'מאומת' : 'Проверено'}
+              </span>
             </span>
           )}
         </div>

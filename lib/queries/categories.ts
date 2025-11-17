@@ -16,6 +16,16 @@ export const getCategories = cache(async () => {
       slug: true,
       icon_name: true,
       is_popular: true,
+      subcategories: {
+        where: { is_active: true },
+        orderBy: { display_order: 'asc' },
+        select: {
+          id: true,
+          name_he: true,
+          name_ru: true,
+          slug: true,
+        },
+      },
     },
   })
 })
@@ -51,6 +61,35 @@ export const getCategoryBySlug = cache(async (slug: string) => {
       slug: true,
       description_he: true,
       description_ru: true,
+      subcategories: {
+        where: { is_active: true },
+        orderBy: { display_order: 'asc' },
+        select: {
+          id: true,
+          name_he: true,
+          name_ru: true,
+          slug: true,
+        },
+      },
+    },
+  })
+})
+
+/**
+ * Get subcategories for a specific category
+ */
+export const getSubcategoriesByCategory = cache(async (categoryId: string) => {
+  return await prisma.subcategory.findMany({
+    where: {
+      category_id: categoryId,
+      is_active: true,
+    },
+    orderBy: { display_order: 'asc' },
+    select: {
+      id: true,
+      name_he: true,
+      name_ru: true,
+      slug: true,
     },
   })
 })

@@ -11,6 +11,12 @@ interface SearchFormProps {
     name_he: string
     name_ru: string
     slug: string
+    subcategories: Array<{
+      id: string
+      name_he: string
+      name_ru: string
+      slug: string
+    }>
   }>
   neighborhoods: Array<{
     id: string
@@ -30,10 +36,15 @@ export default function SearchForm({
   const router = useRouter()
   const { trackEvent } = useAnalytics()
   const [categorySlug, setCategorySlug] = useState('')
+  const [subcategorySlug, setSubcategorySlug] = useState('')
   const [neighborhoodSlug, setNeighborhoodSlug] = useState('')
   const [error, setError] = useState('')
   const categoryRef = useRef<HTMLSelectElement>(null)
   const neighborhoodRef = useRef<HTMLSelectElement>(null)
+
+  // Get subcategories for selected category
+  const selectedCategory = categories.find(c => c.slug === categorySlug)
+  const availableSubcategories = selectedCategory?.subcategories || []
 
   // Load previously selected values from localStorage on mount
   useEffect(() => {
@@ -119,12 +130,15 @@ export default function SearchForm({
     // Track search event
     await trackEvent('search_performed', {
       category: categorySlug,
+      subcategory: subcategorySlug || undefined,
       neighborhood: neighborhoodSlug,
       language: locale,
     })
 
     // Navigate to results page
-    const url = `/${locale}/search/${categorySlug}/${neighborhoodSlug}`
+    const url = subcategorySlug
+      ? `/${locale}/search/${categorySlug}/${neighborhoodSlug}?subcategory=${subcategorySlug}`
+      : `/${locale}/search/${categorySlug}/${neighborhoodSlug}`
     router.push(url)
   }
 
@@ -149,7 +163,10 @@ export default function SearchForm({
               id="category"
               ref={categoryRef}
               value={categorySlug}
-              onChange={(e) => setCategorySlug(e.target.value)}
+              onChange={(e) => {
+                setCategorySlug(e.target.value)
+                setSubcategorySlug('') // Reset subcategory when category changes
+              }}
               className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 transition-all duration-200 hover:border-primary-400 hover:shadow-md focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
             >
@@ -162,6 +179,43 @@ export default function SearchForm({
             </select>
           </div>
         </div>
+
+        {/* Subcategory Select - Only shown if category has subcategories */}
+        {availableSubcategories.length > 0 && (
+          <div className="animate-fade-in-up">
+            <label
+              htmlFor="subcategory"
+              className="mb-2 block text-sm font-medium text-gray-700"
+            >
+              {locale === 'he' ? 'תת-קטגוריה' : 'Подкатегория'}{' '}
+              <span className="text-xs text-gray-500">
+                ({locale === 'he' ? 'אופציונלי' : 'необязательно'})
+              </span>
+            </label>
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              </div>
+              <select
+                id="subcategory"
+                value={subcategorySlug}
+                onChange={(e) => setSubcategorySlug(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 transition-all duration-200 hover:border-primary-400 hover:shadow-md focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">
+                  {locale === 'he' ? 'כל התת-קטגוריות' : 'Все подкатегории'}
+                </option>
+                {availableSubcategories.map((subcat) => (
+                  <option key={subcat.id} value={subcat.slug}>
+                    {locale === 'he' ? subcat.name_he : subcat.name_ru}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
 
         {/* Neighborhood Select */}
         <div>

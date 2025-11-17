@@ -2,6 +2,7 @@ import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import AdminLogoutButton from '@/components/client/AdminLogoutButton'
+import AdminMobileMenu from '@/components/client/AdminMobileMenu'
 
 export default async function AdminLayout({
   children,
@@ -22,62 +23,75 @@ export default async function AdminLayout({
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Admin Header */}
-      <header className="border-b bg-white shadow-sm">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-8">
-            <h1 className="text-xl font-bold text-gray-900">
-              {locale === 'he' ? 'ניהול מערכת' : 'Панель администратора'}
+      <header className="sticky top-0 z-30 border-b bg-white shadow-sm">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 lg:gap-4 lg:py-4">
+          {/* Left: Mobile Menu + Title */}
+          <div className="flex items-center gap-2 lg:gap-4">
+            <AdminMobileMenu locale={locale} />
+            <h1 className="text-base font-bold text-gray-900 lg:text-xl">
+              {locale === 'he' ? 'ניהול מערכת' : 'Панель'}
             </h1>
 
-            <nav className="flex gap-6">
+            {/* Desktop Navigation - Hidden on Mobile */}
+            <nav className="hidden gap-4 lg:flex xl:gap-6">
               <Link
                 href={`/${locale}/admin`}
-                className="text-gray-600 hover:text-primary-600"
+                className="whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
               >
                 {locale === 'he' ? 'ראשי' : 'Главная'}
               </Link>
               <Link
                 href={`/${locale}/admin/pending`}
-                className="text-gray-600 hover:text-primary-600"
+                className="whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
               >
-                {locale === 'he' ? 'ממתינים לאישור' : 'Ожидают одобрения'}
+                {locale === 'he' ? 'ממתינים' : 'Ожидают'}
+              </Link>
+              <Link
+                href={`/${locale}/admin/category-requests`}
+                className="whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
+              >
+                {locale === 'he' ? 'קטגוריות' : 'Категории'}
               </Link>
               <Link
                 href={`/${locale}/admin/businesses`}
-                className="text-gray-600 hover:text-primary-600"
+                className="whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
               >
-                {locale === 'he' ? 'עסקים' : 'Предприятия'}
+                {locale === 'he' ? 'עסקים' : 'Бизнесы'}
               </Link>
               <Link
                 href={`/${locale}/admin/analytics`}
-                className="text-gray-600 hover:text-primary-600"
+                className="whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
               >
-                {locale === 'he' ? 'ניתוח נתונים' : 'Аналитика'}
+                {locale === 'he' ? 'ניתוח' : 'Аналитика'}
               </Link>
               <Link
                 href={`/${locale}/admin/settings`}
-                className="text-gray-600 hover:text-primary-600"
+                className="whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
               >
                 {locale === 'he' ? 'הגדרות' : 'Настройки'}
               </Link>
             </nav>
           </div>
 
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">{session.email}</span>
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 lg:gap-3">
+            {/* Email - Hidden on small mobile */}
+            <span className="hidden text-sm text-gray-600 sm:inline">
+              {session.email}
+            </span>
             <AdminLogoutButton locale={locale} />
             <Link
               href={`/${locale}`}
-              className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200"
+              className="whitespace-nowrap rounded-lg bg-gray-100 px-2 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 sm:px-3 sm:py-2 sm:text-sm lg:px-4"
             >
-              {locale === 'he' ? 'חזור לאתר' : 'Вернуться на сайт'}
+              {locale === 'he' ? 'לאתר' : 'На сайт'}
             </Link>
           </div>
         </div>
       </header>
 
       {/* Admin Content */}
-      <main className="container mx-auto px-4 py-8">{children}</main>
+      <main className="mx-auto max-w-7xl px-4 py-6 lg:py-8">{children}</main>
     </div>
   )
 }

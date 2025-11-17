@@ -10,28 +10,6 @@ const bundleAnalyzer = withBundleAnalyzer({
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  webpack: (config, { dev, isServer }) => {
-    if (dev && !isServer) {
-      // Fix HMR issues in development
-      config.watchOptions = {
-        ...config.watchOptions,
-        ignored: /node_modules/,
-      }
-
-      // Fix webpack HMR errors with originalFactory
-      config.optimization = {
-        ...config.optimization,
-        moduleIds: 'deterministic',
-      }
-
-      // Ensure clean module resolution
-      config.snapshot = {
-        ...config.snapshot,
-        managedPaths: [],
-      }
-    }
-    return config
-  },
   experimental: {
     serverActions: {
       bodySizeLimit: '2mb',

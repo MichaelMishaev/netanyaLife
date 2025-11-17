@@ -15,6 +15,9 @@ interface SearchResultsPageProps {
     category: string
     neighborhood: string
   }
+  searchParams: {
+    subcategory?: string
+  }
 }
 
 export async function generateMetadata({
@@ -98,6 +101,7 @@ export async function generateMetadata({
 
 export default async function SearchResultsPage({
   params: { locale, category: categorySlug, neighborhood: neighborhoodSlug },
+  searchParams,
 }: SearchResultsPageProps) {
   const t = await getTranslations('results')
 
@@ -117,22 +121,50 @@ export default async function SearchResultsPage({
 
   if (neighborhoodSlug !== 'all' && !neighborhood) notFound()
 
-  // Get search results with CRITICAL ordering logic
-  const businesses = await getSearchResults({
+  // Get subcategory slug from query params
+  const subcategorySlug = searchParams.subcategory
+
+  // Find subcategory if provided
+  const subcategory = subcategorySlug
+    ? category.subcategories?.find(s => s.slug === subcategorySlug)
+    : null
+
+  // First, try to get results with subcategory filter
+  let businesses = await getSearchResults({
     categoryId: category.id,
+    subcategoryId: subcategory?.id,
     neighborhoodId: neighborhood?.id,
     cityId: city.id,
     locale,
   })
 
-  // Get total count
+  // Track if we auto-expanded the search (removed subcategory filter)
+  let autoExpandedSubcategory = false
+
+  // If no results with subcategory, auto-expand to show all category results
+  if (businesses.length === 0 && subcategory) {
+    businesses = await getSearchResults({
+      categoryId: category.id,
+      subcategoryId: undefined, // Remove subcategory filter
+      neighborhoodId: neighborhood?.id,
+      cityId: city.id,
+      locale,
+    })
+    autoExpandedSubcategory = businesses.length > 0
+  }
+
+  // Get total count (with current filters)
   const totalCount = await getSearchResultsCount({
     categoryId: category.id,
+    subcategoryId: autoExpandedSubcategory ? undefined : subcategory?.id,
     neighborhoodId: neighborhood?.id,
     cityId: city.id,
   })
 
   const categoryName = locale === 'he' ? category.name_he : category.name_ru
+  const subcategoryName = subcategory
+    ? locale === 'he' ? subcategory.name_he : subcategory.name_ru
+    : null
   const neighborhoodName = neighborhood
     ? locale === 'he'
       ? neighborhood.name_he
@@ -140,6 +172,11 @@ export default async function SearchResultsPage({
     : locale === 'he'
     ? 'כל נתניה'
     : 'Вся Нетания'
+
+  // Display name includes subcategory if selected
+  const displayName = subcategoryName
+    ? `${categoryName} - ${subcategoryName}`
+    : categoryName
 
   // Breadcrumb items
   const breadcrumbItems = [
@@ -170,12 +207,47 @@ export default async function SearchResultsPage({
       <div className="mb-4 md:mb-8">
         <BackButton href={`/${locale}`} locale={locale} label={t('back')} />
         <h1 className="mb-1 text-2xl font-bold md:mb-2 md:text-3xl">
-          {categoryName} {locale === 'he' ? 'ב' : 'в '}{neighborhoodName}
+          {displayName} {locale === 'he' ? 'ב' : 'в '}{neighborhoodName}
         </h1>
         <p className="text-sm text-gray-600 md:text-base">
           {totalCount} {t('results', { count: totalCount })}
         </p>
       </div>
+
+      {/* Auto-Expanded Search Banner */}
+      {autoExpandedSubcategory && subcategoryName && (
+        <div className="mb-6 rounded-lg border-2 border-blue-200 bg-blue-50 p-4">
+          <div className="flex items-start gap-3">
+            {/* Info Icon */}
+            <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+
+            <div className="flex-1">
+              <p className="font-medium text-blue-900">
+                {locale === 'he'
+                  ? `לא נמצאו תוצאות עבור "${subcategoryName}"`
+                  : `Не найдено результатов для "${subcategoryName}"`
+                }
+              </p>
+              <p className="mt-1 text-sm text-blue-800">
+                {locale === 'he'
+                  ? `מוצגים כל ה${categoryName} ב${neighborhoodName}`
+                  : `Показаны все ${categoryName} в ${neighborhoodName}`
+                }
+              </p>
+            </div>
+
+            {/* Reapply Filter Link */}
+            <Link
+              href={`/${locale}/search/${categorySlug}/${neighborhoodSlug}?subcategory=${subcategorySlug}`}
+              className="flex-shrink-0 text-sm font-medium text-blue-700 underline hover:text-blue-900"
+            >
+              {locale === 'he' ? 'חזור לסינון' : 'Вернуть фильтр'}
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* No Results - Improved Empty State */}
       {businesses.length === 0 && (

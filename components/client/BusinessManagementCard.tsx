@@ -81,8 +81,11 @@ export default function BusinessManagementCard({
           {/* Status Badges */}
           <div className="mb-3 flex flex-wrap gap-2">
             {business.is_verified && (
-              <span className="rounded-full bg-blue-100 px-2.5 py-1 text-xs font-medium text-blue-800">
-                ✓ {locale === 'he' ? 'מאומת' : 'Проверено'}
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 px-2.5 py-1 text-xs font-bold text-white shadow-md shadow-green-500/30 ring-1 ring-white">
+                <svg className="h-3.5 w-3.5 drop-shadow" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm-1 14.59l-3.29-3.3 1.41-1.41L11 13.76l5.88-5.88 1.41 1.41L11 16.59z"/>
+                </svg>
+                {locale === 'he' ? 'מאומת' : 'Проверено'}
               </span>
             )}
             {business.is_pinned && (
@@ -135,12 +138,14 @@ export default function BusinessManagementCard({
             disabled={isUpdating}
             className={`min-w-0 rounded-lg border px-2 py-2.5 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
               business.is_verified
-                ? 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100 active:bg-blue-200'
+                ? 'border-green-400 bg-green-50 text-green-700 hover:bg-green-100 active:bg-green-200'
                 : 'border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100'
             }`}
           >
-            <span className="flex items-center justify-center gap-0.5">
-              <span className="text-[10px]">✓</span>
+            <span className="flex items-center justify-center gap-1">
+              <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm-1 14.59l-3.29-3.3 1.41-1.41L11 13.76l5.88-5.88 1.41 1.41L11 16.59z"/>
+              </svg>
               <span className="truncate">
                 {business.is_verified
                   ? locale === 'he'
@@ -196,8 +201,11 @@ export default function BusinessManagementCard({
           <div className="mb-2 flex items-center gap-3">
             <h3 className="text-lg font-bold text-gray-900">{name}</h3>
             {business.is_verified && (
-              <span className="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800">
-                ✓ {locale === 'he' ? 'מאומת' : 'Проверено'}
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 px-2 py-1 text-xs font-bold text-white shadow-md shadow-green-500/30 ring-1 ring-white">
+                <svg className="h-3.5 w-3.5 drop-shadow" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm-1 14.59l-3.29-3.3 1.41-1.41L11 13.76l5.88-5.88 1.41 1.41L11 16.59z"/>
+                </svg>
+                {locale === 'he' ? 'מאומת' : 'Проверено'}
               </span>
             )}
             {business.is_pinned && (
@@ -258,7 +266,7 @@ export default function BusinessManagementCard({
             disabled={isUpdating}
             className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
               business.is_verified
-                ? 'border-blue-300 bg-blue-50 text-blue-700 hover:bg-blue-100'
+                ? 'border-green-400 bg-green-50 text-green-700 hover:bg-green-100'
                 : 'border-gray-300 text-gray-700 hover:bg-gray-50'
             }`}
             title={
@@ -271,7 +279,9 @@ export default function BusinessManagementCard({
                   : 'Проверить'
             }
           >
-            ✓
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm-1 14.59l-3.29-3.3 1.41-1.41L11 13.76l5.88-5.88 1.41 1.41L11 16.59z"/>
+            </svg>
           </button>
 
           <button

@@ -9,6 +9,12 @@ interface AdminBusinessFormProps {
     id: string
     name_he: string
     name_ru: string
+    subcategories: Array<{
+      id: string
+      name_he: string
+      name_ru: string
+      slug: string
+    }>
   }>
   neighborhoods: Array<{
     id: string
@@ -29,6 +35,7 @@ export default function AdminBusinessForm({
   const [formData, setFormData] = useState({
     name: '',
     categoryId: '',
+    subcategoryId: '',
     neighborhoodId: '',
     description: '',
     phone: '',
@@ -41,6 +48,10 @@ export default function AdminBusinessForm({
     isVerified: false,
     isPinned: false,
   })
+
+  // Get subcategories for selected category
+  const selectedCategory = categories.find(c => c.id === formData.categoryId)
+  const availableSubcategories = selectedCategory?.subcategories || []
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -65,10 +76,19 @@ export default function AdminBusinessForm({
         [name]: (e.target as HTMLInputElement).checked,
       }))
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }))
+      // If category changes, reset subcategory
+      if (name === 'categoryId') {
+        setFormData((prev) => ({
+          ...prev,
+          categoryId: value,
+          subcategoryId: '',
+        }))
+      } else {
+        setFormData((prev) => ({
+          ...prev,
+          [name]: value,
+        }))
+      }
     }
   }
 
@@ -258,6 +278,37 @@ export default function AdminBusinessForm({
           )}
         </div>
       </div>
+
+      {/* Subcategory - Only shown if category has subcategories */}
+      {availableSubcategories.length > 0 && (
+        <div>
+          <label
+            htmlFor="subcategoryId"
+            className="mb-2 block font-medium text-gray-700"
+          >
+            {locale === 'he' ? 'תת-קטגוריה' : 'Подкатегория'}{' '}
+            <span className="text-gray-400">
+              {locale === 'he' ? '(אופציונלי)' : '(необязательно)'}
+            </span>
+          </label>
+          <select
+            id="subcategoryId"
+            name="subcategoryId"
+            value={formData.subcategoryId}
+            onChange={handleChange}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-500"
+          >
+            <option value="">
+              {locale === 'he' ? 'בחר תת-קטגוריה (אופציונלי)' : 'Выберите подкатегорию (необязательно)'}
+            </option>
+            {availableSubcategories.map((subcategory) => (
+              <option key={subcategory.id} value={subcategory.id}>
+                {locale === 'he' ? subcategory.name_he : subcategory.name_ru}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Description */}
       <div>

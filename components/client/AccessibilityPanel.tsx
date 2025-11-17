@@ -42,7 +42,7 @@ export default function AccessibilityPanel() {
       {/* Toggle Button - Fixed bottom-right */}
       <button
         onClick={handleOpen}
-        className="fixed bottom-6 end-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg transition hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-500 focus:ring-offset-2"
+        className="fixed bottom-24 end-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary-600 text-white shadow-lg transition hover:bg-primary-700 focus:outline-none focus:ring-4 focus:ring-primary-500 focus:ring-offset-2 md:bottom-72"
         aria-label={t('title')}
         aria-expanded={isOpen}
       >
@@ -63,7 +63,7 @@ export default function AccessibilityPanel() {
 
           {/* Panel Content */}
           <div
-            className="fixed bottom-24 end-6 z-50 w-80 rounded-lg border bg-white p-6 shadow-2xl"
+            className="fixed bottom-40 end-6 z-50 w-80 max-h-[calc(100vh-24rem)] overflow-y-auto rounded-lg border bg-white p-6 shadow-2xl md:bottom-[22rem]"
             role="dialog"
             aria-modal="true"
             aria-labelledby="accessibility-title"

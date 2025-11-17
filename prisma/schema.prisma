@@ -66,9 +66,69 @@ model Category {
 
   businesses  Business[]
   pending_businesses PendingBusiness[]
+  subcategories Subcategory[]
 
   @@index([is_active, is_popular])
   @@map("categories")
+}
+
+model Subcategory {
+  id          String         @id @default(cuid())
+  category_id String
+  name_he     String         // "עיצוב שיער"
+  name_ru     String         // "Парикמахרские услуги"
+  slug        String         // "hair-styling"
+  is_active   Boolean        @default(true)
+  display_order Int          @default(0)
+  created_at  DateTime       @default(now())
+  updated_at  DateTime       @updatedAt
+
+  category    Category       @relation(fields: [category_id], references: [id], onDelete: Cascade)
+  businesses  Business[]
+  pending_businesses PendingBusiness[]
+
+  @@unique([category_id, slug])
+  @@index([category_id, is_active])
+  @@map("subcategories")
+}
+
+model CategoryRequest {
+  id              String         @id @default(cuid())
+
+  // Requested category info
+  category_name_he String         // Hebrew name requested
+  category_name_ru String?        // Russian name (optional)
+  description     String?        @db.Text // Why they need this category
+
+  // Requester info
+  requester_name  String?
+  requester_email String?
+  requester_phone String?
+
+  // Business context (optional - helps admin understand the need)
+  business_name   String?        // Name of business requesting
+
+  // Admin workflow
+  status          CategoryRequestStatus @default(PENDING)
+  admin_notes     String?        @db.Text
+  reviewed_at     DateTime?
+  reviewed_by     String?        // Admin email who reviewed
+
+  // If approved, link to created category
+  created_category_id String?
+
+  // Metadata
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  @@index([status, created_at])
+  @@map("category_requests")
+}
+
+enum CategoryRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 // ============================================================================
@@ -112,8 +172,10 @@ model Business {
   serves_all_city Boolean        @default(false) // Informational: Business serves all Netanya
 
   // Relationships
-  category_id     String
-  category        Category       @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  category_id     String?        // Made optional temporarily for restructuring
+  subcategory_id  String?        // Optional: More specific service type
+  category        Category?      @relation(fields: [category_id], references: [id], onDelete: Restrict)
+  subcategory     Subcategory?   @relation(fields: [subcategory_id], references: [id], onDelete: SetNull)
   neighborhood    Neighborhood   @relation(fields: [neighborhood_id], references: [id], onDelete: Restrict)
   city_id_fk      City           @relation(fields: [city_id], references: [id], name: "business_city", onDelete: Restrict)
 
@@ -159,8 +221,10 @@ model PendingBusiness {
   serves_all_city Boolean        @default(false) // Informational: Business serves all Netanya
 
   // Category
-  category_id     String
-  category        Category       @relation(fields: [category_id], references: [id])
+  category_id     String?        // Made optional temporarily for restructuring
+  subcategory_id  String?        // Optional: More specific service type
+  category        Category?      @relation(fields: [category_id], references: [id])
+  subcategory     Subcategory?   @relation(fields: [subcategory_id], references: [id], onDelete: SetNull)
   neighborhood    Neighborhood   @relation(fields: [neighborhood_id], references: [id])
 
   // Submission metadata

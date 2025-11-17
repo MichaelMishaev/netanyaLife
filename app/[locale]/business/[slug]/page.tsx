@@ -30,7 +30,9 @@ export async function generateMetadata({
   const description = locale === 'he'
     ? business.description_he
     : (business.description_ru || business.description_he)
-  const categoryName = locale === 'he' ? business.category.name_he : business.category.name_ru
+  const categoryName = business.category
+    ? (locale === 'he' ? business.category.name_he : business.category.name_ru)
+    : (locale === 'he' ? 'שירותים' : 'Услуги')
   const neighborhoodName = locale === 'he' ? business.neighborhood.name_he : business.neighborhood.name_ru
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://netanyalocal.com'
@@ -101,7 +103,9 @@ export default async function BusinessDetailPage({
   const description = locale === 'he' ? business.description_he : (business.description_ru || business.description_he)
   const address = locale === 'he' ? business.address_he : (business.address_ru || business.address_he)
   const openingHours = locale === 'he' ? business.opening_hours_he : (business.opening_hours_ru || business.opening_hours_he)
-  const categoryName = locale === 'he' ? business.category.name_he : business.category.name_ru
+  const categoryName = business.category
+    ? (locale === 'he' ? business.category.name_he : business.category.name_ru)
+    : (locale === 'he' ? 'שירותים' : 'Услуги')
   const neighborhoodName = locale === 'he' ? business.neighborhood.name_he : business.neighborhood.name_ru
 
   // Calculate average rating
@@ -115,50 +119,65 @@ export default async function BusinessDetailPage({
   const businessUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://netanyalocal.com'}/${locale}/business/${slug}`
 
   // Breadcrumb items
-  const breadcrumbItems = [
-    {
-      label: locale === 'he' ? 'בית' : 'Главная',
-      href: `/${locale}`,
-    },
-    {
-      label: categoryName,
-      href: `/${locale}/search/${business.category.slug}/${business.neighborhood.slug}`,
-    },
-    {
-      label: neighborhoodName,
-      href: `/${locale}/search/${business.category.slug}/${business.neighborhood.slug}`,
-    },
-    {
-      label: name,
-      href: `/${locale}/business/${slug}`,
-    },
-  ]
+  const breadcrumbItems = business.category
+    ? [
+        {
+          label: locale === 'he' ? 'בית' : 'Главная',
+          href: `/${locale}`,
+        },
+        {
+          label: categoryName,
+          href: `/${locale}/search/${business.category.slug}/${business.neighborhood.slug}`,
+        },
+        {
+          label: neighborhoodName,
+          href: `/${locale}/search/${business.category.slug}/${business.neighborhood.slug}`,
+        },
+        {
+          label: name,
+          href: `/${locale}/business/${slug}`,
+        },
+      ]
+    : [
+        {
+          label: locale === 'he' ? 'בית' : 'Главная',
+          href: `/${locale}`,
+        },
+        {
+          label: name,
+          href: `/${locale}/business/${slug}`,
+        },
+      ]
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Track business view */}
-      <BusinessViewTracker
-        businessId={business.id}
-        businessSlug={slug}
-        businessNameHe={business.name_he}
-        businessNameRu={business.name_ru}
-        categorySlug={business.category.slug}
-        categoryNameHe={business.category.name_he}
-        categoryNameRu={business.category.name_ru}
-        neighborhoodSlug={business.neighborhood.slug}
-        neighborhoodNameHe={business.neighborhood.name_he}
-        neighborhoodNameRu={business.neighborhood.name_ru}
-      />
+      {business.category && (
+        <BusinessViewTracker
+          businessId={business.id}
+          businessSlug={slug}
+          businessNameHe={business.name_he}
+          businessNameRu={business.name_ru}
+          categorySlug={business.category.slug}
+          categoryNameHe={business.category.name_he}
+          categoryNameRu={business.category.name_ru}
+          neighborhoodSlug={business.neighborhood.slug}
+          neighborhoodNameHe={business.neighborhood.name_he}
+          neighborhoodNameRu={business.neighborhood.name_ru}
+        />
+      )}
 
       {/* Breadcrumbs */}
       <Breadcrumbs items={breadcrumbItems} locale={locale} />
 
       {/* Back Link */}
-      <BackButton
-        href={`/${locale}/search/${business.category.slug}/${business.neighborhood.slug}`}
-        locale={locale}
-        label={t('back')}
-      />
+      {business.category && (
+        <BackButton
+          href={`/${locale}/search/${business.category.slug}/${business.neighborhood.slug}`}
+          locale={locale}
+          label={t('back')}
+        />
+      )}
 
       {/* Header */}
       <div className="mb-8 rounded-lg border bg-white p-8">

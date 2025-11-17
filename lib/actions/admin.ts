@@ -665,6 +665,7 @@ export async function createBusiness(locale: string, data: any) {
         slug_ru: locale === 'ru' ? slug : null,
         city_id: neighborhood.city_id,
         category_id: data.categoryId,
+        subcategory_id: data.subcategoryId || null,
         neighborhood_id: data.neighborhoodId,
         description_he: locale === 'he' && data.description ? data.description : null,
         description_ru: locale === 'ru' && data.description ? data.description : null,

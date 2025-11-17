@@ -4,6 +4,9 @@ import { useEffect } from 'react'
 
 export default function PWAInstaller() {
   useEffect(() => {
+    // TEMPORARILY DISABLED: Service worker registration
+    // TODO: Re-enable when PWA setup is complete
+    /*
     // Register service worker
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker
@@ -15,6 +18,7 @@ export default function PWAInstaller() {
           console.error('Service Worker registration failed:', error)
         })
     }
+    */
   }, [])
 
   return null

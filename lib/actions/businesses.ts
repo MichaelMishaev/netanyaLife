@@ -98,6 +98,7 @@ export async function submitPendingBusiness(locale: string, data: any) {
         description: validated.description || null,
         language: locale, // 'he' or 'ru'
         category_id: validated.categoryId,
+        subcategory_id: validated.subcategoryId || null,
         neighborhood_id: validated.neighborhoodId,
 
         // Contact Info

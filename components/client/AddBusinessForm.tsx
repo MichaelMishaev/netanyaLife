@@ -5,12 +5,19 @@ import { useTranslations } from 'next-intl'
 import { submitPendingBusiness } from '@/lib/actions/businesses'
 import { useRouter } from 'next/navigation'
 import { useAnalytics } from '@/contexts/AnalyticsContext'
+import CategoryRequestModal from './CategoryRequestModal'
 
 interface AddBusinessFormProps {
   categories: Array<{
     id: string
     name_he: string
     name_ru: string
+    subcategories: Array<{
+      id: string
+      name_he: string
+      name_ru: string
+      slug: string
+    }>
   }>
   neighborhoods: Array<{
     id: string
@@ -34,6 +41,7 @@ export default function AddBusinessForm({
   const [formData, setFormData] = useState({
     name: '',
     categoryId: '',
+    subcategoryId: '',
     neighborhoodId: '',
     description: '',
     phone: '',
@@ -46,9 +54,14 @@ export default function AddBusinessForm({
     servesAllCity: false,
   })
 
+  // Get subcategories for selected category
+  const selectedCategory = categories.find(c => c.id === formData.categoryId)
+  const availableSubcategories = selectedCategory?.subcategories || []
+
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [showCategoryRequestModal, setShowCategoryRequestModal] = useState(false)
   const [fieldErrors, setFieldErrors] = useState<{
     name?: string
     categoryId?: string
@@ -123,10 +136,19 @@ export default function AddBusinessForm({
       ? (e.target as HTMLInputElement).checked
       : e.target.value
 
-    setFormData((prev) => ({
-      ...prev,
-      [fieldName]: value,
-    }))
+    // If category changes, reset subcategory
+    if (fieldName === 'categoryId') {
+      setFormData((prev) => ({
+        ...prev,
+        categoryId: value as string,
+        subcategoryId: '',
+      }))
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [fieldName]: value,
+      }))
+    }
 
     // Clear field error when user starts typing
     if (fieldErrors[fieldName as keyof typeof fieldErrors]) {
@@ -337,7 +359,44 @@ export default function AddBusinessForm({
         {fieldErrors.categoryId && (
           <p className="mt-1 text-sm text-red-600">{fieldErrors.categoryId}</p>
         )}
+
+        {/* Request New Category Button */}
+        <button
+          type="button"
+          onClick={() => setShowCategoryRequestModal(true)}
+          className="mt-2 text-sm text-primary-600 hover:text-primary-700 hover:underline focus:outline-none"
+        >
+          {locale === 'he' ? 'לא מצאת קטגוריה? בקש קטגוריה חדשה' : 'Не нашли категорию? Запросить новую'}
+        </button>
       </div>
+
+      {/* Subcategory - Only shown if category has subcategories */}
+      {availableSubcategories.length > 0 && (
+        <div>
+          <label
+            htmlFor="subcategoryId"
+            className="mb-2 block font-medium text-gray-700"
+          >
+            {locale === 'he' ? 'תת-קטגוריה' : 'Подкатегория'} <span className="text-gray-400">{tCommon('optional')}</span>
+          </label>
+          <select
+            id="subcategoryId"
+            name="subcategoryId"
+            value={formData.subcategoryId}
+            onChange={handleChange}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-500"
+          >
+            <option value="">
+              {locale === 'he' ? 'בחר תת-קטגוריה (אופציונלי)' : 'Выберите подкатегорию (необязательно)'}
+            </option>
+            {availableSubcategories.map((subcategory) => (
+              <option key={subcategory.id} value={subcategory.id}>
+                {locale === 'he' ? subcategory.name_he : subcategory.name_ru}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {/* Neighborhood */}
       <div>
@@ -629,6 +688,14 @@ export default function AddBusinessForm({
           {tCommon('cancel')}
         </button>
       </div>
+
+      {/* Category Request Modal */}
+      <CategoryRequestModal
+        isOpen={showCategoryRequestModal}
+        onClose={() => setShowCategoryRequestModal(false)}
+        locale={locale}
+        businessName={formData.name}
+      />
     </form>
   )
 }

@@ -13,11 +13,12 @@ import { cache } from 'react'
  */
 export async function getSearchResults(params: {
   categoryId: string
+  subcategoryId?: string // Optional: filter by subcategory
   neighborhoodId?: string // If null, search all Netanya
   cityId: string
   locale: string
 }) {
-  const { categoryId, neighborhoodId, cityId, locale } = params
+  const { categoryId, subcategoryId, neighborhoodId, cityId, locale } = params
 
   // Get top pinned count setting
   const setting = await prisma.adminSettings.findUnique({
@@ -31,6 +32,10 @@ export async function getSearchResults(params: {
     city_id: cityId,
     is_visible: true,
     deleted_at: null,
+  }
+
+  if (subcategoryId) {
+    whereClause.subcategory_id = subcategoryId
   }
 
   if (neighborhoodId) {
@@ -149,16 +154,21 @@ export const getBusinessBySlug = cache(async (slug: string, locale: string) => {
  */
 export async function getSearchResultsCount(params: {
   categoryId: string
+  subcategoryId?: string
   neighborhoodId?: string
   cityId: string
 }) {
-  const { categoryId, neighborhoodId, cityId } = params
+  const { categoryId, subcategoryId, neighborhoodId, cityId } = params
 
   const whereClause: any = {
     category_id: categoryId,
     city_id: cityId,
     is_visible: true,
     deleted_at: null,
+  }
+
+  if (subcategoryId) {
+    whereClause.subcategory_id = subcategoryId
   }
 
   if (neighborhoodId) {

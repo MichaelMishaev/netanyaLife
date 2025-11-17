@@ -9,6 +9,7 @@ export const addBusinessSchema = z
     // Business Info
     name: z.string().min(2, 'שם העסק חייב להכיל לפחות 2 תווים'),
     categoryId: z.string().min(1, 'יש לבחור קטגוריה'),
+    subcategoryId: z.string().optional(),
     neighborhoodId: z.string().min(1, 'יש לבחור שכונה'),
     description: z.string().optional(),
 

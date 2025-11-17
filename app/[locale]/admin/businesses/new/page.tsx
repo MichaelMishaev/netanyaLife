@@ -1,5 +1,6 @@
 import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
+import { getCategories } from '@/lib/queries/categories'
 import AdminBusinessForm from '@/components/client/AdminBusinessForm'
 
 interface AdminNewBusinessPageProps {
@@ -15,10 +16,7 @@ export default async function AdminNewBusinessPage({
 
   // Get categories and neighborhoods for the form
   const [categories, neighborhoods] = await Promise.all([
-    prisma.category.findMany({
-      where: { is_active: true },
-      orderBy: { display_order: 'asc' },
-    }),
+    getCategories(),
     prisma.neighborhood.findMany({
       where: { is_active: true },
       orderBy: { display_order: 'asc' },
