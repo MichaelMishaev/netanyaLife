@@ -330,6 +330,8 @@ enum EventType {
   ACCESSIBILITY_OPENED
   ACCESSIBILITY_FONT_CHANGED
   ACCESSIBILITY_CONTRAST_TOGGLED
+  SEARCH_FORM_VIEW
+  RECENT_SEARCH_CLICKED
 }
 
 // ============================================================================

@@ -4,6 +4,19 @@ import { useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import { useAnalytics } from '@/contexts/AnalyticsContext'
+import {
+  getRecentSearches,
+  saveRecentSearch,
+  formatRecentSearch,
+  type RecentSearch,
+} from '@/lib/utils/recentSearches'
+import { getVariant } from '@/lib/utils/ab-test'
+import { detectNeighborhood, isGeolocationSupported } from '@/lib/utils/geolocation'
+import { getCategoryIcon } from '@/lib/utils/categoryIcons'
+
+// A/B Test Configuration
+const AB_TEST_ENABLED = false // Set to false to show new design to everyone
+const TREATMENT_PERCENTAGE = 50 // 50% of users see new design
 
 interface SearchFormProps {
   categories: Array<{
@@ -37,8 +50,11 @@ export default function SearchForm({
   const { trackEvent } = useAnalytics()
   const [categorySlug, setCategorySlug] = useState('')
   const [subcategorySlug, setSubcategorySlug] = useState('')
-  const [neighborhoodSlug, setNeighborhoodSlug] = useState('')
+  const [neighborhoodSlug, setNeighborhoodSlug] = useState(neighborhoods[0]?.slug || '') // Default to first neighborhood
   const [error, setError] = useState('')
+  const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([])
+  const [variant, setVariant] = useState<'control' | 'treatment'>('treatment')
+  const [valuesRestored, setValuesRestored] = useState(false)
   const categoryRef = useRef<HTMLSelectElement>(null)
   const neighborhoodRef = useRef<HTMLSelectElement>(null)
 
@@ -46,35 +62,90 @@ export default function SearchForm({
   const selectedCategory = categories.find(c => c.slug === categorySlug)
   const availableSubcategories = selectedCategory?.subcategories || []
 
-  // Load previously selected values from localStorage on mount
+  // Load recent searches and restore last form values on mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedCategory = localStorage.getItem('lastSearchCategory')
-      const savedNeighborhood = localStorage.getItem('lastSearchNeighborhood')
-      
-      if (savedCategory && categories.some((cat) => cat.slug === savedCategory)) {
-        setCategorySlug(savedCategory)
-      }
-      if (savedNeighborhood && neighborhoods.some((hood) => hood.slug === savedNeighborhood)) {
-        setNeighborhoodSlug(savedNeighborhood)
+      const recent = getRecentSearches()
+      setRecentSearches(recent.slice(0, 3)) // Show max 3
+
+      // Restore last search form values
+      const lastFormValues = localStorage.getItem('lastSearchFormValues')
+      if (lastFormValues) {
+        try {
+          const parsed = JSON.parse(lastFormValues)
+          if (parsed.categorySlug) {
+            setCategorySlug(parsed.categorySlug)
+          }
+          if (parsed.subcategorySlug) {
+            setSubcategorySlug(parsed.subcategorySlug)
+          }
+          if (parsed.neighborhoodSlug) {
+            // Verify the neighborhood still exists
+            const validNeighborhood = neighborhoods.find(n => n.slug === parsed.neighborhoodSlug)
+            if (validNeighborhood) {
+              setNeighborhoodSlug(parsed.neighborhoodSlug)
+            }
+          }
+          setValuesRestored(true)
+        } catch (e) {
+          console.error('Error restoring form values:', e)
+        }
       }
     }
-  }, [categories, neighborhoods])
+  }, [neighborhoods])
 
-  // Set custom validation messages in the selected language
+  // A/B Test: Assign variant on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && AB_TEST_ENABLED) {
+      const assignedVariant = getVariant('search_form_design', TREATMENT_PERCENTAGE)
+      setVariant(assignedVariant)
+
+      // Track variant assignment
+      trackEvent('search_form_view', {
+        variant: assignedVariant,
+        test_name: 'search_form_design',
+      })
+    }
+  }, [trackEvent])
+
+  // Geolocation: Auto-detect neighborhood on mount (only if no previous selection exists)
+  useEffect(() => {
+    const autoDetectLocation = async () => {
+      // Don't override restored values from previous searches
+      if (valuesRestored) {
+        return
+      }
+
+      // Geolocation is opt-in - will ask user for permission
+      if (isGeolocationSupported()) {
+        const detectedSlug = await detectNeighborhood()
+
+        // If user denies or geolocation fails, falls back to default/last selection
+        if (detectedSlug) {
+          // Check if the detected slug exists in neighborhoods
+          const validNeighborhood = neighborhoods.find((n) => n.slug === detectedSlug)
+          if (validNeighborhood) {
+            setNeighborhoodSlug(detectedSlug)
+
+            // Track geolocation success
+            trackEvent('geolocation_detected', {
+              neighborhood: detectedSlug,
+            })
+          }
+        }
+      }
+    }
+
+    autoDetectLocation()
+  }, [neighborhoods, trackEvent, valuesRestored])
+
+  // Set custom validation messages for category
   useEffect(() => {
     const categoryEl = categoryRef.current
-    const neighborhoodEl = neighborhoodRef.current
 
     const handleCategoryInvalid = () => {
       if (categoryEl) {
         categoryEl.setCustomValidity(t('categoryPlaceholder'))
-      }
-    }
-
-    const handleNeighborhoodInvalid = () => {
-      if (neighborhoodEl) {
-        neighborhoodEl.setCustomValidity(t('neighborhoodPlaceholder'))
       }
     }
 
@@ -84,30 +155,15 @@ export default function SearchForm({
       }
     }
 
-    const handleNeighborhoodChange = () => {
-      if (neighborhoodEl) {
-        neighborhoodEl.setCustomValidity('')
-      }
-    }
-
     if (categoryEl) {
       categoryEl.addEventListener('invalid', handleCategoryInvalid)
       categoryEl.addEventListener('change', handleCategoryChange)
-    }
-
-    if (neighborhoodEl) {
-      neighborhoodEl.addEventListener('invalid', handleNeighborhoodInvalid)
-      neighborhoodEl.addEventListener('change', handleNeighborhoodChange)
     }
 
     return () => {
       if (categoryEl) {
         categoryEl.removeEventListener('invalid', handleCategoryInvalid)
         categoryEl.removeEventListener('change', handleCategoryChange)
-      }
-      if (neighborhoodEl) {
-        neighborhoodEl.removeEventListener('invalid', handleNeighborhoodInvalid)
-        neighborhoodEl.removeEventListener('change', handleNeighborhoodChange)
       }
     }
   }, [t])
@@ -116,15 +172,31 @@ export default function SearchForm({
     e.preventDefault()
     setError('')
 
-    if (!categorySlug || !neighborhoodSlug) {
+    if (!categorySlug) {
       setError(t('requiredFields'))
       return
     }
 
-    // Save selected values to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('lastSearchCategory', categorySlug)
-      localStorage.setItem('lastSearchNeighborhood', neighborhoodSlug)
+    // Get category and subcategory data for saving
+    const category = categories.find((c) => c.slug === categorySlug)
+    const subcategory = availableSubcategories.find((s) => s.slug === subcategorySlug)
+    const neighborhood = neighborhoods.find((n) => n.slug === neighborhoodSlug)
+
+    // Save to recent searches
+    if (category && neighborhood) {
+      const recentSearch: RecentSearch = {
+        categorySlug: category.slug,
+        categoryName_he: category.name_he,
+        categoryName_ru: category.name_ru,
+        subcategorySlug: subcategory?.slug,
+        subcategoryName_he: subcategory?.name_he,
+        subcategoryName_ru: subcategory?.name_ru,
+        neighborhoodSlug: neighborhoodSlug,
+        neighborhoodName_he: neighborhood.name_he,
+        neighborhoodName_ru: neighborhood.name_ru,
+        timestamp: new Date().toISOString(),
+      }
+      saveRecentSearch(recentSearch)
     }
 
     // Track search event
@@ -135,11 +207,34 @@ export default function SearchForm({
       language: locale,
     })
 
+    // Save current form values for restoration on back navigation
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('lastSearchFormValues', JSON.stringify({
+        categorySlug,
+        subcategorySlug,
+        neighborhoodSlug
+      }))
+    }
+
     // Navigate to results page
     const url = subcategorySlug
       ? `/${locale}/search/${categorySlug}/${neighborhoodSlug}?subcategory=${subcategorySlug}`
       : `/${locale}/search/${categorySlug}/${neighborhoodSlug}`
     router.push(url)
+  }
+
+  // Handle clicking a recent search
+  const handleRecentSearchClick = async (search: RecentSearch) => {
+    setCategorySlug(search.categorySlug)
+    setSubcategorySlug(search.subcategorySlug || '')
+    setNeighborhoodSlug(search.neighborhoodSlug)
+
+    // Track event
+    await trackEvent('recent_search_clicked', {
+      category: search.categorySlug,
+      subcategory: search.subcategorySlug,
+      neighborhood: search.neighborhoodSlug,
+    })
   }
 
   return (
@@ -171,11 +266,15 @@ export default function SearchForm({
               required
             >
               <option value="">{t('categoryPlaceholder')}</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.slug}>
-                  {locale === 'he' ? cat.name_he : cat.name_ru}
-                </option>
-              ))}
+              {categories.map((cat) => {
+                const icon = getCategoryIcon(cat.slug)
+                const name = locale === 'he' ? cat.name_he : cat.name_ru
+                return (
+                  <option key={cat.id} value={cat.slug}>
+                    {icon ? `${icon} ${name}` : name}
+                  </option>
+                )
+              })}
             </select>
           </div>
         </div>
@@ -217,38 +316,110 @@ export default function SearchForm({
           </div>
         )}
 
-        {/* Neighborhood Select */}
+        {/* Neighborhood Selection - A/B Test */}
         <div>
           <label
-            htmlFor="neighborhood"
-            className="mb-2 block text-sm font-medium text-gray-700"
+            htmlFor={variant === 'control' ? 'neighborhood-select' : 'neighborhood-label'}
+            id="neighborhood-label"
+            className={variant === 'control' ? 'mb-2 block text-sm font-medium text-gray-700' : 'mb-3 block text-sm font-medium text-gray-700'}
           >
             {t('neighborhoodPlaceholder')}
           </label>
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
-              <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+
+          {variant === 'control' ? (
+            /* CONTROL: Old Dropdown Design */
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+                <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <select
+                id="neighborhood-select"
+                ref={neighborhoodRef}
+                value={neighborhoodSlug}
+                onChange={(e) => setNeighborhoodSlug(e.target.value)}
+                className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 transition-all duration-200 hover:border-primary-400 hover:shadow-md focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                required
+              >
+                <option value="">{t('neighborhoodPlaceholder')}</option>
+                {neighborhoods.map((hood) => (
+                  <option key={hood.id} value={hood.slug}>
+                    {locale === 'he' ? hood.name_he : hood.name_ru}
+                  </option>
+                ))}
+              </select>
             </div>
-            <select
-              id="neighborhood"
-              ref={neighborhoodRef}
-              value={neighborhoodSlug}
-              onChange={(e) => setNeighborhoodSlug(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 transition-all duration-200 hover:border-primary-400 hover:shadow-md focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              required
+          ) : (
+            /* TREATMENT: New Segmented Buttons Design */
+            <div
+              role="radiogroup"
+              aria-labelledby="neighborhood-label"
+              className="flex flex-wrap gap-2"
             >
-              <option value="">{t('neighborhoodPlaceholder')}</option>
               {neighborhoods.map((hood) => (
-                <option key={hood.id} value={hood.slug}>
+                <button
+                  key={hood.id}
+                  type="button"
+                  role="radio"
+                  aria-checked={neighborhoodSlug === hood.slug}
+                  aria-label={
+                    locale === 'he'
+                      ? `${hood.name_he} נתניה`
+                      : `${hood.name_ru} Нетания`
+                  }
+                  onClick={() => setNeighborhoodSlug(hood.slug)}
+                  className={`
+                    min-w-[64px] flex-1 rounded-lg border-2 px-4 py-3 text-base font-medium transition-all duration-200
+                    focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+                    ${
+                      neighborhoodSlug === hood.slug
+                        ? 'border-primary-600 bg-primary-600 text-white shadow-md hover:bg-primary-700'
+                        : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50 hover:shadow-sm'
+                    }
+                  `}
+                >
                   {locale === 'he' ? hood.name_he : hood.name_ru}
-                </option>
+                </button>
               ))}
-            </select>
-          </div>
+            </div>
+          )}
         </div>
+
+        {/* Recent Searches */}
+        {recentSearches.length > 0 && (
+          <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-gray-600">
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              {locale === 'he' ? 'חיפושים אחרונים' : 'Недавние поиски'}
+            </div>
+            <div className="space-y-1">
+              {recentSearches.map((search, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  onClick={() => handleRecentSearchClick(search)}
+                  className="w-full text-start text-sm text-gray-600 transition-colors duration-150 hover:text-primary-600 hover:underline"
+                >
+                  • {formatRecentSearch(search, locale as 'he' | 'ru')}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Error Message */}
         {error && (
@@ -260,7 +431,7 @@ export default function SearchForm({
         {/* Submit Button */}
         <button
           type="submit"
-          className="w-full rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-3 font-medium text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:from-primary-700 hover:to-primary-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-[0.98]"
+          className="w-full rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-3.5 text-base font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:from-primary-700 hover:to-primary-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-[0.98]"
         >
           {t('searchButton')}
         </button>

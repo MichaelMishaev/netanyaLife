@@ -12,6 +12,8 @@ interface Business {
   email: string | null
   opening_hours_he: string | null
   opening_hours_ru: string | null
+  latitude: { toString(): string } | null
+  longitude: { toString(): string } | null
   category: {
     name_he: string
     name_ru: string
@@ -70,6 +72,14 @@ export function generateLocalBusinessSchema(
       },
     }),
     ...(openingHours && { openingHours }),
+    // Add GeoCoordinates for Google Maps integration
+    ...(business.latitude && business.longitude && {
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: business.latitude.toString(),
+        longitude: business.longitude.toString(),
+      },
+    }),
   }
 
   // Add aggregate rating if available
