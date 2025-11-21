@@ -1,8 +1,9 @@
 'use server'
 
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { getSession } from '@/lib/auth'
+import { generateUniqueBusinessSlug } from '@/lib/utils/slug'
 
 /**
  * Approve a pending business and create it as an active business
@@ -30,21 +31,34 @@ export async function approvePendingBusiness(pendingId: string, locale: string) 
       return { success: false, error: 'Pending business not found' }
     }
 
+    // Look up business owner by submitter email (if provided)
+    let ownerId: string | null = null
+    if (pending.submitter_email) {
+      const owner = await prisma.businessOwner.findUnique({
+        where: { email: pending.submitter_email },
+        select: { id: true },
+      })
+      if (owner) {
+        ownerId = owner.id
+      }
+    }
+
+    // Generate unique slugs for both languages
+    const slugHe = await generateUniqueBusinessSlug(pending.name, 'he')
+    const slugRu = pending.language === 'ru'
+      ? await generateUniqueBusinessSlug(pending.name, 'ru')
+      : null
+
     // Create the business - map language-specific fields
     await prisma.business.create({
       data: {
         name_he: pending.language === 'he' ? pending.name : '',
         name_ru: pending.language === 'ru' ? pending.name : null,
-        slug_he:
-          pending.language === 'he'
-            ? pending.name.toLowerCase().replace(/\s+/g, '-')
-            : pending.name.toLowerCase().replace(/\s+/g, '-'),
-        slug_ru:
-          pending.language === 'ru'
-            ? pending.name.toLowerCase().replace(/\s+/g, '-')
-            : null,
+        slug_he: slugHe,
+        slug_ru: slugRu,
         city_id: pending.neighborhood.city_id,
         category_id: pending.category_id,
+        subcategory_id: pending.subcategory_id || null,
         neighborhood_id: pending.neighborhood_id,
         description_he: pending.language === 'he' ? pending.description : null,
         description_ru: pending.language === 'ru' ? pending.description : null,
@@ -62,6 +76,7 @@ export async function approvePendingBusiness(pendingId: string, locale: string) 
         is_verified: false,
         is_pinned: false,
         serves_all_city: pending.serves_all_city || false,
+        owner_id: ownerId, // Link to business owner if found
       },
     })
 
@@ -71,8 +86,13 @@ export async function approvePendingBusiness(pendingId: string, locale: string) 
       data: { status: 'APPROVED' },
     })
 
+    // Revalidate admin pages
     revalidatePath(`/${locale}/admin/pending`)
     revalidatePath(`/${locale}/admin`)
+
+    // Revalidate search results page for this category/neighborhood
+    // This ensures newly approved businesses show up immediately
+    revalidatePath(`/${locale}/search`, 'layout')
 
     return { success: true }
   } catch (error) {
@@ -650,19 +670,19 @@ export async function createBusiness(locale: string, data: any) {
       return { success: false, error: 'Neighborhood not found' }
     }
 
-    // Generate slug from name
-    const slug = data.name
-      .toLowerCase()
-      .replace(/\s+/g, '-')
-      .replace(/[^\w\-]+/g, '')
+    // Generate unique slugs for both languages
+    const slugHe = await generateUniqueBusinessSlug(data.name, 'he')
+    const slugRu = locale === 'ru'
+      ? await generateUniqueBusinessSlug(data.name, 'ru')
+      : null
 
     // Create the business
     await prisma.business.create({
       data: {
         name_he: locale === 'he' ? data.name : '',
         name_ru: locale === 'ru' ? data.name : null,
-        slug_he: locale === 'he' ? slug : slug,
-        slug_ru: locale === 'ru' ? slug : null,
+        slug_he: slugHe,
+        slug_ru: slugRu,
         city_id: neighborhood.city_id,
         category_id: data.categoryId,
         subcategory_id: data.subcategoryId || null,
@@ -682,6 +702,7 @@ export async function createBusiness(locale: string, data: any) {
         is_visible: data.isVisible !== undefined ? data.isVisible : true,
         is_verified: data.isVerified !== undefined ? data.isVerified : false,
         is_pinned: data.isPinned !== undefined ? data.isPinned : false,
+        is_test: data.isTest !== undefined ? data.isTest : true,
       },
     })
 
@@ -693,5 +714,318 @@ export async function createBusiness(locale: string, data: any) {
   } catch (error) {
     console.error('Error creating business:', error)
     return { success: false, error: 'Failed to create business' }
+  }
+}
+
+/**
+ * Toggle business test flag
+ */
+export async function toggleBusinessTest(
+  businessId: string,
+  locale: string
+) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: { is_test: true },
+    })
+
+    if (!business) {
+      return { success: false, error: 'Business not found' }
+    }
+
+    await prisma.business.update({
+      where: { id: businessId },
+      data: { is_test: !business.is_test },
+    })
+
+    revalidatePath(`/${locale}/admin/businesses`)
+    revalidatePath(`/${locale}/admin`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error toggling business test flag:', error)
+    return { success: false, error: 'Failed to update business' }
+  }
+}
+
+// ============================================================================
+// SUBCATEGORY ACTIONS
+// ============================================================================
+
+/**
+ * Create subcategory
+ */
+export async function createSubcategory(data: {
+  category_id: string
+  name_he: string
+  name_ru: string
+  slug: string
+  display_order: number
+  locale: string
+}) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    await prisma.subcategory.create({
+      data: {
+        category_id: data.category_id,
+        name_he: data.name_he,
+        name_ru: data.name_ru,
+        slug: data.slug,
+        is_active: true,
+        display_order: data.display_order,
+      },
+    })
+
+    revalidatePath(`/${data.locale}/admin/categories`)
+    revalidatePath(`/${data.locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error creating subcategory:', error)
+    return { success: false, error: 'Failed to create subcategory' }
+  }
+}
+
+/**
+ * Update subcategory
+ */
+export async function updateSubcategory(
+  subcategoryId: string,
+  data: {
+    name_he: string
+    name_ru: string
+    slug: string
+    display_order: number
+    locale: string
+  }
+) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    await prisma.subcategory.update({
+      where: { id: subcategoryId },
+      data: {
+        name_he: data.name_he,
+        name_ru: data.name_ru,
+        slug: data.slug,
+        display_order: data.display_order,
+      },
+    })
+
+    revalidatePath(`/${data.locale}/admin/categories`)
+    revalidatePath(`/${data.locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating subcategory:', error)
+    return { success: false, error: 'Failed to update subcategory' }
+  }
+}
+
+/**
+ * Toggle subcategory active status
+ */
+export async function toggleSubcategoryActive(subcategoryId: string, locale: string) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const subcategory = await prisma.subcategory.findUnique({
+      where: { id: subcategoryId },
+      select: { is_active: true },
+    })
+
+    if (!subcategory) {
+      return { success: false, error: 'Subcategory not found' }
+    }
+
+    await prisma.subcategory.update({
+      where: { id: subcategoryId },
+      data: { is_active: !subcategory.is_active },
+    })
+
+    revalidatePath(`/${locale}/admin/categories`)
+    revalidatePath(`/${locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error toggling subcategory:', error)
+    return { success: false, error: 'Failed to update subcategory' }
+  }
+}
+
+/**
+ * Delete subcategory
+ */
+export async function deleteSubcategory(subcategoryId: string, locale: string) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    // Check if subcategory has businesses
+    const count = await prisma.business.count({
+      where: { subcategory_id: subcategoryId },
+    })
+
+    if (count > 0) {
+      return {
+        success: false,
+        error: locale === 'he'
+          ? `לא ניתן למחוק תת-קטגוריה עם ${count} עסקים`
+          : `Невозможно удалить подкатегорию с ${count} бизнесами`,
+      }
+    }
+
+    await prisma.subcategory.delete({
+      where: { id: subcategoryId },
+    })
+
+    revalidatePath(`/${locale}/admin/categories`)
+    revalidatePath(`/${locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting subcategory:', error)
+    return { success: false, error: 'Failed to delete subcategory' }
+  }
+}
+
+/**
+ * Reorder subcategories
+ */
+export async function reorderSubcategories(
+  categoryId: string,
+  subcategoryIds: string[],
+  locale: string
+) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    // Update display_order for each subcategory
+    await Promise.all(
+      subcategoryIds.map((id, index) =>
+        prisma.subcategory.update({
+          where: { id },
+          data: { display_order: index + 1 },
+        })
+      )
+    )
+
+    revalidatePath(`/${locale}/admin/categories`)
+    revalidatePath(`/${locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error reordering subcategories:', error)
+    return { success: false, error: 'Failed to reorder subcategories' }
+  }
+}
+
+/**
+ * Move businesses from one category to another (super admin only)
+ */
+export async function moveBusinessesToCategory(
+  businessIds: string[],
+  newCategoryId: string,
+  newSubcategoryId: string | null,
+  locale: string
+) {
+  // Check authentication
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  // Verify super admin (only super admin can move businesses)
+  // session is already an AdminUser from getSession()
+  if (session.email !== '345287@gmail.com') {
+    return {
+      success: false,
+      error: locale === 'he'
+        ? 'פעולה זו מותרת רק למנהל על'
+        : 'Эта операция разрешена только суперадминистратору'
+    }
+  }
+
+  try {
+    // Verify new category exists
+    const category = await prisma.category.findUnique({
+      where: { id: newCategoryId },
+    })
+
+    if (!category) {
+      return {
+        success: false,
+        error: locale === 'he' ? 'קטגוריה לא נמצאה' : 'Категория не найдена'
+      }
+    }
+
+    // Verify subcategory if provided
+    if (newSubcategoryId) {
+      const subcategory = await prisma.subcategory.findUnique({
+        where: { id: newSubcategoryId },
+      })
+
+      if (!subcategory || subcategory.category_id !== newCategoryId) {
+        return {
+          success: false,
+          error: locale === 'he'
+            ? 'תת-קטגוריה לא תואמת לקטגוריה'
+            : 'Подкатегория не соответствует категории'
+        }
+      }
+    }
+
+    // Move all businesses
+    await prisma.business.updateMany({
+      where: {
+        id: { in: businessIds },
+      },
+      data: {
+        category_id: newCategoryId,
+        subcategory_id: newSubcategoryId,
+        updated_at: new Date(),
+      },
+    })
+
+    // Revalidate pages
+    revalidatePath(`/${locale}/admin/categories`)
+    revalidatePath(`/${locale}/admin/businesses`)
+    revalidatePath(`/${locale}/search`, 'layout')
+
+    return {
+      success: true,
+      message: locale === 'he'
+        ? `${businessIds.length} עסקים הועברו בהצלחה`
+        : `${businessIds.length} бизнесов успешно перемещено`
+    }
+  } catch (error) {
+    console.error('Error moving businesses to category:', error)
+    return {
+      success: false,
+      error: locale === 'he'
+        ? 'שגיאה בהעברת עסקים'
+        : 'Ошибка при перемещении бизнесов'
+    }
   }
 }

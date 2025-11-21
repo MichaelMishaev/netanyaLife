@@ -19,12 +19,14 @@
     "sort": "Сортировка",
     "clear": "Очистить",
     "noResults": "Результаты не найдены",
-    "required": "Обязательное поле"
+    "required": "Обязательное поле",
+    "optional": "Необязательное"
   },
   "nav": {
     "home": "Главная",
     "search": "Поиск",
     "addBusiness": "Добавить бизнес",
+    "businessLogin": "Вход для владельцев",
     "about": "О нас",
     "contact": "Контакты",
     "admin": "Управление",
@@ -113,6 +115,7 @@
     "phone": "Телефон",
     "whatsapp": "WhatsApp",
     "website": "Веб-сайт",
+    "directions": "Маршрут",
     "email": "Эл. почта",
     "address": "Адрес",
     "openingHours": "Часы работы",
@@ -217,6 +220,49 @@
     "contrast": "Высокая контрастность",
     "underlineLinks": "Подчеркнуть ссылки",
     "keyboardNav": "Навигация с клавиатуры"
+  },
+  "businessOwner": {
+    "login": {
+      "title": "Вход для владельцев бизнеса",
+      "subtitle": "Управление вашим бизнесом в одном месте - обновляйте данные, отвечайте на отзывы и просматривайте статистику",
+      "email": "Email",
+      "emailPlaceholder": "your@email.com",
+      "password": "Пароль",
+      "passwordPlaceholder": "Введите пароль",
+      "name": "Полное имя",
+      "namePlaceholder": "Имя и фамилия",
+      "loginButton": "Войти",
+      "registerButton": "Зарегистрироваться",
+      "switchToRegister": "Нет аккаунта?",
+      "switchToLogin": "Уже есть аккаунт?",
+      "googleButton": "Войти через Google",
+      "divider": "или",
+      "errors": {
+        "invalidCredentials": "Неверный email или пароль",
+        "accountInactive": "Аккаунт неактивен. Свяжитесь с поддержкой",
+        "emailExists": "Email уже зарегистрирован",
+        "weakPassword": "Пароль должен содержать минимум 8 символов",
+        "invalidEmail": "Неверный формат email",
+        "serverError": "Ошибка сервера. Попробуйте позже",
+        "requiredFields": "Заполните все поля",
+        "accessDenied": "Вход отменен",
+        "invalidRequest": "Неверный запрос",
+        "invalidState": "Небезопасное соединение. Попробуйте снова",
+        "invalidToken": "Неверный токен",
+        "unauthorized": "У вас нет разрешения на вход"
+      }
+    },
+    "dashboard": {
+      "title": "Панель управления",
+      "welcome": "Здравствуйте, {name}",
+      "myBusinesses": "Мои бизнесы",
+      "noBusinesses": "У вас нет зарегистрированных бизнесов",
+      "addFirst": "Добавьте свой первый бизнес",
+      "stats": "Статистика",
+      "views": "Просмотры",
+      "clicks": "Клики",
+      "reviews": "Отзывы"
+    }
   },
   "admin": {
     "title": "Управление",

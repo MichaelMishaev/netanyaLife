@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createCategory, updateCategory } from '@/lib/actions/admin'
+import { useNotification } from '@/contexts/NotificationContext'
 
 interface CategoryFormProps {
   locale: string
@@ -16,8 +17,10 @@ export default function CategoryForm({
   category,
   nextDisplayOrder,
 }: CategoryFormProps) {
+  const { showAlert } = useNotification()
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [slugError, setSlugError] = useState<string>('')
 
   const [formData, setFormData] = useState({
     name_he: category?.name_he || '',
@@ -30,8 +33,45 @@ export default function CategoryForm({
     display_order: category?.display_order || nextDisplayOrder,
   })
 
+  const validateSlug = (slug: string): string => {
+    // Check for Hebrew characters (U+0590 to U+05FF)
+    const hebrewPattern = /[\u0590-\u05FF]/
+    // Check for Russian characters (U+0400 to U+04FF)
+    const russianPattern = /[\u0400-\u04FF]/
+    // Valid slug pattern: lowercase letters, numbers, hyphens
+    const validSlugPattern = /^[a-z0-9-]+$/
+
+    if (hebrewPattern.test(slug)) {
+      return locale === 'he'
+        ? '❌ Slug לא יכול להכיל תווים בעברית. השתמש באותיות לטיניות בלבד.'
+        : '❌ Slug не может содержать ивритские символы. Используйте только латинские буквы.'
+    }
+
+    if (russianPattern.test(slug)) {
+      return locale === 'he'
+        ? '❌ Slug לא יכול להכיל תווים ברוסית. השתמש באותיות לטיניות בלבד.'
+        : '❌ Slug не может содержать русские символы. Используйте только латинские буквы.'
+    }
+
+    if (slug && !validSlugPattern.test(slug)) {
+      return locale === 'he'
+        ? '❌ Slug יכול להכיל רק אותיות אנגליות קטנות, מספרים ומקפים.'
+        : '❌ Slug может содержать только строчные латинские буквы, цифры и дефисы.'
+    }
+
+    return ''
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    // Validate slug before submitting
+    const error = validateSlug(formData.slug)
+    if (error) {
+      setSlugError(error)
+      return
+    }
+
     setIsSubmitting(true)
 
     const data = {
@@ -46,6 +86,7 @@ export default function CategoryForm({
 
     if (result.success) {
       setIsOpen(false)
+      setSlugError('')
       // Reset form if creating
       if (mode === 'create') {
         setFormData({
@@ -60,7 +101,7 @@ export default function CategoryForm({
         })
       }
     } else {
-      alert(result.error)
+      showAlert(result.error || 'Error saving category', 'error')
     }
 
     setIsSubmitting(false)
@@ -70,6 +111,13 @@ export default function CategoryForm({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target
+
+    // Real-time validation for slug
+    if (name === 'slug') {
+      const error = validateSlug(value)
+      setSlugError(error)
+    }
+
     setFormData((prev) => ({
       ...prev,
       [name]:
@@ -84,8 +132,12 @@ export default function CategoryForm({
         onClick={() => setIsOpen(true)}
         className={
           mode === 'create'
-            ? 'rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700'
-            : 'rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50'
+            ? 'min-h-[44px] rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white transition hover:bg-blue-700 active:bg-blue-800'
+            : 'min-h-[44px] rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 active:bg-gray-100'
+        }
+        aria-label={mode === 'create'
+          ? (locale === 'he' ? 'הוסף קטגוריה' : 'Добавить категорию')
+          : (locale === 'he' ? 'ערוך קטגוריה' : 'Редактировать категорию')
         }
       >
         {mode === 'create'
@@ -95,24 +147,44 @@ export default function CategoryForm({
           : '✏️'}
       </button>
 
-      {/* Modal */}
+      {/* Modal - Full Screen on Mobile */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white p-6 shadow-xl">
-            <h2 className="mb-6 text-2xl font-bold text-gray-900">
-              {mode === 'create'
-                ? locale === 'he'
-                  ? 'הוסף קטגוריה חדשה'
-                  : 'Добавить новую категорию'
-                : locale === 'he'
-                  ? 'ערוך קטגוריה'
-                  : 'Редактировать категорию'}
-            </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 md:p-4">
+          <div className="flex h-full w-full flex-col bg-white md:h-auto md:max-h-[90vh] md:max-w-2xl md:rounded-lg md:shadow-xl">
+            {/* Sticky Header */}
+            <div className="sticky top-0 z-10 border-b bg-white px-4 py-4 md:px-6">
+              <div className="flex items-center justify-between">
+                <h2 className="text-lg font-bold text-gray-900 md:text-2xl">
+                  {mode === 'create'
+                    ? locale === 'he'
+                      ? 'הוסף קטגוריה חדשה'
+                      : 'Добавить новую категорию'
+                    : locale === 'he'
+                      ? 'ערוך קטגוריה'
+                      : 'Редактировать категорию'}
+                </h2>
+                {/* Close Button - Mobile */}
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  disabled={isSubmitting}
+                  className="rounded-lg p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600 disabled:opacity-50 md:hidden"
+                  aria-label={locale === 'he' ? 'סגור' : 'Закрыть'}
+                >
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="flex flex-1 flex-col overflow-hidden">
+              {/* Scrollable Content */}
+              <div className="flex-1 overflow-y-auto px-4 py-4 md:px-6">
+                <div className="space-y-4">
               {/* Name Hebrew */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   {locale === 'he' ? 'שם בעברית' : 'Название на иврите'}{' '}
                   <span className="text-red-500">*</span>
                 </label>
@@ -122,14 +194,15 @@ export default function CategoryForm({
                   value={formData.name_he}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  dir="rtl"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="חשמלאים"
                 />
               </div>
 
               {/* Name Russian */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   {locale === 'he' ? 'שם ברוסית' : 'Название на русском'}{' '}
                   <span className="text-red-500">*</span>
                 </label>
@@ -139,14 +212,15 @@ export default function CategoryForm({
                   value={formData.name_ru}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  dir="ltr"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Электрики"
                 />
               </div>
 
               {/* Slug */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   {locale === 'he' ? 'Slug (URL)' : 'Slug (URL)'}{' '}
                   <span className="text-red-500">*</span>
                 </label>
@@ -157,19 +231,28 @@ export default function CategoryForm({
                   onChange={handleChange}
                   required
                   pattern="[a-z0-9-]+"
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 font-mono text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  dir="ltr"
+                  className={`w-full rounded-lg border px-4 py-3 font-mono text-sm focus:outline-none focus:ring-2 md:text-base ${
+                    slugError
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                      : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500'
+                  }`}
                   placeholder="hashmalim"
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  {locale === 'he'
-                    ? 'אותיות אנגליות קטנות, מספרים ומקפים בלבד'
-                    : 'Только строчные латинские буквы, цифры и дефисы'}
-                </p>
+                {slugError ? (
+                  <p className="mt-1 text-xs text-red-600 font-medium">{slugError}</p>
+                ) : (
+                  <p className="mt-1 text-xs text-gray-500">
+                    {locale === 'he'
+                      ? 'אותיות אנגליות קטנות, מספרים ומקפים בלבד'
+                      : 'Только строчные латинские буквы, цифры и дефисы'}
+                  </p>
+                )}
               </div>
 
               {/* Icon Name */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   {locale === 'he' ? 'אייקון (אימוג\'י)' : 'Иконка (эмодзи)'}
                 </label>
                 <input
@@ -177,7 +260,7 @@ export default function CategoryForm({
                   name="icon_name"
                   value={formData.icon_name}
                   onChange={handleChange}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="⚡"
                   maxLength={2}
                 />
@@ -185,7 +268,7 @@ export default function CategoryForm({
 
               {/* Description Hebrew */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   {locale === 'he' ? 'תיאור בעברית' : 'Описание на иврите'}
                 </label>
                 <textarea
@@ -193,14 +276,15 @@ export default function CategoryForm({
                   value={formData.description_he}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  dir="rtl"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="תיאור אופציונלי לקטגוריה"
                 />
               </div>
 
               {/* Description Russian */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   {locale === 'he' ? 'תיאור ברוסית' : 'Описание на русском'}
                 </label>
                 <textarea
@@ -208,14 +292,15 @@ export default function CategoryForm({
                   value={formData.description_ru}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  dir="ltr"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Необязательное описание категории"
                 />
               </div>
 
               {/* Display Order */}
               <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block text-sm font-medium text-gray-700">
                   {locale === 'he' ? 'סדר תצוגה' : 'Порядок отображения'}{' '}
                   <span className="text-red-500">*</span>
                 </label>
@@ -226,7 +311,8 @@ export default function CategoryForm({
                   onChange={handleChange}
                   required
                   min={1}
-                  className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  inputMode="numeric"
+                  className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   {locale === 'he'
@@ -236,46 +322,51 @@ export default function CategoryForm({
               </div>
 
               {/* Is Popular */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <input
                   type="checkbox"
                   name="is_popular"
                   id="is_popular"
                   checked={formData.is_popular}
                   onChange={handleChange}
-                  className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                  className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
                 />
                 <label
                   htmlFor="is_popular"
-                  className="text-sm font-medium text-gray-700"
+                  className="text-sm font-medium text-gray-700 md:text-base"
                 >
                   ⭐ {locale === 'he' ? 'סמן כפופולרי' : 'Отметить как популярное'}
                 </label>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex gap-3 border-t pt-4">
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  disabled={isSubmitting}
-                  className="flex-1 rounded-lg border border-gray-300 px-4 py-2 font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {locale === 'he' ? 'ביטול' : 'Отмена'}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="flex-1 rounded-lg bg-blue-600 px-4 py-2 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {isSubmitting
-                    ? locale === 'he'
-                      ? 'שומר...'
-                      : 'Сохранение...'
-                    : locale === 'he'
-                      ? 'שמור'
-                      : 'Сохранить'}
-                </button>
+                </div>
+              </div>
+
+              {/* Sticky Footer - Action Buttons */}
+              <div className="sticky bottom-0 border-t bg-white px-4 py-3 md:px-6 md:py-4">
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setIsOpen(false)}
+                    disabled={isSubmitting}
+                    className="min-h-[44px] flex-1 rounded-lg border border-gray-300 px-4 py-2.5 font-medium text-gray-700 transition hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {locale === 'he' ? 'ביטול' : 'Отмена'}
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !!slugError}
+                    className="min-h-[44px] flex-1 rounded-lg bg-blue-600 px-4 py-2.5 font-medium text-white transition hover:bg-blue-700 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {isSubmitting
+                      ? locale === 'he'
+                        ? 'שומר...'
+                        : 'Сохранение...'
+                      : locale === 'he'
+                        ? 'שמור'
+                        : 'Сохранить'}
+                  </button>
+                </div>
               </div>
             </form>
           </div>

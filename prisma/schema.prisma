@@ -170,6 +170,10 @@ model Business {
   is_pinned       Boolean        @default(false) // Top X results
   pinned_order    Int?           // Order within pinned (1, 2, 3...)
   serves_all_city Boolean        @default(false) // Informational: Business serves all Netanya
+  is_test         Boolean        @default(false) // Test business for development/staging
+
+  // Ownership
+  owner_id        String?        // Business owner (nullable for businesses without owners)
 
   // Relationships
   category_id     String?        // Made optional temporarily for restructuring
@@ -178,6 +182,7 @@ model Business {
   subcategory     Subcategory?   @relation(fields: [subcategory_id], references: [id], onDelete: SetNull)
   neighborhood    Neighborhood   @relation(fields: [neighborhood_id], references: [id], onDelete: Restrict)
   city_id_fk      City           @relation(fields: [city_id], references: [id], name: "business_city", onDelete: Restrict)
+  owner           BusinessOwner? @relation(fields: [owner_id], references: [id], name: "business_owner", onDelete: SetNull)
 
   // Child entities
   reviews         Review[]
@@ -219,6 +224,7 @@ model PendingBusiness {
 
   // Service Area
   serves_all_city Boolean        @default(false) // Informational: Business serves all Netanya
+  is_test         Boolean        @default(false) // Test business submission
 
   // Category
   category_id     String?        // Made optional temporarily for restructuring
@@ -332,6 +338,7 @@ enum EventType {
   ACCESSIBILITY_CONTRAST_TOGGLED
   SEARCH_FORM_VIEW
   RECENT_SEARCH_CLICKED
+  GEOLOCATION_DETECTED
 }
 
 // ============================================================================
@@ -351,7 +358,8 @@ model AdminSettings {
 model AdminUser {
   id              String         @id @default(cuid())
   email           String         @unique
-  password_hash   String         // bcrypt hash (NOT plain text!)
+  password_hash   String?        // bcrypt hash (NULLABLE for OAuth-only users)
+  google_id       String?        @unique // Google OAuth ID
   name            String
   role            AdminRole      @default(SUPERADMIN)
   is_active       Boolean        @default(true)
@@ -359,10 +367,44 @@ model AdminUser {
   created_at      DateTime       @default(now())
   updated_at      DateTime       @updatedAt
 
+  @@index([google_id])
   @@map("admin_users")
 }
 
 enum AdminRole {
   SUPERADMIN
   // Future: MODERATOR, VIEWER
+}
+
+model BusinessOwner {
+  id              String         @id @default(cuid())
+  email           String         @unique
+  password_hash   String?        // bcrypt hash (NULLABLE for OAuth-only users)
+  google_id       String?        @unique // Google OAuth ID
+  name            String
+  phone           String?        // Contact phone
+  is_active       Boolean        @default(true)
+  is_verified     Boolean        @default(false) // Email verification
+  last_login_at   DateTime?
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  // Relationship: One owner can manage multiple businesses
+  businesses      Business[]     @relation("business_owner")
+
+  @@index([google_id])
+  @@index([email])
+  @@map("business_owners")
+}
+
+// OAuth State Storage - for CSRF protection during Google OAuth flow
+model OAuthState {
+  id         String   @id @default(cuid())
+  state      String   @unique // Random UUID for CSRF protection
+  created_at DateTime @default(now())
+  expires_at DateTime // 10 minutes expiration
+
+  @@index([state])
+  @@index([expires_at])
+  @@map("oauth_states")
 }

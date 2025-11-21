@@ -6,6 +6,19 @@ import { submitPendingBusiness } from '@/lib/actions/businesses'
 import { useRouter } from 'next/navigation'
 import { useAnalytics } from '@/contexts/AnalyticsContext'
 import CategoryRequestModal from './CategoryRequestModal'
+import OpeningHoursInput from './OpeningHoursInput'
+import SearchableSelect from './SearchableSelect'
+import SimpleSelect from './SimpleSelect'
+
+interface CategoryRequestParams {
+  categoryNameHe: string
+  categoryNameRu: string
+  description: string
+  businessName: string
+  requesterName: string
+  requesterEmail: string
+  requesterPhone: string
+}
 
 interface AddBusinessFormProps {
   categories: Array<{
@@ -25,12 +38,14 @@ interface AddBusinessFormProps {
     name_ru: string
   }>
   locale: string
+  categoryRequestParams?: CategoryRequestParams
 }
 
 export default function AddBusinessForm({
   categories,
   neighborhoods,
   locale,
+  categoryRequestParams,
 }: AddBusinessFormProps) {
   const t = useTranslations('addBusiness')
   const tCommon = useTranslations('common')
@@ -74,6 +89,14 @@ export default function AddBusinessForm({
   // Refs for validation
   const categoryRef = useRef<HTMLSelectElement>(null)
   const neighborhoodRef = useRef<HTMLSelectElement>(null)
+
+  // Auto-open category request modal if URL params are present
+  useEffect(() => {
+    if (categoryRequestParams) {
+      console.log('🔵 Auto-opening category request modal with params:', categoryRequestParams)
+      setShowCategoryRequestModal(true)
+    }
+  }, [categoryRequestParams])
 
   // Set custom validation messages in the selected language
   useEffect(() => {
@@ -276,7 +299,8 @@ export default function AddBusinessForm({
   const hasErrors = Object.keys(fieldErrors).length > 0
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <>
+      <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
       {/* Validation Error Summary */}
       <div
         className={`rounded-lg bg-red-50 border border-red-200 p-4 transition-all ${
@@ -305,7 +329,7 @@ export default function AddBusinessForm({
 
       {/* Business Name */}
       <div>
-        <label htmlFor="name" className="mb-2 block font-medium text-gray-700">
+        <label htmlFor="name" className="mb-2 block text-base font-semibold text-gray-900">
           {t('form.name')} <span className="text-red-500">*</span>
         </label>
         <input
@@ -315,7 +339,7 @@ export default function AddBusinessForm({
           value={formData.name}
           onChange={handleChange}
           required
-          className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${
+          className={`w-full rounded-lg border px-4 py-3 text-base focus:outline-none focus:ring-2 ${
             fieldErrors.name
               ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
               : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
@@ -324,40 +348,47 @@ export default function AddBusinessForm({
           dir={locale === 'he' ? 'rtl' : 'ltr'}
         />
         {fieldErrors.name && (
-          <p className="mt-1 text-sm text-red-600">{fieldErrors.name}</p>
+          <p className="mt-2 text-sm font-medium text-red-600">{fieldErrors.name}</p>
         )}
       </div>
 
       {/* Category */}
       <div>
-        <label
-          htmlFor="categoryId"
-          className="mb-2 block font-medium text-gray-700"
-        >
-          {t('form.category')} <span className="text-red-500">*</span>
-        </label>
-        <select
-          id="categoryId"
-          name="categoryId"
-          ref={categoryRef}
+        <SearchableSelect
+          options={categories.map((category) => ({
+            value: category.id,
+            label: locale === 'he' ? category.name_he : category.name_ru,
+          }))}
           value={formData.categoryId}
-          onChange={handleChange}
-          required
-          className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${
-            fieldErrors.categoryId
-              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-              : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
-          }`}
-        >
-          <option value="">{t('form.categoryPlaceholder')}</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {locale === 'he' ? category.name_he : category.name_ru}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => {
+            setFormData((prev) => ({
+              ...prev,
+              categoryId: value,
+              subcategoryId: '',
+            }))
+            // Clear field error when user selects
+            if (fieldErrors.categoryId) {
+              setFieldErrors((prev) => {
+                const newErrors = { ...prev }
+                delete newErrors.categoryId
+                return newErrors
+              })
+            }
+          }}
+          placeholder={t('form.categoryPlaceholder')}
+          searchPlaceholder={locale === 'he' ? 'חיפוש קטגוריה...' : 'Поиск категории...'}
+          emptyMessage={locale === 'he' ? 'לא נמצאו קטגוריות' : 'Категории не найдены'}
+          label={
+            <>
+              {t('form.category')} <span className="text-red-500">*</span>
+            </>
+          }
+          required={true}
+          error={!!fieldErrors.categoryId}
+          dir={locale === 'he' ? 'rtl' : 'ltr'}
+        />
         {fieldErrors.categoryId && (
-          <p className="mt-1 text-sm text-red-600">{fieldErrors.categoryId}</p>
+          <p className="mt-2 text-sm font-medium text-red-600">{fieldErrors.categoryId}</p>
         )}
 
         {/* Request New Category Button */}
@@ -373,63 +404,75 @@ export default function AddBusinessForm({
       {/* Subcategory - Only shown if category has subcategories */}
       {availableSubcategories.length > 0 && (
         <div>
-          <label
-            htmlFor="subcategoryId"
-            className="mb-2 block font-medium text-gray-700"
-          >
-            {locale === 'he' ? 'תת-קטגוריה' : 'Подкатегория'} <span className="text-gray-400">{tCommon('optional')}</span>
-          </label>
-          <select
-            id="subcategoryId"
-            name="subcategoryId"
+          <SearchableSelect
+            options={[
+              {
+                value: '',
+                label: locale === 'he' ? 'בחר תת-קטגוריה (אופציונלי)' : 'Выберите подкатегорию (необязательно)',
+              },
+              ...availableSubcategories.map((subcategory) => ({
+                value: subcategory.id,
+                label: locale === 'he' ? subcategory.name_he : subcategory.name_ru,
+              })),
+            ]}
             value={formData.subcategoryId}
-            onChange={handleChange}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:border-primary-500 focus:ring-primary-500"
-          >
-            <option value="">
-              {locale === 'he' ? 'בחר תת-קטגוריה (אופציונלי)' : 'Выберите подкатегорию (необязательно)'}
-            </option>
-            {availableSubcategories.map((subcategory) => (
-              <option key={subcategory.id} value={subcategory.id}>
-                {locale === 'he' ? subcategory.name_he : subcategory.name_ru}
-              </option>
-            ))}
-          </select>
+            onChange={(value) => {
+              setFormData((prev) => ({ ...prev, subcategoryId: value }))
+            }}
+            placeholder={locale === 'he' ? 'בחר תת-קטגוריה (אופציונלי)' : 'Выберите подкатегорию (необязательно)'}
+            searchPlaceholder={locale === 'he' ? 'חיפוש תת-קטגוריה...' : 'Поиск подкатегории...'}
+            emptyMessage={locale === 'he' ? 'לא נמצאו תת-קטגוריות' : 'Подкатегории не найдены'}
+            label={
+              <>
+                {locale === 'he' ? 'תת-קטגוריה' : 'Подкатегория'}{' '}
+                <span className="text-gray-400">{tCommon('optional')}</span>
+              </>
+            }
+            required={false}
+            dir={locale === 'he' ? 'rtl' : 'ltr'}
+          />
         </div>
       )}
 
       {/* Neighborhood */}
       <div>
-        <label
-          htmlFor="neighborhoodId"
-          className="mb-2 block font-medium text-gray-700"
-        >
-          {t('form.neighborhood')} <span className="text-red-500">*</span>
-        </label>
-        <select
-          id="neighborhoodId"
-          name="neighborhoodId"
-          ref={neighborhoodRef}
+        <SimpleSelect
+          options={[
+            { value: '', label: t('form.neighborhoodPlaceholder') },
+            ...neighborhoods.map((neighborhood) => ({
+              value: neighborhood.id,
+              label: locale === 'he' ? neighborhood.name_he : neighborhood.name_ru,
+            })),
+          ]}
           value={formData.neighborhoodId}
-          onChange={handleChange}
-          required
-          className={`w-full rounded-lg border px-4 py-2 focus:outline-none focus:ring-2 ${
-            fieldErrors.neighborhoodId
-              ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
-              : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
-          }`}
-        >
-          <option value="">{t('form.neighborhoodPlaceholder')}</option>
-          {neighborhoods.map((neighborhood) => (
-            <option key={neighborhood.id} value={neighborhood.id}>
-              {locale === 'he'
-                ? neighborhood.name_he
-                : neighborhood.name_ru}
-            </option>
-          ))}
-        </select>
+          onChange={(value) => {
+            setFormData((prev) => ({ ...prev, neighborhoodId: value }))
+            // Clear error when user selects
+            if (fieldErrors.neighborhoodId) {
+              setFieldErrors((prev) => {
+                const newErrors = { ...prev }
+                delete newErrors.neighborhoodId
+                return newErrors
+              })
+            }
+          }}
+          placeholder={t('form.neighborhoodPlaceholder')}
+          label={
+            <>
+              {t('form.neighborhood')} <span className="text-red-500">*</span>
+            </>
+          }
+          helperText={
+            locale === 'he'
+              ? 'המיקום בו העסק שלך ממוקם'
+              : 'Местоположение вашего бизнеса'
+          }
+          required={true}
+          error={!!fieldErrors.neighborhoodId}
+          dir={locale === 'he' ? 'rtl' : 'ltr'}
+        />
         {fieldErrors.neighborhoodId && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="mt-2 text-sm font-medium text-red-600">
             {fieldErrors.neighborhoodId}
           </p>
         )}
@@ -459,9 +502,9 @@ export default function AddBusinessForm({
       <div>
         <label
           htmlFor="description"
-          className="mb-2 block font-medium text-gray-700"
+          className="mb-2 block text-base font-semibold text-gray-900"
         >
-          {t('form.description')}
+          {t('form.description')} <span className="text-gray-500 text-sm font-normal">{tCommon('optional')}</span>
         </label>
         <textarea
           id="description"
@@ -469,7 +512,7 @@ export default function AddBusinessForm({
           value={formData.description}
           onChange={handleChange}
           rows={4}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
           placeholder={t('form.descriptionPlaceholder')}
           dir={locale === 'he' ? 'rtl' : 'ltr'}
         />
@@ -477,23 +520,31 @@ export default function AddBusinessForm({
 
       {/* Contact Info Section */}
       <div
-        className={`rounded-lg border p-4 ${
+        className={`rounded-lg border p-4 md:p-5 ${
           fieldErrors.contact
             ? 'border-red-500 bg-red-50'
-            : 'border-gray-200 bg-gray-50'
+            : 'border-primary-200 bg-primary-50'
         }`}
       >
-        <h3 className="mb-4 font-bold text-gray-900">
+        <h3 className="mb-1 text-lg font-bold text-gray-900">
           {t('form.contactRequired')} <span className="text-red-500">*</span>
         </h3>
+        <p className="mb-4 text-sm text-gray-600">
+          {locale === 'he' 
+            ? 'נדרש לפחות אחד מהשדות הבאים' 
+            : 'Требуется хотя бы одно из следующих полей'}
+        </p>
 
         <div className="space-y-4">
           {/* Phone */}
           <div>
             <label
               htmlFor="phone"
-              className="mb-2 block font-medium text-gray-700"
+              className="mb-2 flex items-center gap-2 text-base font-semibold text-gray-900"
             >
+              <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+              </svg>
               {t('form.phone')}
             </label>
             <input
@@ -502,7 +553,7 @@ export default function AddBusinessForm({
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder={t('form.phonePlaceholder')}
               dir="ltr"
             />
@@ -512,8 +563,11 @@ export default function AddBusinessForm({
           <div>
             <label
               htmlFor="whatsappNumber"
-              className="mb-2 block font-medium text-gray-700"
+              className="mb-2 flex items-center gap-2 text-base font-semibold text-gray-900"
             >
+              <svg className="h-5 w-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+              </svg>
               {t('form.whatsapp')}
             </label>
             <input
@@ -522,15 +576,16 @@ export default function AddBusinessForm({
               name="whatsappNumber"
               value={formData.whatsappNumber}
               onChange={handleChange}
-              className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-base focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder={t('form.whatsappPlaceholder')}
               dir="ltr"
             />
           </div>
         </div>
         {fieldErrors.contact && (
-          <p className="mt-4 text-sm text-red-600 font-medium">
-            {fieldErrors.contact}
+          <p className="mt-4 flex items-start gap-2 text-sm text-red-700 font-medium">
+            <span className="text-lg">⚠️</span>
+            <span>{fieldErrors.contact}</span>
           </p>
         )}
       </div>
@@ -584,21 +639,13 @@ export default function AddBusinessForm({
 
       {/* Opening Hours */}
       <div>
-        <label
-          htmlFor="openingHours"
-          className="mb-2 block font-medium text-gray-700"
-        >
+        <label htmlFor="openingHours" className="mb-2 block font-medium text-gray-700">
           {t('form.openingHours')}
         </label>
-        <input
-          type="text"
-          id="openingHours"
-          name="openingHours"
+        <OpeningHoursInput
           value={formData.openingHours}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          placeholder={t('form.openingHoursPlaceholder')}
-          dir={locale === 'he' ? 'rtl' : 'ltr'}
+          onChange={(value) => setFormData((prev) => ({ ...prev, openingHours: value }))}
+          locale={locale}
         />
       </div>
 
@@ -670,12 +717,46 @@ export default function AddBusinessForm({
         </div>
       )}
 
+      {/* Validation Error Summary Near Submit */}
+      {hasErrors && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-4" role="alert">
+          <div className="flex items-start gap-3">
+            <span className="text-red-500 text-xl">⚠️</span>
+            <div className="flex-1">
+              <h3 className="font-bold text-red-800 mb-2">
+                {locale === 'he' ? 'אנא מלא את השדות הבאים:' : 'Пожалуйста, заполните следующие поля:'}
+              </h3>
+              <ul className="list-disc list-inside space-y-1 text-red-700 text-sm">
+                {fieldErrors.name && (
+                  <li>{t('form.name')}</li>
+                )}
+                {fieldErrors.categoryId && (
+                  <li>{t('form.category')}</li>
+                )}
+                {fieldErrors.neighborhoodId && (
+                  <li>{t('form.neighborhood')}</li>
+                )}
+                {fieldErrors.contact && (
+                  <li>{locale === 'he' ? 'טלפון או ווטסאפ (לפחות אחד)' : 'Телефон или WhatsApp (хотя бы один)'}</li>
+                )}
+                {fieldErrors.websiteUrl && (
+                  <li>{t('form.website')}</li>
+                )}
+                {fieldErrors.submitterEmail && (
+                  <li>{t('form.submitterEmail')}</li>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Submit Button */}
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3 pt-2 sm:flex-row">
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white transition hover:bg-primary-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex-1 rounded-lg bg-primary-600 px-6 py-4 text-base font-semibold text-white shadow-lg transition hover:bg-primary-700 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:py-3"
         >
           {isSubmitting ? tCommon('loading') : t('submit')}
         </button>
@@ -683,19 +764,21 @@ export default function AddBusinessForm({
           type="button"
           onClick={() => router.back()}
           disabled={isSubmitting}
-          className="rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg border-2 border-gray-300 px-6 py-4 text-base font-medium text-gray-700 transition hover:bg-gray-50 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:py-3"
         >
           {tCommon('cancel')}
         </button>
       </div>
+    </form>
 
-      {/* Category Request Modal */}
+      {/* Category Request Modal - Outside form to avoid nested forms */}
       <CategoryRequestModal
         isOpen={showCategoryRequestModal}
         onClose={() => setShowCategoryRequestModal(false)}
         locale={locale}
         businessName={formData.name}
+        initialData={categoryRequestParams}
       />
-    </form>
+    </>
   )
 }

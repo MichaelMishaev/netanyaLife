@@ -207,7 +207,7 @@ async function main() {
   console.log('\n👤 Seeding admin user...')
 
   const adminEmail = process.env.ADMIN_EMAIL || '345287@gmail.com'
-  const adminPassword = process.env.ADMIN_PASSWORD || 'admin1'
+  const adminPassword = process.env.ADMIN_PASSWORD || 'admin123456'
   const hashedPassword = await bcrypt.hash(adminPassword, 10)
 
   const adminUser = await prisma.adminUser.upsert({

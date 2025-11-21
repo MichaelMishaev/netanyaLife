@@ -13,6 +13,7 @@ import {
 import { getVariant } from '@/lib/utils/ab-test'
 import { detectNeighborhood, isGeolocationSupported } from '@/lib/utils/geolocation'
 import { getCategoryIcon } from '@/lib/utils/categoryIcons'
+import SearchableSelect from './SearchableSelect'
 
 // A/B Test Configuration
 const AB_TEST_ENABLED = false // Set to false to show new design to everyone
@@ -24,6 +25,7 @@ interface SearchFormProps {
     name_he: string
     name_ru: string
     slug: string
+    is_popular: boolean
     subcategories: Array<{
       id: string
       name_he: string
@@ -111,9 +113,20 @@ export default function SearchForm({
   // Geolocation: Auto-detect neighborhood on mount (only if no previous selection exists)
   useEffect(() => {
     const autoDetectLocation = async () => {
-      // Don't override restored values from previous searches
-      if (valuesRestored) {
-        return
+      // Check if there's a saved location in localStorage - if so, don't override with geolocation
+      if (typeof window !== 'undefined') {
+        const lastFormValues = localStorage.getItem('lastSearchFormValues')
+        if (lastFormValues) {
+          try {
+            const parsed = JSON.parse(lastFormValues)
+            if (parsed.neighborhoodSlug) {
+              // User has a previous selection, don't override with geolocation
+              return
+            }
+          } catch (e) {
+            // If parsing fails, continue with geolocation
+          }
+        }
       }
 
       // Geolocation is opt-in - will ask user for permission
@@ -137,7 +150,7 @@ export default function SearchForm({
     }
 
     autoDetectLocation()
-  }, [neighborhoods, trackEvent, valuesRestored])
+  }, [neighborhoods, trackEvent])
 
   // Set custom validation messages for category
   useEffect(() => {
@@ -237,82 +250,109 @@ export default function SearchForm({
     })
   }
 
+  // Check if any filters are applied
+  const hasFiltersApplied = categorySlug !== '' || subcategorySlug !== ''
+
+  // Clear all filters
+  const handleClearFilters = () => {
+    setCategorySlug('')
+    setSubcategorySlug('')
+    setError('')
+  }
+
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-2xl">
       <div className="space-y-4">
+        {/* Clear Filters Button - Only shown when filters applied */}
+        {hasFiltersApplied && (
+          <div className="flex justify-end animate-fade-in-up">
+            <button
+              type="button"
+              onClick={handleClearFilters}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-95"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span>{locale === 'he' ? 'נקה סינונים' : 'Очистить фильтры'}</span>
+            </button>
+          </div>
+        )}
+
         {/* Category Select */}
         <div>
-          <label
-            htmlFor="category"
-            className="mb-2 block text-sm font-medium text-gray-700"
-          >
-            {t('categoryPlaceholder')}
-          </label>
-          <div className="relative">
-            <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+          <SearchableSelect
+            options={[...categories]
+              .sort((a, b) => {
+                // Popular categories first
+                if (a.is_popular && !b.is_popular) return -1
+                if (!a.is_popular && b.is_popular) return 1
+                // Then maintain original order (already sorted by display_order from server)
+                return 0
+              })
+              .map((cat) => {
+                const icon = getCategoryIcon(cat.slug)
+                const name = locale === 'he' ? cat.name_he : cat.name_ru
+                return {
+                  value: cat.slug,
+                  label: name,
+                  icon: icon || undefined,
+                }
+              })}
+            value={categorySlug}
+            onChange={(value) => {
+              setCategorySlug(value)
+              setSubcategorySlug('') // Reset subcategory when category changes
+            }}
+            placeholder={t('categoryPlaceholder')}
+            searchPlaceholder={locale === 'he' ? 'חיפוש קטגוריה...' : 'Поиск категории...'}
+            emptyMessage={locale === 'he' ? 'לא נמצאו קטגוריות' : 'Категории не найдены'}
+            label={t('categoryPlaceholder')}
+            required={true}
+            icon={
               <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
-            </div>
-            <select
-              id="category"
-              ref={categoryRef}
-              value={categorySlug}
-              onChange={(e) => {
-                setCategorySlug(e.target.value)
-                setSubcategorySlug('') // Reset subcategory when category changes
-              }}
-              className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 transition-all duration-200 hover:border-primary-400 hover:shadow-md focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              required
-            >
-              <option value="">{t('categoryPlaceholder')}</option>
-              {categories.map((cat) => {
-                const icon = getCategoryIcon(cat.slug)
-                const name = locale === 'he' ? cat.name_he : cat.name_ru
-                return (
-                  <option key={cat.id} value={cat.slug}>
-                    {icon ? `${icon} ${name}` : name}
-                  </option>
-                )
-              })}
-            </select>
-          </div>
+            }
+            dir={locale === 'he' ? 'rtl' : 'ltr'}
+          />
         </div>
 
         {/* Subcategory Select - Only shown if category has subcategories */}
         {availableSubcategories.length > 0 && (
           <div className="animate-fade-in-up">
-            <label
-              htmlFor="subcategory"
-              className="mb-2 block text-sm font-medium text-gray-700"
-            >
-              {locale === 'he' ? 'תת-קטגוריה' : 'Подкатегория'}{' '}
-              <span className="text-xs text-gray-500">
-                ({locale === 'he' ? 'אופציונלי' : 'необязательно'})
-              </span>
-            </label>
-            <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3">
+            <SearchableSelect
+              options={[
+                {
+                  value: '',
+                  label: locale === 'he' ? 'כל התת-קטגוריות' : 'Все подкатегории',
+                },
+                ...availableSubcategories.map((subcat) => ({
+                  value: subcat.slug,
+                  label: locale === 'he' ? subcat.name_he : subcat.name_ru,
+                })),
+              ]}
+              value={subcategorySlug}
+              onChange={(value) => setSubcategorySlug(value)}
+              placeholder={locale === 'he' ? 'כל התת-קטגוריות' : 'Все подкатегории'}
+              searchPlaceholder={locale === 'he' ? 'חיפוש תת-קטגוריה...' : 'Поиск подкатегории...'}
+              emptyMessage={locale === 'he' ? 'לא נמצאו תת-קטגוריות' : 'Подкатегории не найдены'}
+              label={
+                <>
+                  {locale === 'he' ? 'תת-קטגוריה' : 'Подкатегория'}{' '}
+                  <span className="text-xs text-gray-500">
+                    ({locale === 'he' ? 'אופציונלי' : 'необязательно'})
+                  </span>
+                </>
+              }
+              required={false}
+              icon={
                 <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
-              </div>
-              <select
-                id="subcategory"
-                value={subcategorySlug}
-                onChange={(e) => setSubcategorySlug(e.target.value)}
-                className="w-full rounded-lg border border-gray-300 py-3 pe-4 ps-10 transition-all duration-200 hover:border-primary-400 hover:shadow-md focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                <option value="">
-                  {locale === 'he' ? 'כל התת-קטגוריות' : 'Все подкатегории'}
-                </option>
-                {availableSubcategories.map((subcat) => (
-                  <option key={subcat.id} value={subcat.slug}>
-                    {locale === 'he' ? subcat.name_he : subcat.name_ru}
-                  </option>
-                ))}
-              </select>
-            </div>
+              }
+              dir={locale === 'he' ? 'rtl' : 'ltr'}
+            />
           </div>
         )}
 
@@ -352,11 +392,11 @@ export default function SearchForm({
               </select>
             </div>
           ) : (
-            /* TREATMENT: New Segmented Buttons Design */
+            /* TREATMENT: New Segmented Buttons Design - All 4 in single row */
             <div
               role="radiogroup"
               aria-labelledby="neighborhood-label"
-              className="flex flex-wrap gap-2"
+              className="grid grid-cols-4 gap-2"
             >
               {neighborhoods.map((hood) => (
                 <button
@@ -371,7 +411,7 @@ export default function SearchForm({
                   }
                   onClick={() => setNeighborhoodSlug(hood.slug)}
                   className={`
-                    min-w-[64px] flex-1 rounded-lg border-2 px-4 py-3 text-base font-medium transition-all duration-200
+                    rounded-lg border-2 px-2 py-3 text-sm sm:text-base font-medium flex items-center justify-center transition-all duration-200
                     focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
                     ${
                       neighborhoodSlug === hood.slug
@@ -386,6 +426,21 @@ export default function SearchForm({
             </div>
           )}
         </div>
+
+        {/* Error Message */}
+        {error && (
+          <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
+            {error}
+          </div>
+        )}
+
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-3.5 text-base font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:from-primary-700 hover:to-primary-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-[0.98]"
+        >
+          {t('searchButton')}
+        </button>
 
         {/* Recent Searches */}
         {recentSearches.length > 0 && (
@@ -420,21 +475,6 @@ export default function SearchForm({
             </div>
           </div>
         )}
-
-        {/* Error Message */}
-        {error && (
-          <div className="rounded-lg bg-red-50 p-3 text-sm text-red-600">
-            {error}
-          </div>
-        )}
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="w-full rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 px-6 py-3.5 text-base font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.02] hover:from-primary-700 hover:to-primary-800 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 active:scale-[0.98]"
-        >
-          {t('searchButton')}
-        </button>
       </div>
     </form>
   )

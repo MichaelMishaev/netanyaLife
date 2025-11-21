@@ -7,11 +7,13 @@ import FilterSheet, { SortOption, FilterOptions } from './FilterSheet'
 interface SearchResultsClientProps {
   businesses: any[]
   locale: string
+  showSubcategories?: boolean
 }
 
 export default function SearchResultsClient({
   businesses,
   locale,
+  showSubcategories = false,
 }: SearchResultsClientProps) {
   // Use 'default' to preserve server ordering initially (prevents hydration errors)
   const [sortOption, setSortOption] = useState<SortOption>('rating-high')
@@ -176,6 +178,29 @@ export default function SearchResultsClient({
         )}
       </div>
 
+      {/* Divider for mixed subcategory results */}
+      {showSubcategories && filteredAndSortedBusinesses.length > 0 && (
+        <div className="mb-6 flex items-center gap-3 rounded-lg border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50 px-6 py-4 shadow-sm">
+          <div className="flex-shrink-0">
+            <svg className="h-6 w-6 text-purple-600" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+            </svg>
+          </div>
+          <div className="flex-1">
+            <p className="text-base font-bold text-purple-900">
+              {locale === 'he'
+                ? 'תוצאות מתת-קטגוריות שונות:'
+                : 'Результаты из разных подкатегорий:'}
+            </p>
+            <p className="text-sm text-purple-700">
+              {locale === 'he'
+                ? 'כל עסק מסומן עם הסוג המדויק שלו'
+                : 'Каждое предприятие помечено своим точным типом'}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Results Grid - With fade-in animation */}
       {filteredAndSortedBusinesses.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -191,6 +216,7 @@ export default function SearchResultsClient({
               <BusinessCard
                 business={business}
                 locale={locale}
+                showSubcategory={showSubcategories}
               />
             </div>
           ))}

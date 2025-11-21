@@ -6,6 +6,7 @@ import {
   toggleBusinessVisibility,
   toggleBusinessVerification,
   toggleBusinessPinned,
+  toggleBusinessTest,
   deleteBusiness,
 } from '@/lib/actions/admin'
 
@@ -27,6 +28,11 @@ export default function BusinessManagementCard({
       : business.name_ru || business.name_he
   const categoryName =
     locale === 'he' ? business.category.name_he : business.category.name_ru
+  const subcategoryName = business.subcategory
+    ? locale === 'he'
+      ? business.subcategory.name_he
+      : business.subcategory.name_ru
+    : null
   const neighborhoodName =
     locale === 'he'
       ? business.neighborhood.name_he
@@ -47,6 +53,12 @@ export default function BusinessManagementCard({
   const handleTogglePinned = async () => {
     setIsUpdating(true)
     await toggleBusinessPinned(business.id, locale)
+    setIsUpdating(false)
+  }
+
+  const handleToggleTest = async () => {
+    setIsUpdating(true)
+    await toggleBusinessTest(business.id, locale)
     setIsUpdating(false)
   }
 
@@ -98,11 +110,22 @@ export default function BusinessManagementCard({
                 🚫 {locale === 'he' ? 'מוסתר' : 'Скрыто'}
               </span>
             )}
+            {business.is_test && (
+              <span className="rounded-full bg-orange-100 px-2.5 py-1 text-xs font-medium text-orange-800">
+                🧪 {locale === 'he' ? 'בדיקה' : 'Тест'}
+              </span>
+            )}
           </div>
 
           {/* Meta Info */}
           <div className="flex flex-wrap gap-2 text-sm text-gray-600">
             <span>{categoryName}</span>
+            {subcategoryName && (
+              <>
+                <span>›</span>
+                <span>{subcategoryName}</span>
+              </>
+            )}
             <span>•</span>
             <span>{neighborhoodName}</span>
             <span>•</span>
@@ -182,6 +205,29 @@ export default function BusinessManagementCard({
           </button>
 
           <button
+            onClick={handleToggleTest}
+            disabled={isUpdating}
+            className={`min-w-0 rounded-lg border px-2 py-2.5 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              business.is_test
+                ? 'border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100 active:bg-orange-200'
+                : 'border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100'
+            }`}
+          >
+            <span className="flex items-center justify-center gap-0.5">
+              <span className="text-[10px]">🧪</span>
+              <span className="truncate">
+                {business.is_test
+                  ? locale === 'he'
+                    ? 'יצור'
+                    : 'Продакшн'
+                  : locale === 'he'
+                    ? 'בדיקה'
+                    : 'Тест'}
+              </span>
+            </span>
+          </button>
+
+          <button
             onClick={handleDelete}
             disabled={isUpdating}
             className="min-w-0 rounded-lg border border-red-300 px-2 py-2.5 text-xs font-medium text-red-700 transition hover:bg-red-50 active:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
@@ -218,10 +264,21 @@ export default function BusinessManagementCard({
                 🚫 {locale === 'he' ? 'מוסתר' : 'Скрыто'}
               </span>
             )}
+            {business.is_test && (
+              <span className="rounded-full bg-orange-100 px-2 py-1 text-xs font-medium text-orange-800">
+                🧪 {locale === 'he' ? 'בדיקה' : 'Тест'}
+              </span>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-3 text-sm text-gray-600">
             <span>{categoryName}</span>
+            {subcategoryName && (
+              <>
+                <span>›</span>
+                <span>{subcategoryName}</span>
+              </>
+            )}
             <span>•</span>
             <span>{neighborhoodName}</span>
             <span>•</span>
@@ -303,6 +360,27 @@ export default function BusinessManagementCard({
             }
           >
             📌
+          </button>
+
+          <button
+            onClick={handleToggleTest}
+            disabled={isUpdating}
+            className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-50 ${
+              business.is_test
+                ? 'border-orange-300 bg-orange-50 text-orange-700 hover:bg-orange-100'
+                : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+            }`}
+            title={
+              business.is_test
+                ? locale === 'he'
+                  ? 'יצור'
+                  : 'Продакшн'
+                : locale === 'he'
+                  ? 'בדיקה'
+                  : 'Тест'
+            }
+          >
+            🧪
           </button>
 
           <button

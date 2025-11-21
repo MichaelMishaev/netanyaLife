@@ -2,10 +2,13 @@ import Link from 'next/link'
 import { getTranslations, getLocale } from 'next-intl/server'
 import LanguageSwitcher from '../client/LanguageSwitcher'
 import PWAInstallButton from '../client/PWAInstallButton'
+import BusinessLoginLink from '../client/BusinessLoginLink'
+import { getOwnerSession } from '@/lib/auth-owner.server'
 
 export default async function Header() {
   const t = await getTranslations('nav')
   const locale = await getLocale()
+  const ownerSession = await getOwnerSession()
 
   return (
     <header className="border-b bg-white">
@@ -15,12 +18,7 @@ export default async function Header() {
         </Link>
 
         <nav className="flex items-center gap-3 sm:gap-4">
-          <Link
-            href={`/${locale}/add-business`}
-            className="text-sm text-gray-600 hover:text-gray-900 sm:text-base"
-          >
-            {t('addBusiness')}
-          </Link>
+          <BusinessLoginLink ownerSession={ownerSession ? { name: ownerSession.name } : null} />
           <PWAInstallButton />
           <LanguageSwitcher />
         </nav>

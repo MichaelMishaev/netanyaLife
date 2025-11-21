@@ -69,7 +69,7 @@ When results_count == 0 for chosen neighborhood:
 - Button: "חיפוש בכל נתניה" (expands search to all neighborhoods)
 
 #### 4. Admin Access (docs/sysAnal.md:205-206)
-- **Single SuperAdmin**: email = "345287@gmail.com", password = "admin1"
+- **Single SuperAdmin**: email = "345287@gmail.com", password = "admin123456"
 - Controls: categories, neighborhoods, business approval, visibility, verification badges, pinned results
 
 ### URL Structure & Routing

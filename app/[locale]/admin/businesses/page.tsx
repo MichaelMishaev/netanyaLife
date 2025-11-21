@@ -37,6 +37,7 @@ export default async function AdminBusinessesPage({
     where: whereConditions,
     include: {
       category: true,
+      subcategory: true,
       neighborhood: true,
       _count: {
         select: {

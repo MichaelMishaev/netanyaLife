@@ -49,6 +49,7 @@ export async function getSearchResults(params: {
     take: topPinnedCount,
     include: {
       category: { select: { name_he: true, name_ru: true, slug: true } },
+      subcategory: { select: { name_he: true, name_ru: true, slug: true } },
       neighborhood: { select: { name_he: true, name_ru: true, slug: true } },
       reviews: {
         where: { is_approved: true },
@@ -62,6 +63,7 @@ export async function getSearchResults(params: {
     where: { ...whereClause, is_pinned: false },
     include: {
       category: { select: { name_he: true, name_ru: true, slug: true } },
+      subcategory: { select: { name_he: true, name_ru: true, slug: true } },
       neighborhood: { select: { name_he: true, name_ru: true, slug: true } },
       reviews: {
         where: { is_approved: true },
@@ -128,6 +130,9 @@ export const getBusinessBySlug = cache(async (slug: string, locale: string) => {
       category: {
         select: { id: true, name_he: true, name_ru: true, slug: true },
       },
+      subcategory: {
+        select: { id: true, name_he: true, name_ru: true, slug: true },
+      },
       neighborhood: {
         select: { id: true, name_he: true, name_ru: true, slug: true },
       },
@@ -177,3 +182,25 @@ export async function getSearchResultsCount(params: {
 
   return await prisma.business.count({ where: whereClause })
 }
+
+/**
+ * Get count of pending businesses awaiting approval
+ */
+export const getPendingBusinessCount = cache(async () => {
+  return await prisma.pendingBusiness.count({
+    where: {
+      status: 'PENDING',
+    },
+  })
+})
+
+/**
+ * Get count of pending category requests
+ */
+export const getPendingCategoryRequestCount = cache(async () => {
+  return await prisma.categoryRequest.count({
+    where: {
+      status: 'PENDING',
+    },
+  })
+})

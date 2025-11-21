@@ -47,6 +47,7 @@ export default function AdminBusinessForm({
     isVisible: true,
     isVerified: false,
     isPinned: false,
+    isTest: true, // Default to true for new businesses in testing
   })
 
   // Get subcategories for selected category
@@ -530,6 +531,20 @@ export default function AdminBusinessForm({
             />
             <span className="text-gray-700">
               {locale === 'he' ? 'מוצמד (יופיע ראשון)' : 'Закреплено (появится первым)'}
+            </span>
+          </label>
+
+          {/* Is Test */}
+          <label className="flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              name="isTest"
+              checked={formData.isTest}
+              onChange={handleChange}
+              className="h-5 w-5 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+            />
+            <span className="text-gray-700">
+              {locale === 'he' ? 'עסק בדיקה (לא יופיע ביצור)' : 'Тестовый бизнес (не будет показан на продакшене)'}
             </span>
           </label>
         </div>

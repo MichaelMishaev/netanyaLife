@@ -1,13 +1,35 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { submitCategoryRequest } from '@/lib/actions/categories'
+
+interface InitialData {
+  categoryNameHe?: string
+  categoryNameRu?: string
+  description?: string
+  businessName?: string
+  requesterName?: string
+  requesterEmail?: string
+  requesterPhone?: string
+}
 
 interface CategoryRequestModalProps {
   isOpen: boolean
   onClose: () => void
   locale: string
   businessName?: string
+  initialData?: InitialData
+}
+
+// Sanitize input to prevent XSS
+function sanitizeInput(input: string | undefined): string {
+  if (!input) return ''
+  // Remove HTML tags and trim
+  return input
+    .replace(/<[^>]*>/g, '')
+    .replace(/[<>]/g, '')
+    .trim()
+    .slice(0, 500) // Max 500 chars
 }
 
 export default function CategoryRequestModal({
@@ -15,20 +37,33 @@ export default function CategoryRequestModal({
   onClose,
   locale,
   businessName,
+  initialData,
 }: CategoryRequestModalProps) {
   const [formData, setFormData] = useState({
-    categoryNameHe: '',
-    categoryNameRu: '',
-    description: '',
-    requesterName: '',
-    requesterEmail: '',
-    requesterPhone: '',
-    businessName: businessName || '',
+    categoryNameHe: sanitizeInput(initialData?.categoryNameHe) || '',
+    categoryNameRu: sanitizeInput(initialData?.categoryNameRu) || '',
+    description: sanitizeInput(initialData?.description) || '',
+    requesterName: sanitizeInput(initialData?.requesterName) || '',
+    requesterEmail: sanitizeInput(initialData?.requesterEmail) || '',
+    requesterPhone: sanitizeInput(initialData?.requesterPhone) || '',
+    businessName: sanitizeInput(initialData?.businessName || businessName) || '',
   })
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+
+  // Log when form is pre-filled from URL params
+  useEffect(() => {
+    if (initialData) {
+      console.log('✅ Category request form pre-filled with URL params:', {
+        categoryNameHe: formData.categoryNameHe,
+        categoryNameRu: formData.categoryNameRu,
+        description: formData.description,
+        businessName: formData.businessName,
+      })
+    }
+  }, [initialData, formData.categoryNameHe, formData.categoryNameRu, formData.description, formData.businessName])
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>

@@ -1,7 +1,8 @@
 import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
-import CategoryManagementCard from '@/components/client/CategoryManagementCard'
+import CategoriesListWithSearch from '@/components/client/CategoriesListWithSearch'
 import CategoryForm from '@/components/client/CategoryForm'
+import { isSuperAdmin } from '@/lib/auth'
 
 interface AdminCategoriesPageProps {
   params: {
@@ -13,11 +14,30 @@ export default async function AdminCategoriesPage({
   params: { locale },
 }: AdminCategoriesPageProps) {
   const t = await getTranslations('admin.categories')
+  const isSuper = await isSuperAdmin()
 
-  // Fetch all categories (active and inactive)
+  // Fetch all categories (active and inactive) with subcategories and businesses
   const categories = await prisma.category.findMany({
     orderBy: { display_order: 'asc' },
     include: {
+      subcategories: {
+        orderBy: { display_order: 'asc' },
+      },
+      businesses: {
+        where: {
+          deleted_at: null,
+        },
+        select: {
+          id: true,
+          name_he: true,
+          name_ru: true,
+          subcategory_id: true,
+          is_visible: true,
+        },
+        orderBy: {
+          name_he: 'asc',
+        },
+      },
       _count: {
         select: {
           businesses: true,
@@ -55,26 +75,12 @@ export default async function AdminCategoriesPage({
         />
       </div>
 
-      {/* Categories List */}
-      <div className="space-y-4">
-        {categories.map((category) => (
-          <CategoryManagementCard
-            key={category.id}
-            category={category}
-            locale={locale}
-          />
-        ))}
-
-        {categories.length === 0 && (
-          <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-12 text-center">
-            <p className="text-gray-500">
-              {locale === 'he'
-                ? 'אין קטגוריות עדיין. הוסף קטגוריה ראשונה!'
-                : 'Категорий пока нет. Добавьте первую категорию!'}
-            </p>
-          </div>
-        )}
-      </div>
+      {/* Categories List with Search */}
+      <CategoriesListWithSearch
+        categories={categories}
+        locale={locale}
+        isSuperAdmin={isSuper}
+      />
     </div>
   )
 }

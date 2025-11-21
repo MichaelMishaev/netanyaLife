@@ -26,7 +26,7 @@ export async function verifyAdminCredentials(
       where: { email },
     })
 
-    if (!admin) {
+    if (!admin || !admin.password_hash) {
       return null
     }
 
@@ -115,4 +115,13 @@ export async function setSessionCookie(token: string) {
 export async function deleteSessionCookie() {
   const cookieStore = await cookies()
   cookieStore.delete(COOKIE_NAME)
+}
+
+/**
+ * Check if the current user is a super admin
+ * Super admin email: 345287@gmail.com
+ */
+export async function isSuperAdmin(): Promise<boolean> {
+  const session = await getSession()
+  return session?.email === '345287@gmail.com'
 }

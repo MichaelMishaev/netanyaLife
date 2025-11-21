@@ -1,3 +1,5 @@
+import Script from 'next/script'
+
 interface BreadcrumbItem {
   label: string
   href: string
@@ -31,7 +33,7 @@ export default function Breadcrumbs({ items, locale }: BreadcrumbsProps) {
       <nav aria-label="Breadcrumb" className="mb-4 hidden md:block">
         <ol className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
           {items.map((item, index) => (
-            <li key={index} className="flex items-center gap-2">
+            <li key={`breadcrumb-${index}`} className="flex items-center gap-2">
               {index > 0 && (
                 <span className="text-gray-400" aria-hidden="true">
                   {chevron}
@@ -55,9 +57,11 @@ export default function Breadcrumbs({ items, locale }: BreadcrumbsProps) {
       </nav>
 
       {/* Structured Data */}
-      <script
+      <Script
+        id="breadcrumb-schema"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        strategy="afterInteractive"
       />
     </>
   )

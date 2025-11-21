@@ -20,6 +20,7 @@ export default async function AdminPendingPage({
     },
     include: {
       category: true,
+      subcategory: true,
       neighborhood: true,
     },
     orderBy: {

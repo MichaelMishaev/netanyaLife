@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createNeighborhood, updateNeighborhood } from '@/lib/actions/admin'
+import { useNotification } from '@/contexts/NotificationContext'
 
 interface NeighborhoodFormProps {
   locale: string
@@ -18,6 +19,7 @@ export default function NeighborhoodForm({
   cityId,
   nextDisplayOrder,
 }: NeighborhoodFormProps) {
+  const { showAlert } = useNotification()
   const [isOpen, setIsOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -58,7 +60,7 @@ export default function NeighborhoodForm({
         })
       }
     } else {
-      alert(result.error)
+      showAlert(result.error || 'Error saving neighborhood', 'error')
     }
 
     setIsSubmitting(false)

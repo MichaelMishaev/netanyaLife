@@ -6,6 +6,7 @@ import {
   deleteNeighborhood,
 } from '@/lib/actions/admin'
 import NeighborhoodForm from './NeighborhoodForm'
+import { useNotification } from '@/contexts/NotificationContext'
 
 interface NeighborhoodManagementCardProps {
   neighborhood: any
@@ -18,6 +19,7 @@ export default function NeighborhoodManagementCard({
   locale,
   cityId,
 }: NeighborhoodManagementCardProps) {
+  const { showAlert, showConfirm } = useNotification()
   const [isUpdating, setIsUpdating] = useState(false)
 
   const name = locale === 'he' ? neighborhood.name_he : neighborhood.name_ru
@@ -34,16 +36,18 @@ export default function NeighborhoodManagementCard({
         ? `האם אתה בטוח שברצונך למחוק את "${name}"?`
         : `Вы уверены, что хотите удалить "${name}"?`
 
-    if (!confirm(confirmMessage)) {
-      return
-    }
+    showConfirm({
+      message: confirmMessage,
+      onConfirm: async () => {
+        setIsUpdating(true)
+        const result = await deleteNeighborhood(neighborhood.id, locale)
+        setIsUpdating(false)
 
-    setIsUpdating(true)
-    const result = await deleteNeighborhood(neighborhood.id, locale)
-    if (!result.success) {
-      alert(result.error)
-      setIsUpdating(false)
-    }
+        if (!result.success) {
+          showAlert(result.error || 'Error deleting neighborhood', 'error', 10000)
+        }
+      }
+    })
   }
 
   return (

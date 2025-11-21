@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { Metadata } from 'next'
@@ -22,6 +22,7 @@ interface SearchResultsPageProps {
 
 export async function generateMetadata({
   params: { locale, category: categorySlug, neighborhood: neighborhoodSlug },
+  searchParams,
 }: SearchResultsPageProps): Promise<Metadata> {
   const city = await getNetanyaCity()
   const category = await getCategoryBySlug(categorySlug)
@@ -36,6 +37,12 @@ export async function generateMetadata({
     }
   }
 
+  // Get subcategory if provided in search params (ensure it's valid or null)
+  const subcategorySlug = searchParams?.subcategory
+  const subcategory = subcategorySlug
+    ? category.subcategories?.find(s => s.slug === subcategorySlug) || null
+    : null
+
   const categoryName = locale === 'he' ? category.name_he : category.name_ru
   const neighborhoodName = neighborhood
     ? locale === 'he'
@@ -47,6 +54,7 @@ export async function generateMetadata({
 
   const totalCount = await getSearchResultsCount({
     categoryId: category.id,
+    subcategoryId: subcategory?.id,
     neighborhoodId: neighborhood?.id,
     cityId: city.id,
   })
@@ -124,10 +132,16 @@ export default async function SearchResultsPage({
   // Get subcategory slug from query params
   const subcategorySlug = searchParams.subcategory
 
-  // Find subcategory if provided
+  // Find subcategory if provided (validate it exists)
   const subcategory = subcategorySlug
-    ? category.subcategories?.find(s => s.slug === subcategorySlug)
+    ? category.subcategories?.find(s => s.slug === subcategorySlug) || null
     : null
+
+  // If subcategory slug is provided but not found, redirect without it
+  if (subcategorySlug && !subcategory) {
+    // Invalid subcategory - redirect to search without subcategory param
+    redirect(`/${locale}/search/${categorySlug}/${neighborhoodSlug}`)
+  }
 
   // First, try to get results with subcategory filter
   let businesses = await getSearchResults({
@@ -173,10 +187,8 @@ export default async function SearchResultsPage({
     ? 'כל נתניה'
     : 'Вся Нетания'
 
-  // Display name includes subcategory if selected
-  const displayName = subcategoryName
-    ? `${categoryName} - ${subcategoryName}`
-    : categoryName
+  // Display name - category only (subcategory shown separately)
+  const displayName = categoryName
 
   // Breadcrumb items
   const breadcrumbItems = [
@@ -209,41 +221,79 @@ export default async function SearchResultsPage({
         <h1 className="mb-1 text-2xl font-bold md:mb-2 md:text-3xl">
           {displayName} {locale === 'he' ? 'ב' : 'в '}{neighborhoodName}
         </h1>
-        <p className="text-sm text-gray-600 md:text-base">
-          {totalCount} {t('results', { count: totalCount })}
-        </p>
+
+        {/* Subcategory Badge */}
+        {subcategoryName && !autoExpandedSubcategory && (
+          <div className="mb-2 flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-100 px-3 py-1 text-sm font-medium text-primary-700">
+              <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+              </svg>
+              <span>{subcategoryName}</span>
+            </span>
+          </div>
+        )}
+
+        {!autoExpandedSubcategory && (
+          <p className="text-sm text-gray-600 md:text-base">
+            {t('results', { count: totalCount })}
+          </p>
+        )}
       </div>
 
-      {/* Auto-Expanded Search Banner */}
+      {/* Auto-Expanded Search Banner - REDESIGNED FOR CLARITY */}
       {autoExpandedSubcategory && subcategoryName && (
-        <div className="mb-6 rounded-lg border-2 border-blue-200 bg-blue-50 p-4">
-          <div className="flex items-start gap-3">
-            {/* Info Icon */}
-            <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+        <div className="mb-6 overflow-hidden rounded-2xl border-2 border-blue-300 bg-white shadow-lg">
+          {/* Header Bar - What User Searched */}
+          <div className="bg-gradient-to-r from-red-50 to-red-100 px-6 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0 rounded-full bg-red-100 p-2">
+                <svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-800">
+                  {locale === 'he' ? 'חיפשת:' : 'Вы искали:'}
+                </p>
+                <p className="text-lg font-bold text-red-900">
+                  {subcategoryName}
+                </p>
+              </div>
+            </div>
+          </div>
 
-            <div className="flex-1">
-              <p className="font-medium text-blue-900">
-                {locale === 'he'
-                  ? `לא נמצאו תוצאות עבור "${subcategoryName}"`
-                  : `Не найдено результатов для "${subcategoryName}"`
-                }
-              </p>
-              <p className="mt-1 text-sm text-blue-800">
-                {locale === 'he'
-                  ? `מוצגים כל ה${categoryName} ב${neighborhoodName}`
-                  : `Показаны все ${categoryName} в ${neighborhoodName}`
-                }
-              </p>
+          {/* Main Content - What We're Showing Instead */}
+          <div className="px-6 py-5">
+            <div className="mb-4 flex items-start gap-3">
+              <div className="flex-shrink-0 rounded-full bg-blue-100 p-2">
+                <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="mb-3 text-base font-bold text-gray-900">
+                  {locale === 'he'
+                    ? `לא נמצאו תוצאות עבור "${subcategoryName}" ב${neighborhoodName}`
+                    : `Не найдено результатов для "${subcategoryName}" в ${neighborhoodName}`}
+                </p>
+                <p className="mb-2 text-sm text-gray-700">
+                  {locale === 'he'
+                    ? `מציג במקום ${businesses.length} עסקים מסוגים אחרים בקטגוריית:`
+                    : `Показано вместо этого ${businesses.length} предприятий других типов в категории:`}
+                </p>
+                <p className="mb-3 text-lg font-extrabold text-blue-700">
+                  {categoryName} • {neighborhoodName}
+                </p>
+              </div>
             </div>
 
-            {/* Reapply Filter Link */}
+            {/* Action Button */}
             <Link
-              href={`/${locale}/search/${categorySlug}/${neighborhoodSlug}?subcategory=${subcategorySlug}`}
-              className="flex-shrink-0 text-sm font-medium text-blue-700 underline hover:text-blue-900"
+              href={`/${locale}`}
+              className="block rounded-lg border-2 border-primary-600 bg-primary-600 px-5 py-3 text-center font-bold text-white shadow-sm transition hover:bg-primary-700 active:scale-[0.98]"
             >
-              {locale === 'he' ? 'חזור לסינון' : 'Вернуть фильтр'}
+              {locale === 'he' ? '🔍 חיפוש חדש' : '🔍 Новый поиск'}
             </Link>
           </div>
         </div>
@@ -283,7 +333,7 @@ export default async function SearchResultsPage({
           <div className="flex flex-col gap-3 sm:flex-row">
             {neighborhood && (
               <Link
-                href={`/${locale}/search/${categorySlug}/all`}
+                href={`/${locale}/search/${categorySlug}/all${subcategorySlug ? `?subcategory=${subcategorySlug}` : ''}`}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-6 py-3 font-medium text-white shadow-sm transition hover:bg-primary-700 active:scale-[0.98]"
               >
                 <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -307,7 +357,11 @@ export default async function SearchResultsPage({
 
       {/* Results with Filtering/Sorting */}
       {businesses.length > 0 && (
-        <SearchResultsClient businesses={businesses} locale={locale} />
+        <SearchResultsClient
+          businesses={businesses}
+          locale={locale}
+          showSubcategories={autoExpandedSubcategory}
+        />
       )}
     </div>
   )

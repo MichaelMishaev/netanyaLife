@@ -14,6 +14,9 @@ export type EventType =
   | 'accessibility_opened'
   | 'accessibility_font_changed'
   | 'accessibility_contrast_toggled'
+  | 'search_form_view'
+  | 'geolocation_detected'
+  | 'recent_search_clicked'
 
 export interface EventProperties {
   [key: string]: string | number | boolean | null | undefined

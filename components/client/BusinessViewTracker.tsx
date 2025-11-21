@@ -15,6 +15,7 @@ interface BusinessViewTrackerProps {
   neighborhoodSlug: string
   neighborhoodNameHe: string
   neighborhoodNameRu: string
+  isTest?: boolean
   source?: string
 }
 
@@ -29,6 +30,7 @@ export default function BusinessViewTracker({
   neighborhoodSlug,
   neighborhoodNameHe,
   neighborhoodNameRu,
+  isTest = false,
   source = 'direct',
 }: BusinessViewTrackerProps) {
   const { trackEvent } = useAnalytics()
@@ -61,6 +63,7 @@ export default function BusinessViewTracker({
       neighborhood_slug: neighborhoodSlug,
       neighborhood_name_he: neighborhoodNameHe,
       neighborhood_name_ru: neighborhoodNameRu,
+      is_test: isTest,
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [businessId]) // Only re-run if businessId changes

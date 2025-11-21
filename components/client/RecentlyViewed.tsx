@@ -111,13 +111,23 @@ export default function RecentlyViewed({ locale }: RecentlyViewedProps) {
               <Link
                 key={business.id}
                 href={`/${locale}/business/${business.slug}`}
-                className="flex overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="relative flex overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
+                {/* Test Badge - Top Left */}
+                {business.is_test && (
+                  <div className="absolute left-1 top-0 z-10">
+                    <div className="flex items-center gap-0.5 rounded-br-lg bg-gradient-to-r from-orange-400 to-orange-500 px-1.5 py-0.5 text-[9px] font-semibold text-white shadow-md">
+                      <span>🧪</span>
+                      <span>{locale === 'he' ? 'בדיקה' : 'Тест'}</span>
+                    </div>
+                  </div>
+                )}
+
                 {/* Left accent bar */}
                 <div className="w-1 flex-shrink-0 bg-gradient-to-b from-primary-500 to-primary-600" />
 
                 {/* Card content */}
-                <div className="flex flex-1 flex-col p-3">
+                <div className={`flex flex-1 flex-col p-3 ${business.is_test ? 'pt-6' : ''}`}>
                   {/* Business Name */}
                   <h3 className="mb-1.5 line-clamp-1 text-sm font-semibold text-gray-900">
                     {name}
@@ -204,11 +214,21 @@ export default function RecentlyViewed({ locale }: RecentlyViewedProps) {
                     href={`/${locale}/business/${business.slug}`}
                     className="group relative flex min-w-[280px] max-w-[280px] flex-shrink-0 flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                   >
+                    {/* Test Badge - Top Left */}
+                    {business.is_test && (
+                      <div className="absolute left-0 top-1 z-10">
+                        <div className="flex items-center gap-1 rounded-br-lg bg-gradient-to-r from-orange-400 to-orange-500 px-2 py-0.5 text-[10px] font-semibold text-white shadow-md">
+                          <span>🧪</span>
+                          <span>{locale === 'he' ? 'בדיקה' : 'Тест'}</span>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Top accent bar */}
                     <div className="h-1 w-full bg-gradient-to-r from-primary-500 to-primary-600" />
 
                     {/* Card content */}
-                    <div className="flex flex-1 flex-col p-4">
+                    <div className={`flex flex-1 flex-col p-4 ${business.is_test ? 'pt-6' : ''}`}>
                       {/* Business Name */}
                       <h3
                         className="mb-2 line-clamp-2 text-base font-semibold text-gray-900"

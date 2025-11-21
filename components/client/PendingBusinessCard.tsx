@@ -34,6 +34,11 @@ export default function PendingBusinessCard({
       : business.address_ru || business.address_he
   const categoryName =
     locale === 'he' ? business.category.name_he : business.category.name_ru
+  const subcategoryName = business.subcategory
+    ? locale === 'he'
+      ? business.subcategory.name_he
+      : business.subcategory.name_ru
+    : null
   const neighborhoodName =
     locale === 'he'
       ? business.neighborhood.name_he
@@ -69,6 +74,12 @@ export default function PendingBusinessCard({
           <h3 className="text-xl font-bold text-gray-900">{name}</h3>
           <div className="mt-1 flex flex-wrap gap-2 text-sm text-gray-600">
             <span>{categoryName}</span>
+            {subcategoryName && (
+              <>
+                <span>→</span>
+                <span>{subcategoryName}</span>
+              </>
+            )}
             <span>•</span>
             <span>{neighborhoodName}</span>
           </div>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { formatPhoneForWhatsApp } from '@/lib/utils/phone'
 
 interface BusinessCardProps {
   business: {
@@ -16,25 +17,35 @@ interface BusinessCardProps {
     whatsapp_number: string | null
     is_verified: boolean
     is_pinned: boolean
+    is_test: boolean
     serves_all_city: boolean
     neighborhood: {
       name_he: string
       name_ru: string
     }
+    subcategory?: {
+      name_he: string
+      name_ru: string
+      slug: string
+    } | null
     reviews?: Array<{ rating: number }>
     avgRating?: number
     reviewCount?: number
   }
   locale: string
+  showSubcategory?: boolean
 }
 
-export default function BusinessCard({ business, locale }: BusinessCardProps) {
+export default function BusinessCard({ business, locale, showSubcategory = false }: BusinessCardProps) {
   const t = useTranslations('business')
   const tResults = useTranslations('results')
 
   const name = locale === 'he' ? business.name_he : (business.name_ru || business.name_he)
   const description = locale === 'he' ? business.description_he : (business.description_ru || business.description_he)
   const neighborhoodName = locale === 'he' ? business.neighborhood.name_he : business.neighborhood.name_ru
+  const subcategoryName = business.subcategory
+    ? (locale === 'he' ? business.subcategory.name_he : business.subcategory.name_ru)
+    : null
   const slug = locale === 'he' ? business.slug_he : (business.slug_ru || business.slug_he)
 
   // Calculate average rating
@@ -71,6 +82,16 @@ export default function BusinessCard({ business, locale }: BusinessCardProps) {
 
   return (
     <div className="group relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
+      {/* Test Badge - Top Left */}
+      {business.is_test && (
+        <div className="absolute left-0 top-0 z-10">
+          <div className="flex items-center gap-1 rounded-br-lg bg-gradient-to-r from-orange-400 to-orange-500 px-2 py-1 text-xs font-semibold text-white shadow-md">
+            <span>🧪</span>
+            <span>{locale === 'he' ? 'בדיקה' : 'Тест'}</span>
+          </div>
+        </div>
+      )}
+
       {/* Pinned/Featured Badge - Top Right */}
       {business.is_pinned && (
         <div className="absolute right-0 top-0 z-10">
@@ -85,7 +106,7 @@ export default function BusinessCard({ business, locale }: BusinessCardProps) {
       <div className={`h-full w-1 flex-shrink-0 bg-gradient-to-b ${accentColor} absolute left-0 top-0`} />
 
       {/* Clickable Card Content */}
-      <Link href={`/${locale}/business/${slug}`} className={`block flex-grow p-3 pe-3 ps-4 md:p-4 md:ps-5 ${business.is_pinned ? 'pt-10 md:pt-12' : ''}`}>
+      <Link href={`/${locale}/business/${slug}`} className={`block flex-grow p-3 pe-3 ps-4 md:p-4 md:ps-5 ${business.is_pinned || business.is_test ? 'pt-10 md:pt-12' : ''}`}>
         {/* Header Row */}
         <div className="mb-2 flex items-start justify-between gap-2">
           <h3 className="flex-1 text-sm font-semibold text-gray-900 md:text-base">
@@ -134,6 +155,27 @@ export default function BusinessCard({ business, locale }: BusinessCardProps) {
           )}
         </div>
 
+        {/* Subcategory Badge - MORE PROMINENT when showSubcategory is true */}
+        {subcategoryName && (
+          <div className="mb-2">
+            <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+              showSubcategory
+                ? 'bg-gradient-to-r from-purple-100 to-indigo-100 text-purple-800 ring-2 ring-purple-300'
+                : 'bg-gray-100 text-gray-700'
+            }`}>
+              <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+              </svg>
+              {showSubcategory && (
+                <span className="font-extrabold">
+                  {locale === 'he' ? 'סוג:' : 'Тип:'}
+                </span>
+              )}
+              <span className={showSubcategory ? 'font-bold' : ''}>{subcategoryName}</span>
+            </span>
+          </div>
+        )}
+
         {/* Rating - 5 Stars */}
         {reviewCount > 0 && (
           <div className="mb-3 flex items-center gap-2">
@@ -172,7 +214,7 @@ export default function BusinessCard({ business, locale }: BusinessCardProps) {
           )}
           {business.whatsapp_number && (
             <a
-              href={`https://wa.me/${business.whatsapp_number.replace(/[^0-9]/g, '')}`}
+              href={`https://wa.me/${formatPhoneForWhatsApp(business.whatsapp_number)}`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}

@@ -13,6 +13,7 @@ interface RecentlyViewedBusiness {
   neighborhood_slug: string
   neighborhood_name_he: string
   neighborhood_name_ru: string
+  is_test?: boolean
   viewedAt: string
 }
 

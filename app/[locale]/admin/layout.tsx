@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import AdminLogoutButton from '@/components/client/AdminLogoutButton'
 import AdminMobileMenu from '@/components/client/AdminMobileMenu'
+import { getPendingBusinessCount, getPendingCategoryRequestCount } from '@/lib/queries/businesses'
 
 export default async function AdminLayout({
   children,
@@ -19,6 +20,12 @@ export default async function AdminLayout({
     redirect(`/${locale}/admin-login`)
   }
 
+  // Get pending counts for badges
+  const [pendingBusinessCount, pendingCategoryRequestCount] = await Promise.all([
+    getPendingBusinessCount(),
+    getPendingCategoryRequestCount(),
+  ])
+
   // Render full admin layout for authenticated pages
   return (
     <div className="min-h-screen bg-gray-50">
@@ -27,7 +34,11 @@ export default async function AdminLayout({
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-3 lg:gap-4 lg:py-4">
           {/* Left: Mobile Menu + Title */}
           <div className="flex items-center gap-2 lg:gap-4">
-            <AdminMobileMenu locale={locale} />
+            <AdminMobileMenu 
+              locale={locale} 
+              pendingBusinessCount={pendingBusinessCount}
+              pendingCategoryRequestCount={pendingCategoryRequestCount}
+            />
             <h1 className="text-base font-bold text-gray-900 lg:text-xl">
               {locale === 'he' ? 'ניהול מערכת' : 'Панель'}
             </h1>
@@ -42,15 +53,31 @@ export default async function AdminLayout({
               </Link>
               <Link
                 href={`/${locale}/admin/pending`}
-                className="whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
+                className="relative whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
               >
                 {locale === 'he' ? 'ממתינים' : 'Ожидают'}
+                {pendingBusinessCount > 0 && (
+                  <span className="absolute -top-2 -end-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+                    {pendingBusinessCount}
+                  </span>
+                )}
               </Link>
               <Link
-                href={`/${locale}/admin/category-requests`}
+                href={`/${locale}/admin/categories`}
                 className="whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
               >
                 {locale === 'he' ? 'קטגוריות' : 'Категории'}
+              </Link>
+              <Link
+                href={`/${locale}/admin/category-requests`}
+                className="relative whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
+              >
+                {locale === 'he' ? 'בקשות קטגוריות' : 'Запросы категорий'}
+                {pendingCategoryRequestCount > 0 && (
+                  <span className="absolute -top-2 -end-2 flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white">
+                    {pendingCategoryRequestCount}
+                  </span>
+                )}
               </Link>
               <Link
                 href={`/${locale}/admin/businesses`}

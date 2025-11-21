@@ -19,12 +19,14 @@
     "sort": "מיון",
     "clear": "נקה",
     "noResults": "לא נמצאו תוצאות",
-    "required": "שדה חובה"
+    "required": "שדה חובה",
+    "optional": "אופציונלי"
   },
   "nav": {
     "home": "ראשי",
     "search": "חיפוש",
     "addBusiness": "הוסף עסק",
+    "businessLogin": "כניסה לבעלי עסקים",   
     "about": "אודות",
     "contact": "יצירת קשר",
     "admin": "ניהול",
@@ -113,6 +115,7 @@
     "phone": "טלפון",
     "whatsapp": "WhatsApp",
     "website": "אתר אינטרנט",
+    "directions": "הוראות הגעה",
     "email": "דוא״ל",
     "address": "כתובת",
     "openingHours": "שעות פתיחה",
@@ -217,6 +220,49 @@
     "contrast": "ניגודיות גבוהה",
     "underlineLinks": "הדגש קישורים",
     "keyboardNav": "ניווט במקלדת"
+  },
+  "businessOwner": {
+    "login": {
+      "title": "כניסה לבעלי עסקים",
+      "subtitle": "ניהול העסק שלך במקום אחד - עדכן פרטים, ענה לביקורות וצפה בסטטיסטיקות",
+      "email": "דוא״ל",
+      "emailPlaceholder": "your@email.com",
+      "password": "סיסמה",
+      "passwordPlaceholder": "הזן סיסמה",
+      "name": "שם מלא",
+      "namePlaceholder": "שם פרטי ומשפחה",
+      "loginButton": "התחבר",
+      "registerButton": "הרשם",
+      "switchToRegister": "אין לך חשבון?",
+      "switchToLogin": "כבר יש לך חשבון?",
+      "googleButton": "התחבר עם Google",
+      "divider": "או",
+      "errors": {
+        "invalidCredentials": "אימייל או סיסמה שגויים",
+        "accountInactive": "החשבון אינו פעיל. צור קשר עם התמיכה",
+        "emailExists": "אימייל כבר רשום במערכת",
+        "weakPassword": "הסיסמה חייבת להכיל לפחות 8 תווים",
+        "invalidEmail": "פורמט אימייל לא תקין",
+        "serverError": "שגיאה בשרת. נסה שוב מאוחר יותר",
+        "requiredFields": "יש למלא את כל השדות",
+        "accessDenied": "ההתחברות בוטלה",
+        "invalidRequest": "בקשה לא תקינה",
+        "invalidState": "חיבור לא בטוח. נסה שוב",
+        "invalidToken": "אסימון לא תקין",
+        "unauthorized": "אין לך הרשאה להתחבר"
+      }
+    },
+    "dashboard": {
+      "title": "לוח בקרה",
+      "welcome": "שלום, {name}",
+      "myBusinesses": "העסקים שלי",
+      "noBusinesses": "אין לך עסקים רשומים",
+      "addFirst": "הוסף את העסק הראשון שלך",
+      "stats": "סטטיסטיקה",
+      "views": "צפיות",
+      "clicks": "לחיצות",
+      "reviews": "ביקורות"
+    }
   },
   "admin": {
     "title": "ניהול",

@@ -7,6 +7,8 @@ import ShareButton from '@/components/client/ShareButton'
 import Breadcrumbs from '@/components/server/Breadcrumbs'
 import BusinessViewTracker from '@/components/client/BusinessViewTracker'
 import BackButton from '@/components/client/BackButton'
+import { generateLocalBusinessSchema } from '@/lib/seo/structured-data'
+import { formatPhoneForWhatsApp } from '@/lib/utils/phone'
 
 interface BusinessDetailPageProps {
   params: {
@@ -106,6 +108,9 @@ export default async function BusinessDetailPage({
   const categoryName = business.category
     ? (locale === 'he' ? business.category.name_he : business.category.name_ru)
     : (locale === 'he' ? 'שירותים' : 'Услуги')
+  const subcategoryName = business.subcategory
+    ? (locale === 'he' ? business.subcategory.name_he : business.subcategory.name_ru)
+    : null
   const neighborhoodName = locale === 'he' ? business.neighborhood.name_he : business.neighborhood.name_ru
 
   // Calculate average rating
@@ -117,6 +122,17 @@ export default async function BusinessDetailPage({
 
   // Construct full business URL
   const businessUrl = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://netanyalocal.com'}/${locale}/business/${slug}`
+
+  // Generate LocalBusiness structured data
+  const ratingData = ratings.length > 0
+    ? { average: avgRating, count: ratings.length }
+    : null
+  const localBusinessSchema = generateLocalBusinessSchema(
+    business as any,
+    ratingData,
+    locale,
+    businessUrl
+  )
 
   // Breadcrumb items
   const breadcrumbItems = business.category
@@ -151,6 +167,12 @@ export default async function BusinessDetailPage({
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* LocalBusiness structured data for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
+      />
+
       {/* Track business view */}
       {business.category && (
         <BusinessViewTracker
@@ -164,6 +186,7 @@ export default async function BusinessDetailPage({
           neighborhoodSlug={business.neighborhood.slug}
           neighborhoodNameHe={business.neighborhood.name_he}
           neighborhoodNameRu={business.neighborhood.name_ru}
+          isTest={business.is_test}
         />
       )}
 
@@ -181,34 +204,57 @@ export default async function BusinessDetailPage({
 
       {/* Header */}
       <div className="mb-8 rounded-lg border bg-white p-8">
-        <div className="mb-4 flex items-start justify-between">
-          <h1 className="text-3xl font-bold">{name}</h1>
-          {business.is_verified && (
-            <span
-              className="inline-flex items-center gap-1.5 rounded-full bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white shadow-md ring-1 ring-blue-800/20"
-              role="status"
-              aria-label={locale === 'he' ? 'עסק מאומת על ידי המערכת' : 'Бизнес проверен системой'}
-            >
-              <svg
-                className="h-4 w-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                aria-hidden="true"
+        <div className="mb-4 flex items-start justify-between gap-3">
+          <h1 className="flex-1 text-3xl font-bold">{name}</h1>
+          <div className="flex flex-wrap items-start gap-2">
+            {business.is_test && (
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-orange-400 to-orange-500 px-3 py-1.5 text-xs font-semibold text-white shadow-md"
+                role="status"
+                aria-label={locale === 'he' ? 'עסק בדיקה' : 'Тестовый бизнес'}
               >
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <span>{t('verified')}</span>
-            </span>
-          )}
+                <span>🧪</span>
+                <span>{locale === 'he' ? 'בדיקה' : 'Тест'}</span>
+              </span>
+            )}
+            {business.is_verified && (
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full bg-blue-700 px-3 py-1.5 text-xs font-semibold text-white shadow-md ring-1 ring-blue-800/20"
+                role="status"
+                aria-label={locale === 'he' ? 'עסק מאומת על ידי המערכת' : 'Бизнес проверен системой'}
+              >
+                <svg
+                  className="h-4 w-4"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+                <span>{t('verified')}</span>
+              </span>
+            )}
+          </div>
         </div>
 
         {/* Meta Info */}
         <div className="mb-6 flex flex-wrap gap-4 text-sm text-gray-600">
           <span>{categoryName}</span>
+          {subcategoryName && (
+            <>
+              <span>•</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                <svg className="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+                </svg>
+                <span>{subcategoryName}</span>
+              </span>
+            </>
+          )}
           <span>•</span>
           <span>{neighborhoodName}</span>
           {ratings.length > 0 && (
@@ -267,7 +313,7 @@ export default async function BusinessDetailPage({
             )}
             {business.whatsapp_number && (
               <a
-                href={`https://wa.me/${business.whatsapp_number.replace(/[^0-9]/g, '')}`}
+                href={`https://wa.me/${formatPhoneForWhatsApp(business.whatsapp_number)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
@@ -307,6 +353,30 @@ export default async function BusinessDetailPage({
                   <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                 </svg>
                 <span>{t('website')}</span>
+              </a>
+            )}
+            {address && (
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+              >
+                {/* Map Pin Icon */}
+                <svg
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                  <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>{t('directions')}</span>
               </a>
             )}
           </div>

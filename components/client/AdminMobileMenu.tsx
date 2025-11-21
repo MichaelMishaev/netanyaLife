@@ -6,33 +6,53 @@ import { usePathname } from 'next/navigation'
 
 interface AdminMobileMenuProps {
   locale: string
+  pendingBusinessCount: number
+  pendingCategoryRequestCount: number
 }
 
-export default function AdminMobileMenu({ locale }: AdminMobileMenuProps) {
+export default function AdminMobileMenu({ 
+  locale, 
+  pendingBusinessCount,
+  pendingCategoryRequestCount 
+}: AdminMobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
 
   const navItems = [
-    { href: `/${locale}/admin`, label: locale === 'he' ? 'ראשי' : 'Главная' },
+    { 
+      href: `/${locale}/admin`, 
+      label: locale === 'he' ? 'ראשי' : 'Главная',
+      badge: 0
+    },
     {
       href: `/${locale}/admin/pending`,
       label: locale === 'he' ? 'ממתינים לאישור' : 'Ожидают одобрения',
+      badge: pendingBusinessCount
+    },
+    {
+      href: `/${locale}/admin/categories`,
+      label: locale === 'he' ? 'קטגוריות' : 'Категории',
+      badge: 0
     },
     {
       href: `/${locale}/admin/category-requests`,
       label: locale === 'he' ? 'בקשות קטגוריות' : 'Запросы категорий',
+      badge: pendingCategoryRequestCount
     },
     {
       href: `/${locale}/admin/businesses`,
       label: locale === 'he' ? 'עסקים' : 'Предприятия',
+      badge: 0
     },
     {
       href: `/${locale}/admin/analytics`,
       label: locale === 'he' ? 'ניתוח נתונים' : 'Аналитика',
+      badge: 0
     },
     {
       href: `/${locale}/admin/settings`,
       label: locale === 'he' ? 'הגדרות' : 'Настройки',
+      badge: 0
     },
   ]
 
@@ -41,9 +61,13 @@ export default function AdminMobileMenu({ locale }: AdminMobileMenuProps) {
       {/* Hamburger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex flex-col items-center justify-center gap-1.5 rounded-lg p-2 hover:bg-gray-100 lg:hidden"
+        className="relative flex flex-col items-center justify-center gap-1.5 rounded-lg p-2 hover:bg-gray-100 lg:hidden"
         aria-label={locale === 'he' ? 'תפריט ניווט' : 'Меню навигации'}
       >
+        {/* Notification dot if there are pending items */}
+        {(pendingBusinessCount > 0 || pendingCategoryRequestCount > 0) && (
+          <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white" />
+        )}
         <span
           className={`h-0.5 w-6 bg-gray-700 transition-transform ${
             isOpen ? 'translate-y-2 rotate-45' : ''
@@ -112,13 +136,22 @@ export default function AdminMobileMenu({ locale }: AdminMobileMenuProps) {
               key={item.href}
               href={item.href}
               onClick={() => setIsOpen(false)}
-              className={`rounded-lg px-4 py-3 text-${locale === 'he' ? 'right' : 'left'} transition ${
+              className={`relative rounded-lg px-4 py-3 text-${locale === 'he' ? 'right' : 'left'} transition ${
                 pathname === item.href
                   ? 'bg-primary-50 font-medium text-primary-600'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              {item.label}
+              <span className="flex items-center justify-between">
+                <span>{item.label}</span>
+                {item.badge > 0 && (
+                  <span className={`flex h-6 min-w-[1.5rem] items-center justify-center rounded-full px-2 text-xs font-bold text-white ${
+                    item.href.includes('pending') ? 'bg-red-500' : 'bg-orange-500'
+                  }`}>
+                    {item.badge}
+                  </span>
+                )}
+              </span>
             </Link>
           ))}
         </nav>

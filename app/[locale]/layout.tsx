@@ -3,12 +3,12 @@ import dynamicImport from 'next/dynamic'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
-import { headers } from 'next/headers'
 import { Assistant } from 'next/font/google'
 import { locales } from '@/i18n/request'
 import { ClientProviders } from '@/components/providers/ClientProviders'
 import Header from '@/components/server/Header'
 import Footer from '@/components/server/Footer'
+import ConditionalHeader from '@/components/client/ConditionalHeader'
 import '../globals.css'
 
 // Load Assistant font (optimized for Hebrew - used by Zap.co.il)
@@ -60,11 +60,6 @@ export default async function LocaleLayout({
   // Determine text direction
   const dir = locale === 'he' ? 'rtl' : 'ltr'
 
-  // Check if this is an admin route
-  const headersList = await headers()
-  const pathname = headersList.get('x-pathname') || ''
-  const isAdminRoute = pathname.includes('/admin')
-
   return (
     <html
       lang={locale}
@@ -87,29 +82,36 @@ export default async function LocaleLayout({
       </head>
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         <NextIntlClientProvider messages={messages}>
-          <ClientProviders>
+          <ClientProviders locale={locale}>
             {/* PWA Service Worker */}
             <PWAInstaller />
 
-            {/* Skip Link */}
-            {!isAdminRoute && (
+            {/* Skip Link - wrapped in ConditionalHeader to hide on admin/portal routes */}
+            <ConditionalHeader>
               <a href="#main-content" className="skip-link">
                 {locale === 'he' ? 'דלג לתוכן' : 'Перейти к содержимому'}
               </a>
-            )}
+            </ConditionalHeader>
 
-            {!isAdminRoute && <Header />}
-            {isAdminRoute ? (
-              children
-            ) : (
-              <main id="main-content" className="flex-1">
-                {children}
-              </main>
-            )}
-            {!isAdminRoute && <Footer />}
+            {/* Main Header - hidden on admin/portal routes */}
+            <ConditionalHeader>
+              <Header />
+            </ConditionalHeader>
 
-            {/* Accessibility Panel */}
-            {!isAdminRoute && <AccessibilityPanel />}
+            {/* Main Content */}
+            <main id="main-content" className="flex-1">
+              {children}
+            </main>
+
+            {/* Footer - hidden on admin/portal routes */}
+            <ConditionalHeader>
+              <Footer />
+            </ConditionalHeader>
+
+            {/* Accessibility Panel - hidden on admin/portal routes */}
+            <ConditionalHeader>
+              <AccessibilityPanel />
+            </ConditionalHeader>
           </ClientProviders>
         </NextIntlClientProvider>
       </body>
