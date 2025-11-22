@@ -2,6 +2,26 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import getRedisClient from '@/lib/redis'
 
+export const dynamic = 'force-dynamic'
+
+// Valid event types from Prisma schema
+const VALID_EVENT_TYPES = [
+  'SEARCH_PERFORMED',
+  'BUSINESS_VIEWED',
+  'CTA_CLICKED',
+  'REVIEW_SUBMITTED',
+  'BUSINESS_SUBMITTED',
+  'PWA_INSTALLED',
+  'SEARCH_ALL_CITY_CLICKED',
+  'LANGUAGE_CHANGED',
+  'ACCESSIBILITY_OPENED',
+  'ACCESSIBILITY_FONT_CHANGED',
+  'ACCESSIBILITY_CONTRAST_TOGGLED',
+  'SEARCH_FORM_VIEW',
+  'RECENT_SEARCH_CLICKED',
+  'GEOLOCATION_DETECTED',
+] as const
+
 /**
  * Rate limiting: 100 events per minute per IP
  */
@@ -70,15 +90,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate event type
+    const normalizedType = event_type.toUpperCase()
+    if (!VALID_EVENT_TYPES.includes(normalizedType as typeof VALID_EVENT_TYPES[number])) {
+      console.warn(`Unknown event type: ${event_type}`)
+      // Still return success to not break client, but don't save
+      return NextResponse.json({ success: true, skipped: true })
+    }
+
     // Save event to database
-    // Convert lowercase event_type to uppercase to match Prisma enum
-    await prisma.event.create({
-      data: {
-        type: event_type.toUpperCase(),
-        properties: properties || {},
-        ip_hash: ip,
-      },
-    })
+    try {
+      await prisma.event.create({
+        data: {
+          type: normalizedType as typeof VALID_EVENT_TYPES[number],
+          properties: properties || {},
+          ip_hash: ip,
+        },
+      })
+    } catch (dbError) {
+      console.error('Database error saving event:', dbError)
+      // Return success to not break client analytics
+      return NextResponse.json({ success: true, db_error: true })
+    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

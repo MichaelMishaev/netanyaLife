@@ -113,21 +113,49 @@ export default async function SearchResultsPage({
 }: SearchResultsPageProps) {
   const t = await getTranslations('results')
 
-  // Get city (Netanya)
-  const city = await getNetanyaCity()
-  if (!city) notFound()
+  // Wrap all database queries in try-catch
+  let city, category, neighborhood
 
-  // Get category
-  const category = await getCategoryBySlug(categorySlug)
-  if (!category) notFound()
+  try {
+    // Get city (Netanya)
+    city = await getNetanyaCity()
+    if (!city) notFound()
 
-  // Get neighborhood (or null for "all Netanya")
-  const neighborhood =
-    neighborhoodSlug === 'all'
-      ? null
-      : await getNeighborhoodBySlug('netanya', neighborhoodSlug)
+    // Get category
+    category = await getCategoryBySlug(categorySlug)
+    if (!category) notFound()
 
-  if (neighborhoodSlug !== 'all' && !neighborhood) notFound()
+    // Get neighborhood (or null for "all Netanya")
+    neighborhood =
+      neighborhoodSlug === 'all'
+        ? null
+        : await getNeighborhoodBySlug('netanya', neighborhoodSlug)
+
+    if (neighborhoodSlug !== 'all' && !neighborhood) notFound()
+  } catch (error) {
+    console.error('Database error in search page:', error)
+    // Return a user-friendly error page
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-red-200 bg-red-50 p-8 py-12 text-center">
+          <h1 className="mb-4 text-2xl font-bold text-red-800">
+            {locale === 'he' ? 'שגיאה בטעינת התוצאות' : 'Ошибка загрузки результатов'}
+          </h1>
+          <p className="mb-6 text-red-600">
+            {locale === 'he'
+              ? 'אנא נסה שוב מאוחר יותר או חזור לדף הבית'
+              : 'Пожалуйста, попробуйте позже или вернитесь на главную'}
+          </p>
+          <a
+            href={`/${locale}`}
+            className="inline-block rounded-lg bg-primary-600 px-6 py-3 font-medium text-white hover:bg-primary-700"
+          >
+            {locale === 'he' ? 'חזרה לדף הבית' : 'На главную'}
+          </a>
+        </div>
+      </div>
+    )
+  }
 
   // Get subcategory slug from query params
   const subcategorySlug = searchParams.subcategory
@@ -143,37 +171,44 @@ export default async function SearchResultsPage({
     redirect(`/${locale}/search/${categorySlug}/${neighborhoodSlug}`)
   }
 
-  // First, try to get results with subcategory filter
-  let businesses = await getSearchResults({
-    categoryId: category.id,
-    subcategoryId: subcategory?.id,
-    neighborhoodId: neighborhood?.id,
-    cityId: city.id,
-    locale,
-  })
-
-  // Track if we auto-expanded the search (removed subcategory filter)
+  // Initialize search results variables
+  let businesses: Awaited<ReturnType<typeof getSearchResults>> = []
   let autoExpandedSubcategory = false
+  let totalCount = 0
 
-  // If no results with subcategory, auto-expand to show all category results
-  if (businesses.length === 0 && subcategory) {
+  try {
+    // First, try to get results with subcategory filter
     businesses = await getSearchResults({
       categoryId: category.id,
-      subcategoryId: undefined, // Remove subcategory filter
+      subcategoryId: subcategory?.id,
       neighborhoodId: neighborhood?.id,
       cityId: city.id,
       locale,
     })
-    autoExpandedSubcategory = businesses.length > 0
-  }
 
-  // Get total count (with current filters)
-  const totalCount = await getSearchResultsCount({
-    categoryId: category.id,
-    subcategoryId: autoExpandedSubcategory ? undefined : subcategory?.id,
-    neighborhoodId: neighborhood?.id,
-    cityId: city.id,
-  })
+    // If no results with subcategory, auto-expand to show all category results
+    if (businesses.length === 0 && subcategory) {
+      businesses = await getSearchResults({
+        categoryId: category.id,
+        subcategoryId: undefined, // Remove subcategory filter
+        neighborhoodId: neighborhood?.id,
+        cityId: city.id,
+        locale,
+      })
+      autoExpandedSubcategory = businesses.length > 0
+    }
+
+    // Get total count (with current filters)
+    totalCount = await getSearchResultsCount({
+      categoryId: category.id,
+      subcategoryId: autoExpandedSubcategory ? undefined : subcategory?.id,
+      neighborhoodId: neighborhood?.id,
+      cityId: city.id,
+    })
+  } catch (searchError) {
+    console.error('Error fetching search results:', searchError)
+    // Continue with empty results rather than crashing
+  }
 
   const categoryName = locale === 'he' ? category.name_he : category.name_ru
   const subcategoryName = subcategory
