@@ -65,8 +65,8 @@ export default async function AdminBusinessesPage({
   ])
   const showTestOnPublic = showTestOnPublicSetting?.value === 'true'
 
-  // Get all neighborhoods and categories for filters
-  const [neighborhoods, categories] = await Promise.all([
+  // Get all neighborhoods, categories, and subcategories for filters
+  const [neighborhoods, categories, subcategories] = await Promise.all([
     prisma.neighborhood.findMany({
       where: { is_active: true },
       select: {
@@ -82,6 +82,16 @@ export default async function AdminBusinessesPage({
         id: true,
         name_he: true,
         name_ru: true,
+      },
+      orderBy: { display_order: 'asc' },
+    }),
+    prisma.subcategory.findMany({
+      where: { is_active: true },
+      select: {
+        id: true,
+        name_he: true,
+        name_ru: true,
+        category_id: true,
       },
       orderBy: { display_order: 'asc' },
     }),
@@ -134,6 +144,7 @@ export default async function AdminBusinessesPage({
               key={business.id}
               business={business}
               locale={locale}
+              subcategories={subcategories}
             />
           ))}
         </div>

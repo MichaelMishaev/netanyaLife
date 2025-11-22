@@ -86,6 +86,12 @@ export default async function AdminLayout({
                 {locale === 'he' ? 'עסקים' : 'Бизнесы'}
               </Link>
               <Link
+                href={`/${locale}/admin/business-map`}
+                className="whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
+              >
+                {locale === 'he' ? 'מפת עסקים' : 'Карта бизнесов'}
+              </Link>
+              <Link
                 href={`/${locale}/admin/analytics`}
                 className="whitespace-nowrap text-sm text-gray-600 hover:text-primary-600"
               >

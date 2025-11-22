@@ -67,7 +67,7 @@ async function main() {
       display_order: 3,
     },
     {
-      name_he: 'מזרח העיר',
+      name_he: 'מזרח',
       name_ru: 'Восток города',
       slug: 'mizrah-hair',
       description_he: 'מזרח נתניה',

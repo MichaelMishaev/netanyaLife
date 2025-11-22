@@ -995,6 +995,61 @@ export async function reorderSubcategories(
 }
 
 /**
+ * Update business subcategory
+ */
+export async function updateBusinessSubcategory(
+  businessId: string,
+  subcategoryId: string | null,
+  locale: string
+) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: { category_id: true },
+    })
+
+    if (!business) {
+      return { success: false, error: 'Business not found' }
+    }
+
+    // If subcategoryId is provided, verify it belongs to the business's category
+    if (subcategoryId) {
+      const subcategory = await prisma.subcategory.findUnique({
+        where: { id: subcategoryId },
+        select: { category_id: true },
+      })
+
+      if (!subcategory || subcategory.category_id !== business.category_id) {
+        return {
+          success: false,
+          error: locale === 'he'
+            ? 'תת-קטגוריה לא תואמת לקטגוריה של העסק'
+            : 'Подкатегория не соответствует категории бизнеса'
+        }
+      }
+    }
+
+    await prisma.business.update({
+      where: { id: businessId },
+      data: { subcategory_id: subcategoryId },
+    })
+
+    revalidatePath(`/${locale}/admin/businesses`)
+    revalidatePath(`/${locale}/admin`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating business subcategory:', error)
+    return { success: false, error: 'Failed to update business subcategory' }
+  }
+}
+
+/**
  * Move businesses from one category to another (super admin only)
  */
 export async function moveBusinessesToCategory(

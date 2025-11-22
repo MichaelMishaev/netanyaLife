@@ -8,19 +8,35 @@ import {
   toggleBusinessPinned,
   toggleBusinessTest,
   deleteBusiness,
+  updateBusinessSubcategory,
 } from '@/lib/actions/admin'
+
+interface Subcategory {
+  id: string
+  name_he: string
+  name_ru: string
+  category_id: string
+}
 
 interface BusinessManagementCardProps {
   business: any
   locale: string
+  subcategories: Subcategory[]
 }
 
 export default function BusinessManagementCard({
   business,
   locale,
+  subcategories,
 }: BusinessManagementCardProps) {
   const t = useTranslations('admin.businesses')
   const [isUpdating, setIsUpdating] = useState(false)
+  const [isEditingSubcategory, setIsEditingSubcategory] = useState(false)
+
+  // Get subcategories for this business's category
+  const availableSubcategories = subcategories.filter(
+    (sub) => sub.category_id === business.category_id
+  )
 
   const name =
     locale === 'he'
@@ -78,6 +94,17 @@ export default function BusinessManagementCard({
     // Page will revalidate automatically
   }
 
+  const handleSubcategoryChange = async (subcategoryId: string) => {
+    setIsUpdating(true)
+    await updateBusinessSubcategory(
+      business.id,
+      subcategoryId === '' ? null : subcategoryId,
+      locale
+    )
+    setIsUpdating(false)
+    setIsEditingSubcategory(false)
+  }
+
   return (
     <div
       className={`rounded-lg border bg-white p-4 shadow-sm md:p-6 ${
@@ -120,11 +147,37 @@ export default function BusinessManagementCard({
           {/* Meta Info */}
           <div className="flex flex-wrap gap-2 text-sm text-gray-600">
             <span>{categoryName}</span>
-            {subcategoryName && (
-              <>
-                <span>›</span>
-                <span>{subcategoryName}</span>
-              </>
+            <span>›</span>
+            {isEditingSubcategory ? (
+              <select
+                value={business.subcategory_id || ''}
+                onChange={(e) => handleSubcategoryChange(e.target.value)}
+                disabled={isUpdating}
+                className="rounded border border-gray-300 px-2 py-0.5 text-xs focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50"
+                autoFocus
+                onBlur={() => setIsEditingSubcategory(false)}
+              >
+                <option value="">{locale === 'he' ? '-- ללא --' : '-- Без --'}</option>
+                {availableSubcategories.map((sub) => (
+                  <option key={sub.id} value={sub.id}>
+                    {locale === 'he' ? sub.name_he : sub.name_ru}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <button
+                onClick={() => availableSubcategories.length > 0 && setIsEditingSubcategory(true)}
+                className={`${
+                  subcategoryName
+                    ? 'text-gray-600'
+                    : 'italic text-orange-500'
+                } ${availableSubcategories.length > 0 ? 'cursor-pointer hover:underline' : 'cursor-default'}`}
+                title={availableSubcategories.length > 0
+                  ? (locale === 'he' ? 'לחץ לשינוי' : 'Нажмите для изменения')
+                  : (locale === 'he' ? 'אין תת-קטגוריות' : 'Нет подкатегорий')}
+              >
+                {subcategoryName || (locale === 'he' ? 'בחר תת-קטגוריה' : 'Выберите')}
+              </button>
             )}
             <span>•</span>
             <span>{neighborhoodName}</span>
@@ -271,13 +324,39 @@ export default function BusinessManagementCard({
             )}
           </div>
 
-          <div className="flex flex-wrap gap-3 text-sm text-gray-600">
+          <div className="flex flex-wrap items-center gap-3 text-sm text-gray-600">
             <span>{categoryName}</span>
-            {subcategoryName && (
-              <>
-                <span>›</span>
-                <span>{subcategoryName}</span>
-              </>
+            <span>›</span>
+            {isEditingSubcategory ? (
+              <select
+                value={business.subcategory_id || ''}
+                onChange={(e) => handleSubcategoryChange(e.target.value)}
+                disabled={isUpdating}
+                className="rounded border border-gray-300 px-2 py-1 text-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50"
+                autoFocus
+                onBlur={() => setIsEditingSubcategory(false)}
+              >
+                <option value="">{locale === 'he' ? '-- ללא --' : '-- Без --'}</option>
+                {availableSubcategories.map((sub) => (
+                  <option key={sub.id} value={sub.id}>
+                    {locale === 'he' ? sub.name_he : sub.name_ru}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <button
+                onClick={() => availableSubcategories.length > 0 && setIsEditingSubcategory(true)}
+                className={`${
+                  subcategoryName
+                    ? 'text-gray-600'
+                    : 'italic text-orange-500'
+                } ${availableSubcategories.length > 0 ? 'cursor-pointer hover:underline' : 'cursor-default'}`}
+                title={availableSubcategories.length > 0
+                  ? (locale === 'he' ? 'לחץ לשינוי' : 'Нажмите для изменения')
+                  : (locale === 'he' ? 'אין תת-קטגוריות' : 'Нет подкатегорий')}
+              >
+                {subcategoryName || (locale === 'he' ? 'בחר תת-קטגוריה' : 'Выберите')}
+              </button>
             )}
             <span>•</span>
             <span>{neighborhoodName}</span>

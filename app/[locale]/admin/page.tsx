@@ -49,14 +49,14 @@ export default async function AdminDashboard({
       label: t('stats.categories'),
       value: totalCategories,
       subtext: locale === 'he' ? 'קטגוריות פעילות' : 'активных категорий',
-      href: '#',
+      href: `/${locale}/admin/categories`,
       color: 'bg-green-500',
     },
     {
       label: t('stats.reviews'),
       value: totalReviews,
       subtext: locale === 'he' ? 'ביקורות כולל' : 'всего отзывов',
-      href: '#',
+      href: `/${locale}/admin/reviews`,
       color: 'bg-purple-500',
     },
   ]
@@ -71,16 +71,19 @@ export default async function AdminDashboard({
           <Link
             key={stat.label}
             href={stat.href}
-            className="block rounded-lg border bg-white p-6 shadow-sm transition hover:shadow-md"
+            className="group block rounded-lg border bg-white p-6 shadow-sm transition-all duration-200 hover:shadow-lg hover:border-primary-300 hover:scale-[1.02] cursor-pointer"
           >
             <div className="mb-2 flex items-center justify-between">
-              <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+              <p className="text-sm font-medium text-gray-600 group-hover:text-primary-600">{stat.label}</p>
               <div className={`h-3 w-3 rounded-full ${stat.color}`} />
             </div>
-            <p className="mb-1 text-3xl font-bold text-gray-900">
+            <p className="mb-1 text-3xl font-bold text-gray-900 group-hover:text-primary-700">
               {stat.value}
             </p>
             <p className="text-xs text-gray-500">{stat.subtext}</p>
+            <div className="mt-3 flex items-center text-xs font-medium text-primary-600 opacity-0 transition-opacity group-hover:opacity-100">
+              {locale === 'he' ? 'לחץ לצפייה →' : 'Нажмите для просмотра →'}
+            </div>
           </Link>
         ))}
       </div>

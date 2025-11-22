@@ -45,6 +45,11 @@ export default function AdminMobileMenu({
       badge: 0
     },
     {
+      href: `/${locale}/admin/business-map`,
+      label: locale === 'he' ? 'מפת עסקים' : 'Карта бизнесов',
+      badge: 0
+    },
+    {
       href: `/${locale}/admin/analytics`,
       label: locale === 'he' ? 'ניתוח נתונים' : 'Аналитика',
       badge: 0

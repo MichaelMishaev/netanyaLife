@@ -29,6 +29,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "tsx prisma/seed.ts",
     "prisma:seed-subcategories": "tsx prisma/seed-subcategories.ts",
+    "prisma:seed-prod": "tsx scripts/seed-prod-businesses.ts",
+    "prisma:export-prod": "tsx scripts/export-prod-businesses.ts",
     "prisma:generate": "prisma generate"
   },
   "dependencies": {
