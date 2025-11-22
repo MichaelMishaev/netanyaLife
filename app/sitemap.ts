@@ -8,6 +8,12 @@ export const revalidate = 3600 // Revalidate every hour
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://netanya-local.com'
 
+  // Check if test businesses should be included
+  const showTestSetting = await prisma.adminSettings.findUnique({
+    where: { key: 'show_test_on_public' },
+  })
+  const showTestOnPublic = showTestSetting?.value === 'true'
+
   // Static routes for both locales
   const staticRoutes: MetadataRoute.Sitemap = [
     {
@@ -37,11 +43,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]
 
   // Get all visible businesses
+  const whereClause: any = {
+    is_visible: true,
+    deleted_at: null,
+  }
+  if (!showTestOnPublic) {
+    whereClause.is_test = false
+  }
+
   const businesses = await prisma.business.findMany({
-    where: {
-      is_visible: true,
-      deleted_at: null,
-    },
+    where: whereClause,
     select: {
       slug_he: true,
       slug_ru: true,

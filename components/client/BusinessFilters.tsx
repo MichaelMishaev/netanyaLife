@@ -15,12 +15,16 @@ interface BusinessFiltersProps {
     name_he: string
     name_ru: string
   }>
+  testBusinessCount?: number
+  realBusinessCount?: number
 }
 
 export default function BusinessFilters({
   locale,
   neighborhoods,
   categories,
+  testBusinessCount = 0,
+  realBusinessCount = 0,
 }: BusinessFiltersProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -28,6 +32,7 @@ export default function BusinessFilters({
 
   const selectedNeighborhood = searchParams.get('neighborhood') || ''
   const selectedCategory = searchParams.get('category') || ''
+  const showTestBusinesses = searchParams.get('showTest') === 'true'
 
   const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -49,7 +54,19 @@ export default function BusinessFilters({
     })
   }
 
-  const hasActiveFilters = selectedNeighborhood || selectedCategory
+  const hasActiveFilters = selectedNeighborhood || selectedCategory || showTestBusinesses
+
+  const handleToggleTest = () => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (showTestBusinesses) {
+      params.delete('showTest')
+    } else {
+      params.set('showTest', 'true')
+    }
+    startTransition(() => {
+      router.push(`?${params.toString()}`)
+    })
+  }
 
   return (
     <div className="mb-6 rounded-lg border bg-white p-4">
@@ -66,6 +83,43 @@ export default function BusinessFilters({
             {locale === 'he' ? 'נקה סינון' : 'Очистить фильтры'}
           </button>
         )}
+      </div>
+
+      {/* Test Business Toggle */}
+      <div className={`mb-4 flex items-center justify-between rounded-lg p-3 ${
+        showTestBusinesses ? 'bg-amber-50' : 'bg-green-50'
+      }`}>
+        <div className="flex items-center gap-2">
+          <span className={`text-sm font-medium ${
+            showTestBusinesses ? 'text-amber-800' : 'text-green-800'
+          }`}>
+            {showTestBusinesses
+              ? (locale === 'he' ? '🧪 עסקי בדיקה' : '🧪 Тестовые')
+              : (locale === 'he' ? '✅ עסקים אמיתיים' : '✅ Реальные')
+            }
+          </span>
+          <span className={`rounded px-2 py-0.5 text-xs font-medium ${
+            showTestBusinesses
+              ? 'bg-amber-200 text-amber-800'
+              : 'bg-green-200 text-green-800'
+          }`}>
+            {showTestBusinesses ? testBusinessCount : realBusinessCount}
+          </span>
+        </div>
+        <button
+          onClick={handleToggleTest}
+          disabled={isPending}
+          dir="ltr"
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+            showTestBusinesses ? 'bg-amber-500' : 'bg-green-500'
+          }`}
+        >
+          <span
+            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+              showTestBusinesses ? 'translate-x-6' : 'translate-x-1'
+            }`}
+          />
+        </button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

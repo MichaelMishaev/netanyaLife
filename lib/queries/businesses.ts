@@ -2,6 +2,16 @@ import { prisma } from '@/lib/prisma'
 import { cache } from 'react'
 
 /**
+ * Helper to check if test businesses should show on public pages
+ */
+async function shouldShowTestOnPublic(): Promise<boolean> {
+  const setting = await prisma.adminSettings.findUnique({
+    where: { key: 'show_test_on_public' },
+  })
+  return setting?.value === 'true'
+}
+
+/**
  * CRITICAL: Search results ordering logic
  *
  * Order:
@@ -20,11 +30,12 @@ export async function getSearchResults(params: {
 }) {
   const { categoryId, subcategoryId, neighborhoodId, cityId, locale } = params
 
-  // Get top pinned count setting
-  const setting = await prisma.adminSettings.findUnique({
-    where: { key: 'top_pinned_count' },
-  })
-  const topPinnedCount = setting ? parseInt(setting.value, 10) : 4
+  // Get settings
+  const [pinnedSetting, showTestOnPublic] = await Promise.all([
+    prisma.adminSettings.findUnique({ where: { key: 'top_pinned_count' } }),
+    shouldShowTestOnPublic(),
+  ])
+  const topPinnedCount = pinnedSetting ? parseInt(pinnedSetting.value, 10) : 4
 
   // Build where clause
   const whereClause: any = {
@@ -32,6 +43,11 @@ export async function getSearchResults(params: {
     city_id: cityId,
     is_visible: true,
     deleted_at: null,
+  }
+
+  // Only filter out test businesses if show_test_on_public is false
+  if (!showTestOnPublic) {
+    whereClause.is_test = false
   }
 
   if (subcategoryId) {
@@ -119,13 +135,21 @@ export async function getSearchResults(params: {
  */
 export const getBusinessBySlug = cache(async (slug: string, locale: string) => {
   const slugField = locale === 'he' ? 'slug_he' : 'slug_ru'
+  const showTestOnPublic = await shouldShowTestOnPublic()
+
+  const whereClause: any = {
+    [slugField]: slug,
+    is_visible: true,
+    deleted_at: null,
+  }
+
+  // Only filter out test businesses if show_test_on_public is false
+  if (!showTestOnPublic) {
+    whereClause.is_test = false
+  }
 
   return await prisma.business.findFirst({
-    where: {
-      [slugField]: slug,
-      is_visible: true,
-      deleted_at: null,
-    },
+    where: whereClause,
     include: {
       category: {
         select: { id: true, name_he: true, name_ru: true, slug: true },
@@ -164,12 +188,18 @@ export async function getSearchResultsCount(params: {
   cityId: string
 }) {
   const { categoryId, subcategoryId, neighborhoodId, cityId } = params
+  const showTestOnPublic = await shouldShowTestOnPublic()
 
   const whereClause: any = {
     category_id: categoryId,
     city_id: cityId,
     is_visible: true,
     deleted_at: null,
+  }
+
+  // Only filter out test businesses if show_test_on_public is false
+  if (!showTestOnPublic) {
+    whereClause.is_test = false
   }
 
   if (subcategoryId) {

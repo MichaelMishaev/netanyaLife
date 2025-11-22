@@ -754,6 +754,59 @@ export async function toggleBusinessTest(
   }
 }
 
+/**
+ * Toggle whether test businesses show on public pages
+ */
+export async function toggleShowTestOnPublic(locale: string) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    const setting = await prisma.adminSettings.findUnique({
+      where: { key: 'show_test_on_public' },
+    })
+
+    const currentValue = setting?.value === 'true'
+    const newValue = !currentValue
+
+    await prisma.adminSettings.upsert({
+      where: { key: 'show_test_on_public' },
+      update: { value: newValue.toString() },
+      create: {
+        key: 'show_test_on_public',
+        value: newValue.toString(),
+        description: 'When true, test businesses will appear on public pages (for testing only)',
+      },
+    })
+
+    // Revalidate all public pages
+    revalidatePath(`/${locale}`)
+    revalidatePath(`/${locale}/search`)
+    revalidatePath(`/${locale}/admin/businesses`)
+
+    return { success: true, showTestOnPublic: newValue }
+  } catch (error) {
+    console.error('Error toggling show_test_on_public:', error)
+    return { success: false, error: 'Failed to update setting' }
+  }
+}
+
+/**
+ * Get current show_test_on_public setting
+ */
+export async function getShowTestOnPublic(): Promise<boolean> {
+  try {
+    const setting = await prisma.adminSettings.findUnique({
+      where: { key: 'show_test_on_public' },
+    })
+    return setting?.value === 'true'
+  } catch {
+    return false
+  }
+}
+
 // ============================================================================
 // SUBCATEGORY ACTIONS
 // ============================================================================

@@ -2,6 +2,7 @@ import { getTranslations } from 'next-intl/server'
 import { prisma } from '@/lib/prisma'
 import BusinessManagementCard from '@/components/client/BusinessManagementCard'
 import BusinessFilters from '@/components/client/BusinessFilters'
+import PublicTestToggle from '@/components/client/PublicTestToggle'
 
 interface AdminBusinessesPageProps {
   params: {
@@ -10,6 +11,7 @@ interface AdminBusinessesPageProps {
   searchParams: {
     neighborhood?: string
     category?: string
+    showTest?: string
   }
 }
 
@@ -19,9 +21,14 @@ export default async function AdminBusinessesPage({
 }: AdminBusinessesPageProps) {
   const t = await getTranslations('admin.businesses')
 
+  // Check if showing test businesses
+  const showTestBusinesses = searchParams?.showTest === 'true'
+
   // Build filter conditions
   const whereConditions: any = {
     deleted_at: null,
+    // Toggle switches between test and real businesses
+    is_test: showTestBusinesses ? true : false,
   }
 
   if (searchParams?.neighborhood) {
@@ -49,6 +56,14 @@ export default async function AdminBusinessesPage({
       created_at: 'desc',
     },
   })
+
+  // Get counts for the toggle and public setting
+  const [testBusinessCount, realBusinessCount, showTestOnPublicSetting] = await Promise.all([
+    prisma.business.count({ where: { deleted_at: null, is_test: true } }),
+    prisma.business.count({ where: { deleted_at: null, is_test: false } }),
+    prisma.adminSettings.findUnique({ where: { key: 'show_test_on_public' } }),
+  ])
+  const showTestOnPublic = showTestOnPublicSetting?.value === 'true'
 
   // Get all neighborhoods and categories for filters
   const [neighborhoods, categories] = await Promise.all([
@@ -91,11 +106,18 @@ export default async function AdminBusinessesPage({
         </div>
       </div>
 
+      {/* Public Test Toggle - Controls if test businesses show on public pages */}
+      <div className="mb-4">
+        <PublicTestToggle locale={locale} initialValue={showTestOnPublic} />
+      </div>
+
       {/* Filters */}
       <BusinessFilters
         locale={locale}
         neighborhoods={neighborhoods}
         categories={categories}
+        testBusinessCount={testBusinessCount}
+        realBusinessCount={realBusinessCount}
       />
 
       {/* Business List */}
