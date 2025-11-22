@@ -5,10 +5,15 @@ import { cache } from 'react'
  * Helper to check if test businesses should show on public pages
  */
 async function shouldShowTestOnPublic(): Promise<boolean> {
-  const setting = await prisma.adminSettings.findUnique({
-    where: { key: 'show_test_on_public' },
-  })
-  return setting?.value === 'true'
+  try {
+    const setting = await prisma.adminSettings.findUnique({
+      where: { key: 'show_test_on_public' },
+    })
+    return setting?.value === 'true'
+  } catch (error) {
+    console.error('Error checking show_test_on_public setting:', error)
+    return false // Default to not showing test businesses if there's an error
+  }
 }
 
 /**
@@ -28,14 +33,22 @@ export async function getSearchResults(params: {
   cityId: string
   locale: string
 }) {
-  const { categoryId, subcategoryId, neighborhoodId, cityId, locale } = params
+  const { categoryId, subcategoryId, neighborhoodId, cityId, locale: _locale } = params
 
-  // Get settings
-  const [pinnedSetting, showTestOnPublic] = await Promise.all([
-    prisma.adminSettings.findUnique({ where: { key: 'top_pinned_count' } }),
-    shouldShowTestOnPublic(),
-  ])
-  const topPinnedCount = pinnedSetting ? parseInt(pinnedSetting.value, 10) : 4
+  // Get settings with error handling
+  let topPinnedCount = 4 // Default value
+  let showTestOnPublic = false
+
+  try {
+    const [pinnedSetting, testSetting] = await Promise.all([
+      prisma.adminSettings.findUnique({ where: { key: 'top_pinned_count' } }).catch(() => null),
+      shouldShowTestOnPublic(),
+    ])
+    topPinnedCount = pinnedSetting ? parseInt(pinnedSetting.value, 10) : 4
+    showTestOnPublic = testSetting
+  } catch (error) {
+    console.error('Error fetching admin settings:', error)
+  }
 
   // Build where clause
   const whereClause: any = {
