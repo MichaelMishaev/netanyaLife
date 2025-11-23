@@ -40,9 +40,15 @@ export default function SearchableSelect({
 }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isMounted, setIsMounted] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const isUnmountingRef = useRef(false)
+
+  // Ensure proper hydration - only render custom UI after mount
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Filter options based on search query
   const filteredOptions = options.filter((option) =>
@@ -120,6 +126,48 @@ export default function SearchableSelect({
   const handleToggle = () => {
     if (isUnmountingRef.current) return
     setIsOpen(!isOpen)
+  }
+
+  // SSR/Initial render: Show a styled placeholder that matches the final UI
+  // This prevents hydration mismatch and flash of unstyled content
+  if (!isMounted) {
+    return (
+      <div className="relative w-full" dir={dir}>
+        {label && (
+          <div className="mb-2 text-base font-semibold text-gray-900">
+            {label}
+          </div>
+        )}
+        <div
+          className={`relative w-full rounded-lg border bg-white py-3 text-start text-base border-gray-300 ${
+            dir === 'rtl'
+              ? icon ? 'pe-10 ps-12' : 'pe-4 ps-12'
+              : icon ? 'pe-12 ps-10' : 'pe-12 ps-4'
+          } ${className}`}
+        >
+          {icon && (
+            <div className={`pointer-events-none absolute inset-y-0 flex items-center ${dir === 'rtl' ? 'end-0 pe-3' : 'start-0 ps-3'}`}>
+              {icon}
+            </div>
+          )}
+          <span className={selectedOption ? 'text-gray-900' : 'text-gray-500'}>
+            {selectedOption ? (
+              <>
+                {selectedOption.icon && <span className="me-2">{selectedOption.icon}</span>}
+                {selectedOption.label}
+              </>
+            ) : (
+              placeholder
+            )}
+          </span>
+          <div className={`pointer-events-none absolute inset-y-0 flex items-center ${dir === 'rtl' ? 'start-0 ps-3' : 'end-0 pe-3'}`}>
+            <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
