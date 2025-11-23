@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getOwnerSession } from '@/lib/auth-owner.server'
 import Link from 'next/link'
-import LanguageSwitcher from '@/components/client/LanguageSwitcher'
 import BusinessPortalMobileMenu from '@/components/client/BusinessPortalMobileMenu'
 
 interface LayoutProps {
@@ -67,6 +66,11 @@ export default async function BusinessPortalLayout({ children, params }: LayoutP
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-3">
+              {/* Portal Badge */}
+              <span className="rounded-full bg-primary-100 px-3 py-1 text-sm font-medium text-primary-700">
+                {isRTL ? 'פורטל בעלי עסקים' : 'Портал владельцев'}
+              </span>
+
               {/* User Menu - Desktop */}
               <div className="hidden items-center gap-3 md:flex">
                 <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
@@ -77,8 +81,6 @@ export default async function BusinessPortalLayout({ children, params }: LayoutP
                     {session.name}
                   </span>
                 </div>
-
-                <LanguageSwitcher />
 
                 <form action="/api/auth/owner/logout" method="POST">
                   <button
@@ -92,20 +94,6 @@ export default async function BusinessPortalLayout({ children, params }: LayoutP
                   </button>
                 </form>
               </div>
-
-              {/* Logo/Brand - Links to main site - Now on the right */}
-              <Link
-                href={`/${locale}`}
-                className="flex items-center gap-2 text-xl font-bold text-primary-600 transition hover:text-primary-700"
-              >
-                <span className="hidden sm:inline">Netanya Local</span>
-                <span className="text-2xl">🏢</span>
-              </Link>
-
-              {/* Portal Badge */}
-              <span className="hidden rounded-full bg-primary-100 px-3 py-1 text-xs font-medium text-primary-700 lg:inline">
-                {isRTL ? 'פורטל בעלי עסקים' : 'Портал владельцев'}
-              </span>
             </div>
           </div>
         </div>
