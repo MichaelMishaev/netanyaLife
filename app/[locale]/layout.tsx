@@ -33,6 +33,36 @@ export const metadata: Metadata = {
   title: 'Netanya Local - קהילת נתניה',
   description:
     'מדריך עסקים מקומיים בנתניה - Local business directory for Netanya residents',
+  metadataBase: new URL('https://netanya.business'),
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  openGraph: {
+    title: 'Netanya Local - קהילת נתניה',
+    description: 'מדריך עסקים מקומיים בנתניה - Local business directory for Netanya residents',
+    url: 'https://netanya.business',
+    siteName: 'Netanya Local',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1024,
+        height: 1024,
+        alt: 'Netanya Local Logo',
+      },
+    ],
+    locale: 'he_IL',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Netanya Local - קהילת נתניה',
+    description: 'מדריך עסקים מקומיים בנתניה - Local business directory for Netanya residents',
+    images: ['/og-image.png'],
+  },
 }
 
 // Force dynamic rendering for all pages (required for client contexts)
@@ -70,7 +100,7 @@ export default async function LocaleLayout({
       <head>
         <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="theme-color" content="#2563eb" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
