@@ -93,7 +93,7 @@ export async function POST(request: Request) {
             is_visible: business.is_visible,
             is_verified: business.is_verified,
             is_pinned: business.is_pinned,
-            is_test: false,
+            is_test: business.is_test,
             category_id: category.id,
             subcategory_id: subcategory?.id || null,
             neighborhood_id: neighborhood.id,
