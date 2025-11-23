@@ -246,11 +246,10 @@ export default function OwnerAddBusinessForm({
         </ul>
       </div>
 
-      {/* Business Name (Hebrew) */}
+      {/* Business Name */}
       <div>
         <label htmlFor="name_he" className="mb-2 block text-base font-semibold text-gray-900">
-          {t('form.name')} ({locale === 'he' ? 'עברית' : 'Иврит'}){' '}
-          <span className="text-red-500">*</span>
+          {t('form.name')} <span className="text-red-500">*</span>
         </label>
         <input
           type="text"
@@ -265,29 +264,11 @@ export default function OwnerAddBusinessForm({
               : 'border-gray-300 focus:border-primary-500 focus:ring-primary-500'
           }`}
           placeholder={t('form.namePlaceholder')}
-          dir="rtl"
+          dir={locale === 'he' ? 'rtl' : 'ltr'}
         />
         {fieldErrors.name_he && (
           <p className="mt-2 text-sm font-medium text-red-600">{fieldErrors.name_he}</p>
         )}
-      </div>
-
-      {/* Business Name (Russian - Optional) */}
-      <div>
-        <label htmlFor="name_ru" className="mb-2 block text-base font-semibold text-gray-900">
-          {t('form.name')} ({locale === 'he' ? 'רוסית' : 'Русский'}){' '}
-          <span className="text-gray-400">{tCommon('optional')}</span>
-        </label>
-        <input
-          type="text"
-          id="name_ru"
-          name="name_ru"
-          value={formData.name_ru}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          placeholder={locale === 'he' ? 'שם העסק ברוסית' : 'Название бизнеса на русском'}
-          dir="ltr"
-        />
       </div>
 
       {/* Category */}
@@ -408,13 +389,13 @@ export default function OwnerAddBusinessForm({
         )}
       </div>
 
-      {/* Description (Hebrew) */}
+      {/* Description */}
       <div>
         <label
           htmlFor="description_he"
           className="mb-2 block text-base font-semibold text-gray-900"
         >
-          {t('form.description')} ({locale === 'he' ? 'עברית' : 'Иврит'}){' '}
+          {t('form.description')}{' '}
           <span className="text-gray-500 text-sm font-normal">{tCommon('optional')}</span>
         </label>
         <textarea
@@ -425,28 +406,7 @@ export default function OwnerAddBusinessForm({
           rows={3}
           className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
           placeholder={t('form.descriptionPlaceholder')}
-          dir="rtl"
-        />
-      </div>
-
-      {/* Description (Russian) */}
-      <div>
-        <label
-          htmlFor="description_ru"
-          className="mb-2 block text-base font-semibold text-gray-900"
-        >
-          {t('form.description')} ({locale === 'he' ? 'רוסית' : 'Русский'}){' '}
-          <span className="text-gray-500 text-sm font-normal">{tCommon('optional')}</span>
-        </label>
-        <textarea
-          id="description_ru"
-          name="description_ru"
-          value={formData.description_ru}
-          onChange={handleChange}
-          rows={3}
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          placeholder={locale === 'he' ? 'תיאור העסק ברוסית' : 'Описание на русском'}
-          dir="ltr"
+          dir={locale === 'he' ? 'rtl' : 'ltr'}
         />
       </div>
 
@@ -565,10 +525,10 @@ export default function OwnerAddBusinessForm({
         />
       </div>
 
-      {/* Address (Hebrew) */}
+      {/* Address */}
       <div>
         <label htmlFor="address_he" className="mb-2 block font-medium text-gray-700">
-          {t('form.address')} ({locale === 'he' ? 'עברית' : 'Иврит'}){' '}
+          {t('form.address')}{' '}
           <span className="text-gray-400">{tCommon('optional')}</span>
         </label>
         <input
@@ -579,51 +539,20 @@ export default function OwnerAddBusinessForm({
           onChange={handleChange}
           className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
           placeholder={t('form.addressPlaceholder')}
-          dir="rtl"
+          dir={locale === 'he' ? 'rtl' : 'ltr'}
         />
       </div>
 
-      {/* Address (Russian) */}
+      {/* Opening Hours */}
       <div>
-        <label htmlFor="address_ru" className="mb-2 block font-medium text-gray-700">
-          {t('form.address')} ({locale === 'he' ? 'רוסית' : 'Русский'}){' '}
-          <span className="text-gray-400">{tCommon('optional')}</span>
-        </label>
-        <input
-          type="text"
-          id="address_ru"
-          name="address_ru"
-          value={formData.address_ru}
-          onChange={handleChange}
-          className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          placeholder={locale === 'he' ? 'כתובת ברוסית' : 'Адрес на русском'}
-          dir="ltr"
-        />
-      </div>
-
-      {/* Opening Hours (Hebrew) */}
-      <div>
-        <label htmlFor="openingHours_he" className="mb-2 block font-medium text-gray-700">
-          {t('form.openingHours')} ({locale === 'he' ? 'עברית' : 'Иврит'}){' '}
+        <label htmlFor="openingHours" className="mb-2 block font-medium text-gray-700">
+          {t('form.openingHours')}{' '}
           <span className="text-gray-400">{tCommon('optional')}</span>
         </label>
         <OpeningHoursInput
           value={formData.openingHours_he}
           onChange={(value) => setFormData((prev) => ({ ...prev, openingHours_he: value }))}
           locale={locale}
-        />
-      </div>
-
-      {/* Opening Hours (Russian) */}
-      <div>
-        <label htmlFor="openingHours_ru" className="mb-2 block font-medium text-gray-700">
-          {t('form.openingHours')} ({locale === 'he' ? 'רוסית' : 'Русский'}){' '}
-          <span className="text-gray-400">{tCommon('optional')}</span>
-        </label>
-        <OpeningHoursInput
-          value={formData.openingHours_ru}
-          onChange={(value) => setFormData((prev) => ({ ...prev, openingHours_ru: value }))}
-          locale="ru"
         />
       </div>
 
