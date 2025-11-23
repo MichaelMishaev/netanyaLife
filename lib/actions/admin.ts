@@ -718,6 +718,79 @@ export async function createBusiness(locale: string, data: any) {
 }
 
 /**
+ * Update existing business (admin only)
+ */
+export async function updateBusiness(businessId: string, locale: string, data: any) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    // Check if business exists
+    const existing = await prisma.business.findUnique({
+      where: { id: businessId },
+    })
+
+    if (!existing) {
+      return { success: false, error: 'Business not found' }
+    }
+
+    // Validate required fields
+    if (!data.name_he || !data.categoryId || !data.neighborhoodId) {
+      return { success: false, error: 'Missing required fields' }
+    }
+
+    // At least phone or whatsapp required
+    if (!data.phone && !data.whatsappNumber) {
+      return {
+        success: false,
+        error:
+          locale === 'he'
+            ? 'חובה למלא טלפון או מספר ווטסאפ אחד לפחות'
+            : 'Требуется телефон или WhatsApp',
+      }
+    }
+
+    // Update the business
+    await prisma.business.update({
+      where: { id: businessId },
+      data: {
+        name_he: data.name_he,
+        name_ru: data.name_ru || null,
+        category_id: data.categoryId,
+        subcategory_id: data.subcategoryId || null,
+        neighborhood_id: data.neighborhoodId,
+        description_he: data.description_he || null,
+        description_ru: data.description_ru || null,
+        phone: data.phone || null,
+        whatsapp_number: data.whatsappNumber || null,
+        website_url: data.websiteUrl || null,
+        email: data.email || null,
+        address_he: data.address_he || null,
+        address_ru: data.address_ru || null,
+        opening_hours_he: data.opening_hours_he || null,
+        opening_hours_ru: data.opening_hours_ru || null,
+        is_visible: data.isVisible !== undefined ? data.isVisible : existing.is_visible,
+        is_verified: data.isVerified !== undefined ? data.isVerified : existing.is_verified,
+        is_pinned: data.isPinned !== undefined ? data.isPinned : existing.is_pinned,
+        is_test: data.isTest !== undefined ? data.isTest : existing.is_test,
+      },
+    })
+
+    revalidatePath(`/${locale}/admin/businesses`)
+    revalidatePath(`/${locale}/admin/business-map`)
+    revalidatePath(`/${locale}/admin`)
+    revalidatePath(`/${locale}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error updating business:', error)
+    return { success: false, error: 'Failed to update business' }
+  }
+}
+
+/**
  * Toggle business test flag
  */
 export async function toggleBusinessTest(

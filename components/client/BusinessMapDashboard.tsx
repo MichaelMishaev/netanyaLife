@@ -109,6 +109,7 @@ export default function BusinessMapDashboard({
   const [dateFilter, setDateFilter] = useState<'all' | 'week' | 'month' | 'quarter'>('all')
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<string | null>(null)
+  const [selectedBusinessForDetails, setSelectedBusinessForDetails] = useState<Business | null>(null)
 
   const t = {
     he: {
@@ -1169,12 +1170,15 @@ export default function BusinessMapDashboard({
                     className={`hover:bg-gray-50 ${isLoading === business.id ? 'opacity-50' : ''}`}
                   >
                     <td className="px-4 py-3">
-                      <div>
-                        <p className="font-medium text-gray-900">{business.name_he}</p>
+                      <button
+                        onClick={() => setSelectedBusinessForDetails(business)}
+                        className="text-start hover:text-primary-600"
+                      >
+                        <p className="font-medium text-gray-900 hover:underline">{business.name_he}</p>
                         {business.name_ru && (
                           <p className="text-sm text-gray-500">{business.name_ru}</p>
                         )}
-                      </div>
+                      </button>
                     </td>
                     <td className="px-4 py-3">
                       <div>
@@ -1319,6 +1323,209 @@ export default function BusinessMapDashboard({
                 <p className="text-lg text-gray-500">{text.noBusinesses}</p>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Business Details Modal */}
+      {selectedBusinessForDetails && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setSelectedBusinessForDetails(null)}
+        >
+          <div
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg bg-white shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="sticky top-0 flex items-center justify-between border-b bg-white px-6 py-4">
+              <h2 className="text-xl font-bold text-gray-900">
+                {selectedBusinessForDetails.name_he}
+              </h2>
+              <button
+                onClick={() => setSelectedBusinessForDetails(null)}
+                className="rounded-full p-2 text-gray-500 transition hover:bg-gray-100"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="space-y-6 p-6">
+              {/* Status Badges */}
+              <div className="flex flex-wrap gap-2">
+                {selectedBusinessForDetails.is_visible ? (
+                  <span className="rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700">
+                    {locale === 'he' ? 'גלוי' : 'Видим'}
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-medium text-red-700">
+                    {locale === 'he' ? 'מוסתר' : 'Скрыт'}
+                  </span>
+                )}
+                {selectedBusinessForDetails.is_verified && (
+                  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700">
+                    ✓ {locale === 'he' ? 'מאומת' : 'Подтвержден'}
+                  </span>
+                )}
+                {selectedBusinessForDetails.is_pinned && (
+                  <span className="rounded-full bg-yellow-100 px-3 py-1 text-sm font-medium text-yellow-700">
+                    📌 {locale === 'he' ? 'מוצמד' : 'Закреплен'}
+                  </span>
+                )}
+                {selectedBusinessForDetails.is_test && (
+                  <span className="rounded-full bg-orange-100 px-3 py-1 text-sm font-medium text-orange-700">
+                    🧪 {locale === 'he' ? 'בדיקה' : 'Тест'}
+                  </span>
+                )}
+              </div>
+
+              {/* Russian Name */}
+              {selectedBusinessForDetails.name_ru && (
+                <div>
+                  <p className="text-sm font-medium text-gray-500">
+                    {locale === 'he' ? 'שם ברוסית' : 'Название на русском'}
+                  </p>
+                  <p className="text-lg text-gray-900">{selectedBusinessForDetails.name_ru}</p>
+                </div>
+              )}
+
+              {/* Category & Subcategory */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">{text.category}</p>
+                  <p className="text-gray-900">{selectedBusinessForDetails.category_name || text.noCategory}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">{text.subcategory}</p>
+                  <p className="text-gray-900">
+                    {selectedBusinessForDetails.subcategory_name || (
+                      <span className="text-amber-600">{text.noSubcategory}</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {/* Neighborhood */}
+              <div>
+                <p className="text-sm font-medium text-gray-500">{text.neighborhood}</p>
+                <p className="text-gray-900">{selectedBusinessForDetails.neighborhood_name}</p>
+              </div>
+
+              {/* Contact Info */}
+              <div className="rounded-lg border bg-gray-50 p-4">
+                <h3 className="mb-3 font-bold text-gray-900">
+                  {locale === 'he' ? 'פרטי התקשרות' : 'Контактная информация'}
+                </h3>
+                <div className="space-y-3">
+                  {selectedBusinessForDetails.phone && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
+                        <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">{text.withPhone}</p>
+                        <a href={`tel:${selectedBusinessForDetails.phone}`} className="font-medium text-blue-600 hover:underline" dir="ltr">
+                          {selectedBusinessForDetails.phone}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {selectedBusinessForDetails.whatsapp_number && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
+                        <svg className="h-5 w-5 text-green-600" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">{text.withWhatsApp}</p>
+                        <a href={`https://wa.me/${selectedBusinessForDetails.whatsapp_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="font-medium text-green-600 hover:underline" dir="ltr">
+                          {selectedBusinessForDetails.whatsapp_number}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {selectedBusinessForDetails.website_url && (
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
+                        <svg className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-500">{text.withWebsite}</p>
+                        <a href={selectedBusinessForDetails.website_url} target="_blank" rel="noopener noreferrer" className="font-medium text-purple-600 hover:underline">
+                          {selectedBusinessForDetails.website_url}
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                  {!selectedBusinessForDetails.phone && !selectedBusinessForDetails.whatsapp_number && !selectedBusinessForDetails.website_url && (
+                    <p className="text-gray-500">{locale === 'he' ? 'אין פרטי התקשרות' : 'Нет контактной информации'}</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Reviews & Dates */}
+              <div className="grid gap-4 sm:grid-cols-3">
+                <div>
+                  <p className="text-sm font-medium text-gray-500">{text.reviews}</p>
+                  <p className="text-xl font-bold text-gray-900">{selectedBusinessForDetails.reviews_count}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">{text.dateAdded}</p>
+                  <p className="text-gray-900">{formatDate(selectedBusinessForDetails.created_at)}</p>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-500">{locale === 'he' ? 'עודכן לאחרונה' : 'Последнее обновление'}</p>
+                  <p className="text-gray-900">{formatDate(selectedBusinessForDetails.updated_at)}</p>
+                </div>
+              </div>
+
+              {/* IDs (for debugging) */}
+              <div className="rounded-lg border bg-gray-50 p-4">
+                <h3 className="mb-2 text-sm font-medium text-gray-500">
+                  {locale === 'he' ? 'מזהים טכניים' : 'Технические ID'}
+                </h3>
+                <div className="space-y-1 font-mono text-xs text-gray-500">
+                  <p>ID: {selectedBusinessForDetails.id}</p>
+                  <p>Slug: {selectedBusinessForDetails.slug_he}</p>
+                  {selectedBusinessForDetails.category_id && <p>Category ID: {selectedBusinessForDetails.category_id}</p>}
+                  {selectedBusinessForDetails.subcategory_id && <p>Subcategory ID: {selectedBusinessForDetails.subcategory_id}</p>}
+                  <p>Neighborhood ID: {selectedBusinessForDetails.neighborhood_id}</p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex flex-wrap gap-2 border-t pt-4">
+                <a
+                  href={`/${locale}/admin/businesses/${selectedBusinessForDetails.id}/edit`}
+                  className="flex items-center gap-2 rounded-lg bg-primary-600 px-4 py-2 font-medium text-white transition hover:bg-primary-700"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  {text.edit}
+                </a>
+                <a
+                  href={`/${locale}/business/${selectedBusinessForDetails.slug_he}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 rounded-lg border bg-white px-4 py-2 font-medium text-gray-700 transition hover:bg-gray-50"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                  {locale === 'he' ? 'צפה בעמוד העסק' : 'Открыть страницу'}
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       )}
