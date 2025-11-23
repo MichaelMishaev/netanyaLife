@@ -83,11 +83,24 @@ export async function approveCategoryRequest(data: ApproveCategoryRequestData) {
 
     // If createCategory is true, create the category
     if (data.createCategory) {
-      // Generate slug from Hebrew name
+      // Generate slug - transliterate Hebrew to English
+      // Use a simple transliteration or require manual slug input
+      const hebrewToEnglish: Record<string, string> = {
+        'א': 'a', 'ב': 'b', 'ג': 'g', 'ד': 'd', 'ה': 'h', 'ו': 'v', 'ז': 'z',
+        'ח': 'ch', 'ט': 't', 'י': 'y', 'כ': 'k', 'ך': 'k', 'ל': 'l', 'מ': 'm',
+        'ם': 'm', 'נ': 'n', 'ן': 'n', 'ס': 's', 'ע': 'a', 'פ': 'p', 'ף': 'f',
+        'צ': 'ts', 'ץ': 'ts', 'ק': 'k', 'ר': 'r', 'ש': 'sh', 'ת': 't'
+      }
+
       const slug = request.category_name_he
         .toLowerCase()
+        .split('')
+        .map(char => hebrewToEnglish[char] || char)
+        .join('')
         .replace(/\s+/g, '-')
-        .replace(/[^\u0590-\u05FFa-z0-9-]/g, '')
+        .replace(/[^a-z0-9-]/g, '')
+        .replace(/-+/g, '-')
+        .replace(/^-|-$/g, '')
 
       // Check if slug already exists
       const existingCategory = await prisma.category.findUnique({
