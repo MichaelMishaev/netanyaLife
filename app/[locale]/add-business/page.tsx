@@ -82,9 +82,14 @@ export default async function AddBusinessPage({
   // Check authentication - redirect to login if not authenticated
   const session = await getOwnerSession()
   if (!session) {
-    redirect(`/${locale}/business-login?redirect=${encodeURIComponent(`/${locale}/add-business`)}`)
+    redirect(`/${locale}/business-login?redirect=${encodeURIComponent(`/${locale}/business-portal/add`)}`)
   }
 
+  // Authenticated owners should use the business portal add form
+  // which creates businesses directly with owner_id (no pending approval needed)
+  redirect(`/${locale}/business-portal/add`)
+
+  // Note: Code below is unreachable but kept for reference
   const t = await getTranslations('addBusiness')
   const tCommon = await getTranslations('common')
 
