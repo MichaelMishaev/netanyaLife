@@ -421,9 +421,9 @@ export async function deleteCategory(categoryId: string, locale: string) {
   }
 
   try {
-    // Check if category has businesses
+    // Check if category has active (non-deleted) businesses
     const count = await prisma.business.count({
-      where: { category_id: categoryId },
+      where: { category_id: categoryId, deleted_at: null },
     })
 
     if (count > 0) {
