@@ -1040,6 +1040,7 @@ export async function updateBusinessSubcategory(
     })
 
     revalidatePath(`/${locale}/admin/businesses`)
+    revalidatePath(`/${locale}/admin/business-map`)
     revalidatePath(`/${locale}/admin`)
 
     return { success: true }

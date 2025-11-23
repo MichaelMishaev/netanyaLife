@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { toggleBusinessVisibility, toggleBusinessVerification, toggleBusinessPinned, toggleBusinessTest, deleteBusiness } from '@/lib/actions/admin'
+import { toggleBusinessVisibility, toggleBusinessVerification, toggleBusinessPinned, toggleBusinessTest, deleteBusiness, updateBusinessSubcategory } from '@/lib/actions/admin'
 
 interface Business {
   id: string
@@ -447,6 +447,22 @@ export default function BusinessMapDashboard({
     }
   }
 
+  const handleUpdateSubcategory = async (businessId: string, subcategoryId: string | null) => {
+    setIsLoading(businessId)
+    try {
+      await updateBusinessSubcategory(businessId, subcategoryId, locale)
+    } finally {
+      setIsLoading(null)
+    }
+  }
+
+  // Get subcategories for a given category
+  const getSubcategoriesForCategory = (categoryId: string | null) => {
+    if (!categoryId) return []
+    const category = categories.find((c) => c.id === categoryId)
+    return category?.subcategories || []
+  }
+
   // Export to CSV
   const exportToCSV = () => {
     const headers = [
@@ -583,15 +599,23 @@ export default function BusinessMapDashboard({
               <p className="text-sm font-medium text-gray-600">{text.verified}</p>
               <p className="mt-1 text-3xl font-bold text-blue-600">{stats.verified}</p>
               <div className="mt-2 flex gap-2 text-xs">
-                <button
+                <span
+                  role="button"
+                  tabIndex={0}
                   onClick={(e) => {
                     e.stopPropagation()
                     drillDown(() => setShowPinnedOnly(true))
                   }}
-                  className="rounded bg-yellow-100 px-2 py-0.5 text-yellow-700 hover:bg-yellow-200"
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.stopPropagation()
+                      drillDown(() => setShowPinnedOnly(true))
+                    }
+                  }}
+                  className="cursor-pointer rounded bg-yellow-100 px-2 py-0.5 text-yellow-700 hover:bg-yellow-200"
                 >
                   {stats.pinned} {text.pinned}
-                </button>
+                </span>
               </div>
             </button>
 
@@ -1155,9 +1179,27 @@ export default function BusinessMapDashboard({
                     <td className="px-4 py-3">
                       <div>
                         <p className="text-gray-900">{business.category_name || text.noCategory}</p>
-                        {business.subcategory_name && (
+                        {business.subcategory_name ? (
                           <p className="text-xs text-gray-500">{business.subcategory_name}</p>
-                        )}
+                        ) : getSubcategoriesForCategory(business.category_id).length > 0 ? (
+                          <select
+                            value=""
+                            onChange={(e) => {
+                              if (e.target.value) {
+                                handleUpdateSubcategory(business.id, e.target.value)
+                              }
+                            }}
+                            disabled={isLoading === business.id}
+                            className="mt-1 w-full rounded border border-amber-300 bg-amber-50 px-2 py-1 text-xs text-amber-700 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+                          >
+                            <option value="">{locale === 'he' ? '+ הוסף תת-קטגוריה' : '+ Добавить подкат.'}</option>
+                            {getSubcategoriesForCategory(business.category_id).map((sub) => (
+                              <option key={sub.id} value={sub.id}>
+                                {locale === 'he' ? sub.name_he : sub.name_ru || sub.name_he}
+                              </option>
+                            ))}
+                          </select>
+                        ) : null}
                       </div>
                     </td>
                     <td className="px-4 py-3 text-gray-900">{business.neighborhood_name}</td>
