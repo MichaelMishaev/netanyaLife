@@ -93,6 +93,11 @@ export default async function BusinessMapPage({
     count: Number(item.count),
   }))
 
+  // Get category IDs that have subcategories
+  const categoryIdsWithSubcategories = new Set(
+    categories.filter((c) => c.subcategories.length > 0).map((c) => c.id)
+  )
+
   // Get summary stats
   const stats = {
     total: businesses.length,
@@ -115,6 +120,13 @@ export default async function BusinessMapPage({
       monthAgo.setMonth(monthAgo.getMonth() - 1)
       return new Date(b.created_at) > monthAgo
     }).length,
+    // Businesses missing subcategory (where category has subcategories)
+    missingSubcategory: businesses.filter(
+      (b) =>
+        b.category_id &&
+        categoryIdsWithSubcategories.has(b.category_id) &&
+        !b.subcategory_id
+    ).length,
   }
 
   // Transform data for client component

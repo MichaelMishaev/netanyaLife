@@ -65,6 +65,7 @@ interface Stats {
   withWebsite: number
   thisWeek: number
   thisMonth: number
+  missingSubcategory: number
 }
 
 interface BusinessMapDashboardProps {
@@ -97,6 +98,7 @@ export default function BusinessMapDashboard({
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
   const [showTestOnly, setShowTestOnly] = useState(false)
   const [showHiddenOnly, setShowHiddenOnly] = useState(false)
+  const [showMissingSubcategory, setShowMissingSubcategory] = useState(false)
   const [dateFilter, setDateFilter] = useState<'all' | 'week' | 'month' | 'quarter'>('all')
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<string | null>(null)
@@ -155,6 +157,8 @@ export default function BusinessMapDashboard({
       businessesAdded: 'עסקים שנוספו',
       emptyCategories: 'קטגוריות ריקות',
       emptyCategoriesDesc: 'קטגוריות ללא עסקים',
+      missingSubcategory: 'חסרה תת-קטגוריה',
+      missingSubcategoryDesc: 'עסקים שצריכים תת-קטגוריה',
     },
     ru: {
       title: 'Карта бизнесов',
@@ -209,6 +213,8 @@ export default function BusinessMapDashboard({
       businessesAdded: 'Добавлено предприятий',
       emptyCategories: 'Пустые категории',
       emptyCategoriesDesc: 'Категории без предприятий',
+      missingSubcategory: 'Нет подкатегории',
+      missingSubcategoryDesc: 'Предприятия без подкатегории',
     },
   }
 
@@ -253,6 +259,16 @@ export default function BusinessMapDashboard({
     // Hidden filter
     if (showHiddenOnly) {
       result = result.filter((b) => !b.is_visible)
+    }
+
+    // Missing subcategory filter
+    if (showMissingSubcategory) {
+      const categoryIdsWithSubs = new Set(
+        categories.filter((c) => c.subcategories.length > 0).map((c) => c.id)
+      )
+      result = result.filter(
+        (b) => b.category_id && categoryIdsWithSubs.has(b.category_id) && !b.subcategory_id
+      )
     }
 
     // Date filter
@@ -307,9 +323,11 @@ export default function BusinessMapDashboard({
     selectedNeighborhood,
     showTestOnly,
     showHiddenOnly,
+    showMissingSubcategory,
     dateFilter,
     sortField,
     sortOrder,
+    categories,
   ])
 
   // Handle actions
@@ -508,6 +526,23 @@ export default function BusinessMapDashboard({
                 {stats.real} {text.realBusinesses}
               </div>
             </div>
+
+            {/* Missing Subcategory Card */}
+            {stats.missingSubcategory > 0 && (
+              <button
+                onClick={() => {
+                  setShowMissingSubcategory(true)
+                  setViewMode('table')
+                }}
+                className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-start shadow-sm transition hover:bg-amber-100"
+              >
+                <p className="text-sm font-medium text-amber-700">{text.missingSubcategory}</p>
+                <p className="mt-1 text-3xl font-bold text-amber-600">{stats.missingSubcategory}</p>
+                <div className="mt-2 text-xs text-amber-600">
+                  {text.missingSubcategoryDesc}
+                </div>
+              </button>
+            )}
           </div>
 
           {/* Contact Info Stats */}
@@ -913,7 +948,7 @@ export default function BusinessMapDashboard({
           </div>
 
           {/* Clear filters */}
-          {(selectedCategory || selectedNeighborhood || selectedSubcategory || searchQuery || showTestOnly || showHiddenOnly || dateFilter !== 'all') && (
+          {(selectedCategory || selectedNeighborhood || selectedSubcategory || searchQuery || showTestOnly || showHiddenOnly || showMissingSubcategory || dateFilter !== 'all') && (
             <button
               onClick={() => {
                 setSelectedCategory(null)
@@ -922,6 +957,7 @@ export default function BusinessMapDashboard({
                 setSearchQuery('')
                 setShowTestOnly(false)
                 setShowHiddenOnly(false)
+                setShowMissingSubcategory(false)
                 setDateFilter('all')
               }}
               className="text-sm text-primary-600 hover:underline"
