@@ -79,7 +79,13 @@ async function main() {
   for (const hood of neighborhoods) {
     const created = await prisma.neighborhood.upsert({
       where: { city_id_slug: { city_id: city.id, slug: hood.slug } },
-      update: {},
+      update: {
+        name_he: hood.name_he,
+        name_ru: hood.name_ru,
+        description_he: hood.description_he,
+        description_ru: hood.description_ru,
+        display_order: hood.display_order,
+      },
       create: {
         ...hood,
         city_id: city.id,
