@@ -19,14 +19,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Structure & Architecture
 
-### Tech Stack (To Be Implemented)
-This is a greenfield project. Recommended stack based on requirements:
-- **Frontend**: Next.js 14+ (App Router for RTL/LTR routing, SEO, i18n)
-- **Database**: PostgreSQL (structured data, neighborhoods, categories)
+### Tech Stack
+- **Framework**: Next.js 14+ (App Router for RTL/LTR routing, SEO, i18n)
+- **Database**: PostgreSQL (hosted on Railway)
+- **ORM**: Prisma
 - **Cache/Sessions**: Redis (for analytics, pending messages)
 - **Styling**: Tailwind CSS (RTL support with `dir` utilities)
-- **PWA**: next-pwa or Workbox
-- **Deployment**: Vercel or similar with edge functions
+- **PWA**: next-pwa
+- **Deployment**: Railway (auto-deploys from main branch)
+- **Domain**: Custom domain via Railway
 
 ### Core Data Models
 
