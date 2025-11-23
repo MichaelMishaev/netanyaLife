@@ -66,6 +66,7 @@ interface Stats {
   thisWeek: number
   thisMonth: number
   missingSubcategory: number
+  noCategory: number
 }
 
 interface BusinessMapDashboardProps {
@@ -99,6 +100,12 @@ export default function BusinessMapDashboard({
   const [showTestOnly, setShowTestOnly] = useState(false)
   const [showHiddenOnly, setShowHiddenOnly] = useState(false)
   const [showMissingSubcategory, setShowMissingSubcategory] = useState(false)
+  const [showVerifiedOnly, setShowVerifiedOnly] = useState(false)
+  const [showPinnedOnly, setShowPinnedOnly] = useState(false)
+  const [showWithPhoneOnly, setShowWithPhoneOnly] = useState(false)
+  const [showWithWhatsAppOnly, setShowWithWhatsAppOnly] = useState(false)
+  const [showWithWebsiteOnly, setShowWithWebsiteOnly] = useState(false)
+  const [showNoCategoryOnly, setShowNoCategoryOnly] = useState(false)
   const [dateFilter, setDateFilter] = useState<'all' | 'week' | 'month' | 'quarter'>('all')
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState<string | null>(null)
@@ -159,6 +166,7 @@ export default function BusinessMapDashboard({
       emptyCategoriesDesc: 'קטגוריות ללא עסקים',
       missingSubcategory: 'חסרה תת-קטגוריה',
       missingSubcategoryDesc: 'עסקים שצריכים תת-קטגוריה',
+      noCategoryDesc: 'עסקים ללא קטגוריה',
     },
     ru: {
       title: 'Карта бизнесов',
@@ -215,10 +223,36 @@ export default function BusinessMapDashboard({
       emptyCategoriesDesc: 'Категории без предприятий',
       missingSubcategory: 'Нет подкатегории',
       missingSubcategoryDesc: 'Предприятия без подкатегории',
+      noCategoryDesc: 'Предприятия без категории',
     },
   }
 
   const text = t[locale as keyof typeof t] || t.he
+
+  // Helper to clear all filters
+  const clearAllFilters = () => {
+    setSelectedCategory(null)
+    setSelectedNeighborhood(null)
+    setSelectedSubcategory(null)
+    setSearchQuery('')
+    setShowTestOnly(false)
+    setShowHiddenOnly(false)
+    setShowMissingSubcategory(false)
+    setShowVerifiedOnly(false)
+    setShowPinnedOnly(false)
+    setShowWithPhoneOnly(false)
+    setShowWithWhatsAppOnly(false)
+    setShowWithWebsiteOnly(false)
+    setShowNoCategoryOnly(false)
+    setDateFilter('all')
+  }
+
+  // Helper to drill down with specific filter
+  const drillDown = (filterFn: () => void) => {
+    clearAllFilters()
+    filterFn()
+    setViewMode('table')
+  }
 
   // Filter and sort businesses
   const filteredBusinesses = useMemo(() => {
@@ -269,6 +303,36 @@ export default function BusinessMapDashboard({
       result = result.filter(
         (b) => b.category_id && categoryIdsWithSubs.has(b.category_id) && !b.subcategory_id
       )
+    }
+
+    // Verified filter
+    if (showVerifiedOnly) {
+      result = result.filter((b) => b.is_verified)
+    }
+
+    // Pinned filter
+    if (showPinnedOnly) {
+      result = result.filter((b) => b.is_pinned)
+    }
+
+    // With phone filter
+    if (showWithPhoneOnly) {
+      result = result.filter((b) => b.phone)
+    }
+
+    // With WhatsApp filter
+    if (showWithWhatsAppOnly) {
+      result = result.filter((b) => b.whatsapp_number)
+    }
+
+    // With website filter
+    if (showWithWebsiteOnly) {
+      result = result.filter((b) => b.website_url)
+    }
+
+    // No category filter
+    if (showNoCategoryOnly) {
+      result = result.filter((b) => !b.category_id)
     }
 
     // Date filter
@@ -324,6 +388,12 @@ export default function BusinessMapDashboard({
     showTestOnly,
     showHiddenOnly,
     showMissingSubcategory,
+    showVerifiedOnly,
+    showPinnedOnly,
+    showWithPhoneOnly,
+    showWithWhatsAppOnly,
+    showWithWebsiteOnly,
+    showNoCategoryOnly,
     dateFilter,
     sortField,
     sortOrder,
@@ -488,7 +558,11 @@ export default function BusinessMapDashboard({
         <div className="space-y-6">
           {/* Stats Grid */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-lg border bg-white p-4 shadow-sm">
+            {/* Total Businesses */}
+            <button
+              onClick={() => drillDown(() => {})}
+              className="rounded-lg border bg-white p-4 text-start shadow-sm transition hover:bg-gray-50 hover:shadow-md"
+            >
               <p className="text-sm font-medium text-gray-600">{text.totalBusinesses}</p>
               <p className="mt-1 text-3xl font-bold text-gray-900">{stats.total}</p>
               <div className="mt-2 flex gap-2 text-xs">
@@ -499,42 +573,57 @@ export default function BusinessMapDashboard({
                   {stats.hidden} {text.hidden}
                 </span>
               </div>
-            </div>
+            </button>
 
-            <div className="rounded-lg border bg-white p-4 shadow-sm">
+            {/* Verified */}
+            <button
+              onClick={() => drillDown(() => setShowVerifiedOnly(true))}
+              className="rounded-lg border bg-white p-4 text-start shadow-sm transition hover:bg-blue-50 hover:shadow-md"
+            >
               <p className="text-sm font-medium text-gray-600">{text.verified}</p>
               <p className="mt-1 text-3xl font-bold text-blue-600">{stats.verified}</p>
               <div className="mt-2 flex gap-2 text-xs">
-                <span className="rounded bg-yellow-100 px-2 py-0.5 text-yellow-700">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    drillDown(() => setShowPinnedOnly(true))
+                  }}
+                  className="rounded bg-yellow-100 px-2 py-0.5 text-yellow-700 hover:bg-yellow-200"
+                >
                   {stats.pinned} {text.pinned}
-                </span>
+                </button>
               </div>
-            </div>
+            </button>
 
-            <div className="rounded-lg border bg-white p-4 shadow-sm">
+            {/* This Week */}
+            <button
+              onClick={() => drillDown(() => setDateFilter('week'))}
+              className="rounded-lg border bg-white p-4 text-start shadow-sm transition hover:bg-green-50 hover:shadow-md"
+            >
               <p className="text-sm font-medium text-gray-600">{text.addedThisWeek}</p>
               <p className="mt-1 text-3xl font-bold text-green-600">{stats.thisWeek}</p>
               <div className="mt-2 text-xs text-gray-500">
                 {stats.thisMonth} {text.addedThisMonth}
               </div>
-            </div>
+            </button>
 
-            <div className="rounded-lg border bg-white p-4 shadow-sm">
+            {/* Test Businesses */}
+            <button
+              onClick={() => drillDown(() => setShowTestOnly(true))}
+              className="rounded-lg border bg-white p-4 text-start shadow-sm transition hover:bg-orange-50 hover:shadow-md"
+            >
               <p className="text-sm font-medium text-gray-600">{text.testBusinesses}</p>
               <p className="mt-1 text-3xl font-bold text-orange-600">{stats.test}</p>
               <div className="mt-2 text-xs text-gray-500">
                 {stats.real} {text.realBusinesses}
               </div>
-            </div>
+            </button>
 
             {/* Missing Subcategory Card */}
             {stats.missingSubcategory > 0 && (
               <button
-                onClick={() => {
-                  setShowMissingSubcategory(true)
-                  setViewMode('table')
-                }}
-                className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-start shadow-sm transition hover:bg-amber-100"
+                onClick={() => drillDown(() => setShowMissingSubcategory(true))}
+                className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-start shadow-sm transition hover:bg-amber-100 hover:shadow-md"
               >
                 <p className="text-sm font-medium text-amber-700">{text.missingSubcategory}</p>
                 <p className="mt-1 text-3xl font-bold text-amber-600">{stats.missingSubcategory}</p>
@@ -543,11 +632,28 @@ export default function BusinessMapDashboard({
                 </div>
               </button>
             )}
+
+            {/* No Category Card */}
+            {stats.noCategory > 0 && (
+              <button
+                onClick={() => drillDown(() => setShowNoCategoryOnly(true))}
+                className="rounded-lg border border-red-300 bg-red-50 p-4 text-start shadow-sm transition hover:bg-red-100 hover:shadow-md"
+              >
+                <p className="text-sm font-medium text-red-700">{text.noCategory}</p>
+                <p className="mt-1 text-3xl font-bold text-red-600">{stats.noCategory}</p>
+                <div className="mt-2 text-xs text-red-600">
+                  {text.noCategoryDesc}
+                </div>
+              </button>
+            )}
           </div>
 
           {/* Contact Info Stats */}
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-lg border bg-white p-4 shadow-sm">
+            <button
+              onClick={() => drillDown(() => setShowWithPhoneOnly(true))}
+              className="rounded-lg border bg-white p-4 text-start shadow-sm transition hover:bg-blue-50 hover:shadow-md"
+            >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100">
                   <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -559,9 +665,12 @@ export default function BusinessMapDashboard({
                   <p className="text-sm text-gray-600">{text.withPhone}</p>
                 </div>
               </div>
-            </div>
+            </button>
 
-            <div className="rounded-lg border bg-white p-4 shadow-sm">
+            <button
+              onClick={() => drillDown(() => setShowWithWhatsAppOnly(true))}
+              className="rounded-lg border bg-white p-4 text-start shadow-sm transition hover:bg-green-50 hover:shadow-md"
+            >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100">
                   <svg className="h-5 w-5 text-green-600" viewBox="0 0 24 24" fill="currentColor">
@@ -573,9 +682,12 @@ export default function BusinessMapDashboard({
                   <p className="text-sm text-gray-600">{text.withWhatsApp}</p>
                 </div>
               </div>
-            </div>
+            </button>
 
-            <div className="rounded-lg border bg-white p-4 shadow-sm">
+            <button
+              onClick={() => drillDown(() => setShowWithWebsiteOnly(true))}
+              className="rounded-lg border bg-white p-4 text-start shadow-sm transition hover:bg-purple-50 hover:shadow-md"
+            >
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-100">
                   <svg className="h-5 w-5 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -587,7 +699,7 @@ export default function BusinessMapDashboard({
                   <p className="text-sm text-gray-600">{text.withWebsite}</p>
                 </div>
               </div>
-            </div>
+            </button>
           </div>
 
           {/* Category Distribution */}
@@ -948,18 +1060,9 @@ export default function BusinessMapDashboard({
           </div>
 
           {/* Clear filters */}
-          {(selectedCategory || selectedNeighborhood || selectedSubcategory || searchQuery || showTestOnly || showHiddenOnly || showMissingSubcategory || dateFilter !== 'all') && (
+          {(selectedCategory || selectedNeighborhood || selectedSubcategory || searchQuery || showTestOnly || showHiddenOnly || showMissingSubcategory || showVerifiedOnly || showPinnedOnly || showWithPhoneOnly || showWithWhatsAppOnly || showWithWebsiteOnly || showNoCategoryOnly || dateFilter !== 'all') && (
             <button
-              onClick={() => {
-                setSelectedCategory(null)
-                setSelectedNeighborhood(null)
-                setSelectedSubcategory(null)
-                setSearchQuery('')
-                setShowTestOnly(false)
-                setShowHiddenOnly(false)
-                setShowMissingSubcategory(false)
-                setDateFilter('all')
-              }}
+              onClick={clearAllFilters}
               className="text-sm text-primary-600 hover:underline"
             >
               {locale === 'he' ? 'נקה סינונים' : 'Очистить фильтры'}

@@ -127,6 +127,8 @@ export default async function BusinessMapPage({
         categoryIdsWithSubcategories.has(b.category_id) &&
         !b.subcategory_id
     ).length,
+    // Businesses without any category
+    noCategory: businesses.filter((b) => !b.category_id).length,
   }
 
   // Transform data for client component
