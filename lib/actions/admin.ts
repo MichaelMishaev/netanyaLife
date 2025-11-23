@@ -422,19 +422,40 @@ export async function deleteCategory(categoryId: string, locale: string) {
 
   try {
     // Check if category has active (non-deleted) businesses
-    const count = await prisma.business.count({
+    const activeCount = await prisma.business.count({
       where: { category_id: categoryId, deleted_at: null },
     })
 
-    if (count > 0) {
+    if (activeCount > 0) {
       return {
         success: false,
-        error: `Cannot delete category with ${count} businesses`,
+        error: `Cannot delete category with ${activeCount} active businesses`,
       }
     }
 
-    await prisma.category.delete({
-      where: { id: categoryId },
+    // Use transaction to safely delete category and handle related records
+    await prisma.$transaction(async (tx) => {
+      // 1. Unlink soft-deleted businesses from this category (set category_id to null)
+      await tx.business.updateMany({
+        where: { category_id: categoryId, deleted_at: { not: null } },
+        data: { category_id: null },
+      })
+
+      // 2. Unlink pending businesses from this category
+      await tx.pendingBusiness.updateMany({
+        where: { category_id: categoryId },
+        data: { category_id: null },
+      })
+
+      // 3. Delete subcategories (they have onDelete: Cascade, but let's be explicit)
+      await tx.subcategory.deleteMany({
+        where: { category_id: categoryId },
+      })
+
+      // 4. Delete the category
+      await tx.category.delete({
+        where: { id: categoryId },
+      })
     })
 
     revalidatePath(`/${locale}/admin/categories`)
