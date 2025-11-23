@@ -33,6 +33,12 @@ export default async function AdminCategoriesPage({
           name_ru: true,
           subcategory_id: true,
           is_visible: true,
+          subcategory: {
+            select: {
+              name_he: true,
+              name_ru: true,
+            },
+          },
         },
         orderBy: {
           name_he: 'asc',

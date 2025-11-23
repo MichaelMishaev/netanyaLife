@@ -541,8 +541,13 @@ export default function CategoryManagementCard({
                   <span className="font-medium text-gray-900">
                     {locale === 'he' ? business.name_he : business.name_ru || business.name_he}
                   </span>
+                  {business.subcategory && (
+                    <span className="ms-2 rounded bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-700">
+                      {locale === 'he' ? business.subcategory.name_he : business.subcategory.name_ru || business.subcategory.name_he}
+                    </span>
+                  )}
                   {!business.is_visible && (
-                    <span className="ml-2 text-xs text-gray-500">
+                    <span className="ms-2 text-xs text-gray-500">
                       ({locale === 'he' ? 'מוסתר' : 'скрыт'})
                     </span>
                   )}
