@@ -721,12 +721,13 @@ export async function createBusiness(locale: string, data: any) {
  * Update existing business (admin only)
  */
 export async function updateBusiness(businessId: string, locale: string, data: any) {
-  const session = await getSession()
-  if (!session) {
-    return { success: false, error: 'Unauthorized' }
-  }
-
   try {
+    console.log('updateBusiness called with:', { businessId, locale, ownerId: data?.ownerId })
+
+    const session = await getSession()
+    if (!session) {
+      return { success: false, error: 'Unauthorized' }
+    }
     // Check if business exists
     const existing = await prisma.business.findUnique({
       where: { id: businessId },
@@ -752,6 +753,21 @@ export async function updateBusiness(businessId: string, locale: string, data: a
       }
     }
 
+    // Validate owner_id if provided
+    const ownerId = data.ownerId && data.ownerId.trim() !== '' ? data.ownerId : null
+    if (ownerId) {
+      const ownerExists = await prisma.businessOwner.findUnique({
+        where: { id: ownerId },
+        select: { id: true },
+      })
+      if (!ownerExists) {
+        return {
+          success: false,
+          error: locale === 'he' ? 'בעל העסק שנבחר לא קיים' : 'Выбранный владелец не существует',
+        }
+      }
+    }
+
     // Update the business
     await prisma.business.update({
       where: { id: businessId },
@@ -761,6 +777,7 @@ export async function updateBusiness(businessId: string, locale: string, data: a
         category_id: data.categoryId,
         subcategory_id: data.subcategoryId || null,
         neighborhood_id: data.neighborhoodId,
+        owner_id: ownerId,
         description_he: data.description_he || null,
         description_ru: data.description_ru || null,
         phone: data.phone || null,
@@ -786,7 +803,9 @@ export async function updateBusiness(businessId: string, locale: string, data: a
     return { success: true }
   } catch (error) {
     console.error('Error updating business:', error)
-    return { success: false, error: 'Failed to update business' }
+    // Return more detailed error for debugging
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+    return { success: false, error: `Failed to update business: ${errorMessage}` }
   }
 }
 

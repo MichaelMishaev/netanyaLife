@@ -21,6 +21,7 @@ interface Business {
   category_id: string | null
   subcategory_id: string | null
   neighborhood_id: string
+  owner_id: string | null
   is_visible: boolean
   is_verified: boolean
   is_pinned: boolean
@@ -45,6 +46,11 @@ interface AdminBusinessEditFormProps {
     name_he: string
     name_ru: string
   }>
+  businessOwners: Array<{
+    id: string
+    name: string
+    email: string
+  }>
   locale: string
 }
 
@@ -52,6 +58,7 @@ export default function AdminBusinessEditForm({
   business,
   categories,
   neighborhoods,
+  businessOwners,
   locale,
 }: AdminBusinessEditFormProps) {
   const router = useRouter()
@@ -62,6 +69,7 @@ export default function AdminBusinessEditForm({
     categoryId: business.category_id || '',
     subcategoryId: business.subcategory_id || '',
     neighborhoodId: business.neighborhood_id,
+    ownerId: business.owner_id || '',
     description_he: business.description_he || '',
     description_ru: business.description_ru || '',
     phone: business.phone || '',
@@ -142,6 +150,9 @@ export default function AdminBusinessEditForm({
       category: 'קטגוריה',
       subcategory: 'תת-קטגוריה',
       neighborhood: 'שכונה',
+      owner: 'בעל העסק',
+      selectOwner: 'בחר בעל עסק',
+      noOwner: 'ללא בעלים',
       descriptionHe: 'תיאור (עברית)',
       descriptionRu: 'תיאור (רוסית)',
       phone: 'טלפון',
@@ -167,6 +178,7 @@ export default function AdminBusinessEditForm({
       contactInfo: 'פרטי התקשרות',
       locationInfo: 'פרטי מיקום',
       statusFlags: 'סטטוס',
+      ownershipInfo: 'בעלות',
     },
     ru: {
       nameHe: 'Название (иврит)',
@@ -174,6 +186,9 @@ export default function AdminBusinessEditForm({
       category: 'Категория',
       subcategory: 'Подкатегория',
       neighborhood: 'Район',
+      owner: 'Владелец бизнеса',
+      selectOwner: 'Выберите владельца',
+      noOwner: 'Без владельца',
       descriptionHe: 'Описание (иврит)',
       descriptionRu: 'Описание (русский)',
       phone: 'Телефон',
@@ -199,6 +214,7 @@ export default function AdminBusinessEditForm({
       contactInfo: 'Контактная информация',
       locationInfo: 'Информация о местоположении',
       statusFlags: 'Статус',
+      ownershipInfo: 'Владение',
     },
   }
 
@@ -454,6 +470,30 @@ export default function AdminBusinessEditForm({
               className="w-full rounded-lg border px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>
+        </div>
+      </div>
+
+      {/* Ownership Info */}
+      <div className="space-y-4">
+        <h3 className="font-bold text-gray-900">{text.ownershipInfo}</h3>
+
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">
+            {text.owner}
+          </label>
+          <select
+            name="ownerId"
+            value={formData.ownerId}
+            onChange={handleChange}
+            className="w-full rounded-lg border px-4 py-2 focus:border-primary-500 focus:outline-none"
+          >
+            <option value="">{text.noOwner}</option>
+            {businessOwners.map((owner) => (
+              <option key={owner.id} value={owner.id}>
+                {owner.name} ({owner.email})
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 

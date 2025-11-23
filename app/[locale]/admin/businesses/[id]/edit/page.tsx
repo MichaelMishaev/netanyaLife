@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import { getCategories } from '@/lib/queries/categories'
 import AdminBusinessEditForm from '@/components/client/AdminBusinessEditForm'
+import BackButton from '@/components/client/BackButton'
 
 interface AdminEditBusinessPageProps {
   params: {
@@ -14,13 +14,14 @@ interface AdminEditBusinessPageProps {
 export default async function AdminEditBusinessPage({
   params: { locale, id },
 }: AdminEditBusinessPageProps) {
-  // Fetch the business
+  // Fetch the business with owner relation
   const business = await prisma.business.findUnique({
     where: { id },
     include: {
       category: true,
       subcategory: true,
       neighborhood: true,
+      owner: true,
     },
   })
 
@@ -28,27 +29,24 @@ export default async function AdminEditBusinessPage({
     notFound()
   }
 
-  // Get categories and neighborhoods for the form
-  const [categories, neighborhoods] = await Promise.all([
+  // Get categories, neighborhoods, and business owners for the form
+  const [categories, neighborhoods, businessOwners] = await Promise.all([
     getCategories(),
     prisma.neighborhood.findMany({
       where: { is_active: true },
       orderBy: { display_order: 'asc' },
+    }),
+    prisma.businessOwner.findMany({
+      where: { is_active: true },
+      orderBy: { name: 'asc' },
+      select: { id: true, name: true, email: true },
     }),
   ])
 
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-8">
-        <Link
-          href={`/${locale}/admin/business-map`}
-          className="mb-4 inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          {locale === 'he' ? 'חזרה למפת עסקים' : 'Назад к карте бизнесов'}
-        </Link>
+        <BackButton locale={locale} />
         <h1 className="mb-2 text-2xl font-bold sm:text-3xl">
           {locale === 'he' ? 'עריכת עסק' : 'Редактировать бизнес'}
         </h1>
@@ -60,6 +58,7 @@ export default async function AdminEditBusinessPage({
           business={business}
           categories={categories}
           neighborhoods={neighborhoods}
+          businessOwners={businessOwners}
           locale={locale}
         />
       </div>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 
 interface BusinessFiltersProps {
   locale: string
@@ -33,6 +33,8 @@ export default function BusinessFilters({
   const selectedNeighborhood = searchParams.get('neighborhood') || ''
   const selectedCategory = searchParams.get('category') || ''
   const showTestBusinesses = searchParams.get('showTest') === 'true'
+  const searchQuery = searchParams.get('search') || ''
+  const [searchInput, setSearchInput] = useState(searchQuery)
 
   const handleFilterChange = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -49,12 +51,18 @@ export default function BusinessFilters({
   }
 
   const clearFilters = () => {
+    setSearchInput('')
     startTransition(() => {
       router.push(`/${locale}/admin/businesses`)
     })
   }
 
-  const hasActiveFilters = selectedNeighborhood || selectedCategory || showTestBusinesses
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    handleFilterChange('search', searchInput.trim())
+  }
+
+  const hasActiveFilters = selectedNeighborhood || selectedCategory || showTestBusinesses || searchQuery
 
   const handleToggleTest = () => {
     const params = new URLSearchParams(searchParams.toString())
@@ -84,6 +92,31 @@ export default function BusinessFilters({
           </button>
         )}
       </div>
+
+      {/* Search by Name */}
+      <form onSubmit={handleSearch} className="mb-4">
+        <label htmlFor="search-input" className="mb-2 block text-sm font-medium">
+          {locale === 'he' ? 'חיפוש לפי שם' : 'Поиск по названию'}
+        </label>
+        <div className="flex gap-2">
+          <input
+            id="search-input"
+            type="text"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            placeholder={locale === 'he' ? 'הקלד שם עסק...' : 'Введите название...'}
+            className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
+            disabled={isPending}
+          />
+          <button
+            type="submit"
+            disabled={isPending || !searchInput.trim()}
+            className="rounded-lg bg-primary-600 px-4 py-2 text-white transition hover:bg-primary-700 disabled:bg-gray-300"
+          >
+            {locale === 'he' ? 'חפש' : 'Найти'}
+          </button>
+        </div>
+      </form>
 
       {/* Test Business Toggle */}
       <div className={`mb-4 flex items-center justify-between rounded-lg p-3 ${

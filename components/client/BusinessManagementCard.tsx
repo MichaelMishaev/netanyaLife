@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import Link from 'next/link'
 import {
   toggleBusinessVisibility,
   toggleBusinessVerification,
@@ -32,6 +33,7 @@ export default function BusinessManagementCard({
   const t = useTranslations('admin.businesses')
   const [isUpdating, setIsUpdating] = useState(false)
   const [isEditingSubcategory, setIsEditingSubcategory] = useState(false)
+  const [showDetails, setShowDetails] = useState(false)
 
   // Get subcategories for this business's category
   const availableSubcategories = subcategories.filter(
@@ -291,6 +293,74 @@ export default function BusinessManagementCard({
             </span>
           </button>
         </div>
+
+        {/* View Details & Edit - Mobile */}
+        <div className="mt-3 flex gap-2">
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium text-gray-700 transition hover:bg-gray-50"
+          >
+            {showDetails
+              ? (locale === 'he' ? 'הסתר פרטים' : 'Скрыть')
+              : (locale === 'he' ? 'הצג פרטים' : 'Подробнее')}
+          </button>
+          <Link
+            href={`/${locale}/admin/businesses/${business.id}/edit`}
+            className="flex-1 rounded-lg bg-primary-600 px-3 py-2 text-center text-xs font-medium text-white transition hover:bg-primary-700"
+          >
+            {locale === 'he' ? 'עריכה' : 'Редактировать'}
+          </Link>
+        </div>
+
+        {/* Expandable Details - Mobile */}
+        {showDetails && (
+          <div className="mt-3 space-y-2 rounded-lg bg-gray-50 p-3 text-sm">
+            {business.phone && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">{locale === 'he' ? 'טלפון:' : 'Тел:'}</span>
+                <a href={`tel:${business.phone}`} className="text-primary-600 hover:underline" dir="ltr">
+                  {business.phone}
+                </a>
+              </div>
+            )}
+            {business.whatsapp_number && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">{locale === 'he' ? 'וואטסאפ:' : 'WhatsApp:'}</span>
+                <span dir="ltr">{business.whatsapp_number}</span>
+              </div>
+            )}
+            {business.email && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">{locale === 'he' ? 'אימייל:' : 'Email:'}</span>
+                <a href={`mailto:${business.email}`} className="text-primary-600 hover:underline">
+                  {business.email}
+                </a>
+              </div>
+            )}
+            {(business.address_he || business.address_ru) && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">{locale === 'he' ? 'כתובת:' : 'Адрес:'}</span>
+                <span>{locale === 'he' ? business.address_he : business.address_ru}</span>
+              </div>
+            )}
+            {business.website_url && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">{locale === 'he' ? 'אתר:' : 'Сайт:'}</span>
+                <a href={business.website_url} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">
+                  {business.website_url}
+                </a>
+              </div>
+            )}
+            {business.owner_id && (
+              <div className="flex items-center gap-2">
+                <span className="text-gray-500">{locale === 'he' ? 'בעלים:' : 'Владелец:'}</span>
+                <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">
+                  {locale === 'he' ? 'משויך' : 'Привязан'}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Desktop Layout */}
@@ -470,8 +540,87 @@ export default function BusinessManagementCard({
           >
             🗑️
           </button>
+
+          <button
+            onClick={() => setShowDetails(!showDetails)}
+            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            title={locale === 'he' ? 'הצג פרטים' : 'Подробнее'}
+          >
+            {showDetails ? '▲' : '▼'}
+          </button>
+
+          <Link
+            href={`/${locale}/admin/businesses/${business.id}/edit`}
+            className="rounded-lg bg-primary-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-primary-700"
+          >
+            {locale === 'he' ? 'עריכה' : 'Редакт.'}
+          </Link>
         </div>
       </div>
+
+      {/* Expandable Details - Desktop */}
+      {showDetails && (
+        <div className="mt-4 hidden border-t pt-4 md:block">
+          <div className="grid grid-cols-2 gap-4 text-sm lg:grid-cols-3">
+            {business.phone && (
+              <div>
+                <span className="text-gray-500">{locale === 'he' ? 'טלפון:' : 'Телефон:'}</span>{' '}
+                <a href={`tel:${business.phone}`} className="text-primary-600 hover:underline" dir="ltr">
+                  {business.phone}
+                </a>
+              </div>
+            )}
+            {business.whatsapp_number && (
+              <div>
+                <span className="text-gray-500">{locale === 'he' ? 'וואטסאפ:' : 'WhatsApp:'}</span>{' '}
+                <span dir="ltr">{business.whatsapp_number}</span>
+              </div>
+            )}
+            {business.email && (
+              <div>
+                <span className="text-gray-500">{locale === 'he' ? 'אימייל:' : 'Email:'}</span>{' '}
+                <a href={`mailto:${business.email}`} className="text-primary-600 hover:underline">
+                  {business.email}
+                </a>
+              </div>
+            )}
+            {(business.address_he || business.address_ru) && (
+              <div>
+                <span className="text-gray-500">{locale === 'he' ? 'כתובת:' : 'Адрес:'}</span>{' '}
+                {locale === 'he' ? business.address_he : business.address_ru}
+              </div>
+            )}
+            {business.website_url && (
+              <div>
+                <span className="text-gray-500">{locale === 'he' ? 'אתר:' : 'Сайт:'}</span>{' '}
+                <a href={business.website_url} target="_blank" rel="noopener noreferrer" className="text-primary-600 hover:underline">
+                  {(() => {
+                    try {
+                      return new URL(business.website_url).hostname
+                    } catch {
+                      return business.website_url
+                    }
+                  })()}
+                </a>
+              </div>
+            )}
+            {business.owner_id && (
+              <div>
+                <span className="text-gray-500">{locale === 'he' ? 'בעלים:' : 'Владелец:'}</span>{' '}
+                <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-800">
+                  {locale === 'he' ? 'משויך' : 'Привязан'}
+                </span>
+              </div>
+            )}
+            {(business.opening_hours_he || business.opening_hours_ru) && (
+              <div className="col-span-2 lg:col-span-3">
+                <span className="text-gray-500">{locale === 'he' ? 'שעות פעילות:' : 'Часы работы:'}</span>{' '}
+                {locale === 'he' ? business.opening_hours_he : business.opening_hours_ru}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

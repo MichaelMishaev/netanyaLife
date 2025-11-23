@@ -12,6 +12,7 @@ interface AdminBusinessesPageProps {
     neighborhood?: string
     category?: string
     showTest?: string
+    search?: string
   }
 }
 
@@ -37,6 +38,14 @@ export default async function AdminBusinessesPage({
 
   if (searchParams?.category) {
     whereConditions.category_id = searchParams.category
+  }
+
+  // Search by name
+  if (searchParams?.search) {
+    whereConditions.OR = [
+      { name_he: { contains: searchParams.search, mode: 'insensitive' } },
+      { name_ru: { contains: searchParams.search, mode: 'insensitive' } },
+    ]
   }
 
   // Get filtered businesses
