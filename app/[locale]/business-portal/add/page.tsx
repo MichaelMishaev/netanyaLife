@@ -52,11 +52,6 @@ export default async function OwnerAddBusinessPage({ params }: PageProps) {
           <h1 className="text-3xl font-bold text-gray-900">
             {locale === 'he' ? 'הוסף עסק חדש' : 'Добавить новый бизнес'}
           </h1>
-          <p className="mt-2 text-gray-600">
-            {locale === 'he'
-              ? 'העסק שלך יופיע מיד באתר לאחר ההוספה'
-              : 'Ваш бизнес появится на сайте сразу после добавления'}
-          </p>
         </div>
         <Link
           href={`/${locale}/business-portal`}
