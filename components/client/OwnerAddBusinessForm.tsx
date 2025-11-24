@@ -349,6 +349,28 @@ export default function OwnerAddBusinessForm({
             required={false}
             dir={locale === 'he' ? 'rtl' : 'ltr'}
           />
+
+          {/* Helpful tip for subcategory selection */}
+          <div className="mt-2 flex items-start gap-2 rounded-lg bg-blue-50 p-3 text-sm">
+            <svg
+              className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <p className="flex-1 leading-relaxed text-blue-800">
+              {locale === 'he'
+                ? 'בחירת תת-קטגוריה מדויקת תגדיל את הסיכוי שהעסק שלך יוצג ללקוחות רלוונטיים 📈'
+                : 'Выбор точной подкатегории увеличит шансы показа вашего бизнеса релевантным клиентам 📈'}
+            </p>
+          </div>
         </div>
       )}
 
