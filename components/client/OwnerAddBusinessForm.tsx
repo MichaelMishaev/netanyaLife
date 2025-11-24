@@ -75,6 +75,7 @@ export default function OwnerAddBusinessForm({
     contact?: string
     websiteUrl?: string
     email?: string
+    openingHours_he?: string
   }>({})
 
   const handleChange = (
@@ -141,6 +142,11 @@ export default function OwnerAddBusinessForm({
     // At least phone or whatsapp required
     if (!formData.phone && !formData.whatsappNumber) {
       errors.contact = t('form.contactRequired')
+    }
+
+    // Opening hours required
+    if (!formData.openingHours_he || !formData.openingHours_he.trim()) {
+      errors.openingHours_he = tCommon('required')
     }
 
     // If there are errors, show them and don't submit
@@ -245,6 +251,11 @@ export default function OwnerAddBusinessForm({
             </li>
           )}
           {fieldErrors.contact && <li>{fieldErrors.contact}</li>}
+          {fieldErrors.openingHours_he && (
+            <li>
+              {t('form.openingHours')}: {fieldErrors.openingHours_he}
+            </li>
+          )}
         </ul>
       </div>
 
@@ -593,15 +604,27 @@ export default function OwnerAddBusinessForm({
 
       {/* Opening Hours */}
       <div>
-        <label htmlFor="openingHours" className="mb-2 block font-medium text-gray-700">
-          {t('form.openingHours')}{' '}
-          <span className="text-gray-400">{tCommon('optional')}</span>
+        <label htmlFor="openingHours" className="mb-2 block text-base font-semibold text-gray-900">
+          {t('form.openingHours')} <span className="text-red-500">*</span>
         </label>
         <OpeningHoursInput
           value={formData.openingHours_he}
-          onChange={(value) => setFormData((prev) => ({ ...prev, openingHours_he: value }))}
+          onChange={(value) => {
+            setFormData((prev) => ({ ...prev, openingHours_he: value }))
+            // Clear error when user starts typing
+            if (fieldErrors.openingHours_he) {
+              setFieldErrors((prev) => {
+                const newErrors = { ...prev }
+                delete newErrors.openingHours_he
+                return newErrors
+              })
+            }
+          }}
           locale={locale}
         />
+        {fieldErrors.openingHours_he && (
+          <p className="mt-2 text-sm font-medium text-red-600">{fieldErrors.openingHours_he}</p>
+        )}
       </div>
 
       {/* Error Message */}
