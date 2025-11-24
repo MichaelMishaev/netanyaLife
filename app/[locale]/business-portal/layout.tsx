@@ -73,13 +73,9 @@ export default async function BusinessPortalLayout({ children, params }: LayoutP
 
               {/* User Menu - Desktop */}
               <div className="hidden items-center gap-3 md:flex">
-                <div className="flex items-center gap-2 rounded-lg bg-gray-50 px-3 py-2">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-sm font-bold text-white">
-                    {session.name.charAt(0).toUpperCase()}
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">
-                    {session.name}
-                  </span>
+                {/* Avatar Circle */}
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-sm font-bold text-white">
+                  {session.name.charAt(0).toUpperCase()}
                 </div>
 
                 <form action="/api/auth/owner/logout" method="POST">
