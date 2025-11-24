@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateBusinessDetails } from '@/lib/actions/business-owner'
+import OpeningHoursInput from './OpeningHoursInput'
 
 interface BusinessEditFormProps {
   locale: string
@@ -29,12 +30,18 @@ export default function BusinessEditForm({ locale, business }: BusinessEditFormP
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [isPending, setIsPending] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+
+  // State for opening hours
+  const [openingHoursHe, setOpeningHoursHe] = useState(business.opening_hours_he || '')
+  const [openingHoursRu, setOpeningHoursRu] = useState(business.opening_hours_ru || '')
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setError(null)
     setSuccess(false)
+    setIsPending(false)
     setIsLoading(true)
 
     const formData = new FormData(e.currentTarget)
@@ -46,8 +53,8 @@ export default function BusinessEditForm({ locale, business }: BusinessEditFormP
       whatsapp_number: formData.get('whatsapp_number') as string,
       website_url: formData.get('website_url') as string,
       email: formData.get('email') as string,
-      opening_hours_he: formData.get('opening_hours_he') as string,
-      opening_hours_ru: formData.get('opening_hours_ru') as string,
+      opening_hours_he: openingHoursHe,
+      opening_hours_ru: openingHoursRu,
       address_he: formData.get('address_he') as string,
       address_ru: formData.get('address_ru') as string,
     }
@@ -60,14 +67,21 @@ export default function BusinessEditForm({ locale, business }: BusinessEditFormP
         return
       }
 
-      setSuccess(true)
+      // Check if changes are pending approval
+      if (result.isPending) {
+        setIsPending(true)
+      } else {
+        setSuccess(true)
+      }
+
+      // Navigate quickly with visual feedback
       setTimeout(() => {
         router.push(`/${locale}/business-portal`)
-      }, 2000)
+        setIsLoading(false)
+      }, 1200)
     } catch (err) {
       setError(locale === 'he' ? 'שגיאה בשמירת השינויים' : 'Ошибка сохранения изменений')
-    } finally {
-      setIsLoading(false)
+      setIsLoading(false) // Only re-enable on error
     }
   }
 
@@ -169,13 +183,13 @@ export default function BusinessEditForm({ locale, business }: BusinessEditFormP
             {locale === 'he' ? 'אתר אינטרנט' : 'Веб-сайт'}
           </label>
           <input
-            type="url"
+            type="text"
             id="website_url"
             name="website_url"
             defaultValue={business.website_url || ''}
             className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             dir="ltr"
-            placeholder="https://example.com"
+            placeholder="example.com or https://example.com"
           />
         </div>
 
@@ -196,36 +210,15 @@ export default function BusinessEditForm({ locale, business }: BusinessEditFormP
       </div>
 
       {/* Opening Hours */}
-      <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <label htmlFor="opening_hours_he" className="mb-2 block font-medium text-gray-700">
-            {locale === 'he' ? 'שעות פתיחה (עברית)' : 'Часы работы (иврит)'}
-          </label>
-          <textarea
-            id="opening_hours_he"
-            name="opening_hours_he"
-            rows={3}
-            defaultValue={business.opening_hours_he || ''}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            dir="rtl"
-            placeholder="א׳-ה׳: 08:00-17:00"
-          />
-        </div>
-
-        <div>
-          <label htmlFor="opening_hours_ru" className="mb-2 block font-medium text-gray-700">
-            {locale === 'he' ? 'שעות פתיחה (רוסית)' : 'Часы работы (русский)'}
-          </label>
-          <textarea
-            id="opening_hours_ru"
-            name="opening_hours_ru"
-            rows={3}
-            defaultValue={business.opening_hours_ru || ''}
-            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            dir="ltr"
-            placeholder="Пн-Чт: 08:00-17:00"
-          />
-        </div>
+      <div>
+        <label className="mb-3 block text-base font-semibold text-gray-900">
+          {locale === 'he' ? 'שעות פתיחה' : 'Часы работы'}
+        </label>
+        <OpeningHoursInput
+          value={openingHoursHe}
+          onChange={(value) => setOpeningHoursHe(value)}
+          locale={locale}
+        />
       </div>
 
       {/* Address */}
@@ -268,10 +261,47 @@ export default function BusinessEditForm({ locale, business }: BusinessEditFormP
         </div>
       )}
 
-      {/* Success Message */}
+      {/* Pending Approval Message */}
+      {isPending && (
+        <div className="rounded-lg border-2 border-blue-300 bg-blue-50 p-4" role="alert">
+          <div className="flex items-start gap-3">
+            <div className="text-2xl">⏳</div>
+            <div className="flex-1">
+              <h4 className="font-bold text-blue-900">
+                {locale === 'he' ? 'השינויים נשלחו לאישור מנהל' : 'Изменения отправлены на одобрение администратора'}
+              </h4>
+              <p className="mt-1 text-sm text-blue-800">
+                {locale === 'he'
+                  ? 'השינויים שלך נשמרו וממתינים לאישור. תראה את העדכונים באתר לאחר שהמנהל יאשר אותם.'
+                  : 'Ваши изменения сохранены и ожидают одобрения. Вы увидите обновления на сайте после одобрения администратором.'}
+              </p>
+              <div className="mt-3 flex items-center gap-2 text-sm text-blue-700">
+                <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </svg>
+                <span>{locale === 'he' ? 'מעביר לדשבורד...' : 'Переход на дашборд...'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Success Message (for direct saves - if any) */}
       {success && (
-        <div className="rounded-lg bg-green-50 p-4 text-green-800" role="alert">
-          {locale === 'he' ? 'השינויים נשמרו בהצלחה!' : 'Изменения успешно сохранены!'}
+        <div className="rounded-lg bg-green-50 p-4" role="alert">
+          <div className="flex items-center justify-between">
+            <span className="text-green-800 font-medium">
+              {locale === 'he' ? 'השינויים נשמרו בהצלחה!' : 'Изменения успешно сохранены!'}
+            </span>
+            <div className="flex items-center gap-2 text-sm text-green-700">
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+              </svg>
+              <span>{locale === 'he' ? 'מעביר...' : 'Переход...'}</span>
+            </div>
+          </div>
         </div>
       )}
 

@@ -247,3 +247,20 @@ export const getPendingCategoryRequestCount = cache(async () => {
     },
   })
 })
+
+/**
+ * Get count of pending business edits
+ */
+export async function getPendingEditsCount(): Promise<number> {
+  try {
+    const count = await prisma.pendingBusinessEdit.count({
+      where: {
+        status: 'PENDING',
+      },
+    })
+    return count
+  } catch (error) {
+    console.error('Error getting pending edits count:', error)
+    return 0
+  }
+}

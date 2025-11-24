@@ -186,6 +186,7 @@ model Business {
 
   // Child entities
   reviews         Review[]
+  pending_edits   PendingBusinessEdit[]
 
   // Metadata
   created_at      DateTime       @default(now())
@@ -199,6 +200,45 @@ model Business {
   @@index([neighborhood_id])
   @@index([deleted_at]) // Filter out soft-deleted
   @@map("businesses")
+}
+
+model PendingBusinessEdit {
+  id              String         @id @default(cuid())
+
+  // Reference to business being edited
+  business_id     String
+  business        Business       @relation(fields: [business_id], references: [id], onDelete: Cascade)
+
+  // Owner who submitted the edit
+  owner_id        String
+  owner           BusinessOwner  @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+
+  // Editable fields (only fields that owner can change)
+  description_he  String?        @db.Text
+  description_ru  String?        @db.Text
+  phone           String?
+  whatsapp_number String?
+  website_url     String?        @db.VarChar(500)
+  email           String?        @db.VarChar(255)
+  opening_hours_he String?       @db.Text
+  opening_hours_ru String?       @db.Text
+  address_he      String?
+  address_ru      String?
+
+  // Admin workflow
+  status          PendingStatus  @default(PENDING)
+  rejection_reason String?       @db.Text
+  reviewed_at     DateTime?
+  reviewed_by     String?        // Admin email who reviewed
+
+  // Metadata
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  @@index([business_id, status])
+  @@index([owner_id])
+  @@index([status, created_at])
+  @@map("pending_business_edits")
 }
 
 model PendingBusiness {
@@ -238,10 +278,16 @@ model PendingBusiness {
   submitter_email String?        // For follow-up
   submitter_phone String?
 
+  // Ownership (link to BusinessOwner if submitted from portal)
+  owner_id        String?        // BusinessOwner who submitted this
+  owner           BusinessOwner? @relation(fields: [owner_id], references: [id], onDelete: SetNull)
+
   // Admin workflow
   status          PendingStatus  @default(PENDING)
   admin_notes     String?        @db.Text
+  rejection_reason String?       @db.Text // Reason for rejection shown to business owner
   reviewed_at     DateTime?
+  reviewed_by     String?        // Admin email who reviewed
 
   // Metadata
   created_at      DateTime       @default(now())
@@ -249,6 +295,7 @@ model PendingBusiness {
 
   @@index([status, created_at])
   @@index([category_id])
+  @@index([owner_id])
   @@map("pending_businesses")
 }
 
@@ -389,8 +436,10 @@ model BusinessOwner {
   created_at      DateTime       @default(now())
   updated_at      DateTime       @updatedAt
 
-  // Relationship: One owner can manage multiple businesses
+  // Relationships: One owner can manage multiple businesses
   businesses      Business[]     @relation("business_owner")
+  pending_businesses PendingBusiness[] // Pending submissions
+  pending_edits   PendingBusinessEdit[] // Pending business edits
 
   @@index([google_id])
   @@index([email])

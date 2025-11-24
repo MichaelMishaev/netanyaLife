@@ -102,9 +102,13 @@ export async function approvePendingBusiness(pendingId: string, locale: string) 
 }
 
 /**
- * Reject a pending business
+ * Reject a pending business with reason
  */
-export async function rejectPendingBusiness(pendingId: string, locale: string) {
+export async function rejectPendingBusiness(
+  pendingId: string,
+  locale: string,
+  rejectionReason?: string
+) {
   // Check authentication
   const session = await getSession()
   if (!session) {
@@ -114,11 +118,17 @@ export async function rejectPendingBusiness(pendingId: string, locale: string) {
   try {
     await prisma.pendingBusiness.update({
       where: { id: pendingId },
-      data: { status: 'REJECTED' },
+      data: {
+        status: 'REJECTED',
+        rejection_reason: rejectionReason || null,
+        reviewed_at: new Date(),
+        reviewed_by: session.email,
+      },
     })
 
     revalidatePath(`/${locale}/admin/pending`)
     revalidatePath(`/${locale}/admin`)
+    revalidatePath(`/${locale}/business-portal`) // Revalidate owner's portal
 
     return { success: true }
   } catch (error) {
@@ -1249,5 +1259,149 @@ export async function moveBusinessesToCategory(
         ? 'שגיאה בהעברת עסקים'
         : 'Ошибка при перемещении бизнесов'
     }
+  }
+}
+
+// ============================================================================
+// PENDING BUSINESS EDITS MANAGEMENT
+// ============================================================================
+
+/**
+ * Get all pending business edits awaiting admin approval
+ */
+export async function getPendingBusinessEdits() {
+  const session = await getSession()
+  if (!session) {
+    return { error: 'Unauthorized' }
+  }
+
+  try {
+    const pendingEdits = await prisma.pendingBusinessEdit.findMany({
+      where: {
+        status: 'PENDING',
+      },
+      include: {
+        business: {
+          include: {
+            category: true,
+            subcategory: true,
+            neighborhood: true,
+          },
+        },
+        owner: {
+          select: {
+            name: true,
+            email: true,
+          },
+        },
+      },
+      orderBy: {
+        created_at: 'asc', // Oldest first (FIFO)
+      },
+    })
+
+    return { success: true, edits: pendingEdits }
+  } catch (error) {
+    console.error('Error fetching pending edits:', error)
+    return { error: 'Failed to fetch pending edits' }
+  }
+}
+
+/**
+ * Approve a pending business edit and apply changes to the business
+ */
+export async function approvePendingEdit(editId: string, locale: string) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    // Get the pending edit with business data
+    const pendingEdit = await prisma.pendingBusinessEdit.findUnique({
+      where: { id: editId },
+      include: {
+        business: true,
+      },
+    })
+
+    if (!pendingEdit) {
+      return { success: false, error: 'Pending edit not found' }
+    }
+
+    if (pendingEdit.status !== 'PENDING') {
+      return { success: false, error: 'Edit has already been reviewed' }
+    }
+
+    // Update the business with the approved changes
+    await prisma.business.update({
+      where: { id: pendingEdit.business_id },
+      data: {
+        description_he: pendingEdit.description_he,
+        description_ru: pendingEdit.description_ru,
+        phone: pendingEdit.phone,
+        whatsapp_number: pendingEdit.whatsapp_number,
+        website_url: pendingEdit.website_url,
+        email: pendingEdit.email,
+        opening_hours_he: pendingEdit.opening_hours_he,
+        opening_hours_ru: pendingEdit.opening_hours_ru,
+        address_he: pendingEdit.address_he,
+        address_ru: pendingEdit.address_ru,
+        updated_at: new Date(),
+      },
+    })
+
+    // Mark the edit as approved
+    await prisma.pendingBusinessEdit.update({
+      where: { id: editId },
+      data: {
+        status: 'APPROVED',
+        reviewed_at: new Date(),
+        reviewed_by: session.email,
+      },
+    })
+
+    revalidatePath(`/${locale}/admin/pending-edits`)
+    revalidatePath(`/${locale}/business-portal`)
+    revalidatePath(`/${locale}/business/${pendingEdit.business.slug_he}`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error approving edit:', error)
+    return { success: false, error: 'Failed to approve edit' }
+  }
+}
+
+/**
+ * Reject a pending business edit with a reason
+ */
+export async function rejectPendingEdit(
+  editId: string,
+  locale: string,
+  rejectionReason?: string
+) {
+  const session = await getSession()
+  if (!session) {
+    return { success: false, error: 'Unauthorized' }
+  }
+
+  try {
+    await prisma.pendingBusinessEdit.update({
+      where: { id: editId },
+      data: {
+        status: 'REJECTED',
+        rejection_reason: rejectionReason || null,
+        reviewed_at: new Date(),
+        reviewed_by: session.email,
+      },
+    })
+
+    revalidatePath(`/${locale}/admin/pending-edits`)
+    revalidatePath(`/${locale}/business-portal`)
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error rejecting edit:', error)
+    return { success: false, error: 'Failed to reject edit' }
   }
 }

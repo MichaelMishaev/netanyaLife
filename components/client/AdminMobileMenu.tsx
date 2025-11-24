@@ -8,19 +8,21 @@ interface AdminMobileMenuProps {
   locale: string
   pendingBusinessCount: number
   pendingCategoryRequestCount: number
+  pendingEditsCount: number
 }
 
-export default function AdminMobileMenu({ 
-  locale, 
+export default function AdminMobileMenu({
+  locale,
   pendingBusinessCount,
-  pendingCategoryRequestCount 
+  pendingCategoryRequestCount,
+  pendingEditsCount
 }: AdminMobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
   const pathname = usePathname()
 
   const navItems = [
-    { 
-      href: `/${locale}/admin`, 
+    {
+      href: `/${locale}/admin`,
       label: locale === 'he' ? 'ראשי' : 'Главная',
       badge: 0
     },
@@ -28,6 +30,11 @@ export default function AdminMobileMenu({
       href: `/${locale}/admin/pending`,
       label: locale === 'he' ? 'ממתינים לאישור' : 'Ожидают одобрения',
       badge: pendingBusinessCount
+    },
+    {
+      href: `/${locale}/admin/pending-edits`,
+      label: locale === 'he' ? 'עריכות ממתינות' : 'Ожидающие правки',
+      badge: pendingEditsCount
     },
     {
       href: `/${locale}/admin/categories`,
@@ -70,7 +77,7 @@ export default function AdminMobileMenu({
         aria-label={locale === 'he' ? 'תפריט ניווט' : 'Меню навигации'}
       >
         {/* Notification dot if there are pending items */}
-        {(pendingBusinessCount > 0 || pendingCategoryRequestCount > 0) && (
+        {(pendingBusinessCount > 0 || pendingCategoryRequestCount > 0 || pendingEditsCount > 0) && (
           <span className="absolute right-1 top-1 h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-white" />
         )}
         <span
@@ -151,7 +158,11 @@ export default function AdminMobileMenu({
                 <span>{item.label}</span>
                 {item.badge > 0 && (
                   <span className={`flex h-6 min-w-[1.5rem] items-center justify-center rounded-full px-2 text-xs font-bold text-white ${
-                    item.href.includes('pending') ? 'bg-red-500' : 'bg-orange-500'
+                    item.href.includes('pending-edits')
+                      ? 'bg-blue-500'
+                      : item.href.includes('pending')
+                        ? 'bg-red-500'
+                        : 'bg-orange-500'
                   }`}>
                     {item.badge}
                   </span>

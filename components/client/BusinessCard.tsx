@@ -34,9 +34,10 @@ interface BusinessCardProps {
   }
   locale: string
   showSubcategory?: boolean
+  showNeighborhoodBadge?: boolean
 }
 
-export default function BusinessCard({ business, locale, showSubcategory = false }: BusinessCardProps) {
+export default function BusinessCard({ business, locale, showSubcategory = false, showNeighborhoodBadge = false }: BusinessCardProps) {
   const t = useTranslations('business')
   const tResults = useTranslations('results')
 
@@ -137,14 +138,23 @@ export default function BusinessCard({ business, locale, showSubcategory = false
           )}
         </div>
 
-        {/* Location & Serves All City */}
+        {/* Location & Serves All City - Enhanced when showNeighborhoodBadge is true */}
         <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-gray-600">
-          <div className="flex items-center gap-1">
-            <svg className="h-3 w-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
-            </svg>
-            <span>{neighborhoodName}</span>
-          </div>
+          {showNeighborhoodBadge ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-blue-100 to-cyan-100 px-2.5 py-1 text-xs font-bold text-blue-800 ring-2 ring-blue-300">
+              <svg className="h-3.5 w-3.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+              </svg>
+              <span>{neighborhoodName}</span>
+            </span>
+          ) : (
+            <div className="flex items-center gap-1">
+              <svg className="h-3 w-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+              </svg>
+              <span>{neighborhoodName}</span>
+            </div>
+          )}
           {business.serves_all_city && (
             <>
               <span className="text-gray-400">•</span>

@@ -173,7 +173,10 @@ export default async function SearchResultsPage({
 
   // Initialize search results variables
   let businesses: Awaited<ReturnType<typeof getSearchResults>> = []
-  let autoExpandedSubcategory = false
+  let primaryFallbackBusinesses: Awaited<ReturnType<typeof getSearchResults>> = []
+  let secondaryFallbackBusinesses: Awaited<ReturnType<typeof getSearchResults>> = []
+  let hasPrimaryFallback = false
+  let hasSecondaryFallback = false
   let totalCount = 0
 
   try {
@@ -186,22 +189,33 @@ export default async function SearchResultsPage({
       locale,
     })
 
-    // If no results with subcategory, auto-expand to show all category results
-    if (businesses.length === 0 && subcategory) {
-      businesses = await getSearchResults({
+    // If no results with subcategory in neighborhood, implement two-tier fallback
+    if (businesses.length === 0 && subcategory && neighborhood) {
+      // PRIMARY FALLBACK: Same subcategory + All city (intent priority)
+      primaryFallbackBusinesses = await getSearchResults({
         categoryId: category.id,
-        subcategoryId: undefined, // Remove subcategory filter
-        neighborhoodId: neighborhood?.id,
+        subcategoryId: subcategory.id, // Keep subcategory
+        neighborhoodId: undefined, // Expand to all city
         cityId: city.id,
         locale,
       })
-      autoExpandedSubcategory = businesses.length > 0
+      hasPrimaryFallback = primaryFallbackBusinesses.length > 0
+
+      // SECONDARY FALLBACK: Other subcategories + Same neighborhood (location priority)
+      secondaryFallbackBusinesses = await getSearchResults({
+        categoryId: category.id,
+        subcategoryId: undefined, // Remove subcategory filter
+        neighborhoodId: neighborhood.id, // Keep neighborhood
+        cityId: city.id,
+        locale,
+      })
+      hasSecondaryFallback = secondaryFallbackBusinesses.length > 0
     }
 
     // Get total count (with current filters)
     totalCount = await getSearchResultsCount({
       categoryId: category.id,
-      subcategoryId: autoExpandedSubcategory ? undefined : subcategory?.id,
+      subcategoryId: subcategory?.id,
       neighborhoodId: neighborhood?.id,
       cityId: city.id,
     })
@@ -258,7 +272,7 @@ export default async function SearchResultsPage({
         </h1>
 
         {/* Subcategory Badge */}
-        {subcategoryName && !autoExpandedSubcategory && (
+        {subcategoryName && !hasPrimaryFallback && !hasSecondaryFallback && (
           <div className="mb-2 flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-100 px-3 py-1 text-sm font-medium text-primary-700">
               <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -269,73 +283,111 @@ export default async function SearchResultsPage({
           </div>
         )}
 
-        {!autoExpandedSubcategory && (
+        {!hasPrimaryFallback && !hasSecondaryFallback && (
           <p className="text-sm text-gray-600 md:text-base">
             {t('results', { count: totalCount })}
           </p>
         )}
       </div>
 
-      {/* Auto-Expanded Search Banner - REDESIGNED FOR CLARITY */}
-      {autoExpandedSubcategory && subcategoryName && (
-        <div className="mb-6 overflow-hidden rounded-2xl border-2 border-blue-300 bg-white shadow-lg">
-          {/* Header Bar - What User Searched */}
-          <div className="bg-gradient-to-r from-red-50 to-red-100 px-6 py-4">
+      {/* Two-Tier Fallback System */}
+      {(hasPrimaryFallback || hasSecondaryFallback) && subcategoryName && neighborhood && (
+        <>
+          {/* Alert Banner - No results in original search */}
+          <div className="mb-6 rounded-xl border-2 border-red-200 bg-gradient-to-r from-red-50 to-pink-50 px-5 py-4">
             <div className="flex items-center gap-3">
-              <div className="flex-shrink-0 rounded-full bg-red-100 p-2">
-                <svg className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-red-800">
-                  {locale === 'he' ? 'חיפשת:' : 'Вы искали:'}
-                </p>
-                <p className="text-lg font-bold text-red-900">
-                  {subcategoryName}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Main Content - What We're Showing Instead */}
-          <div className="px-6 py-5">
-            <div className="mb-4 flex items-start gap-3">
-              <div className="flex-shrink-0 rounded-full bg-blue-100 p-2">
-                <svg className="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="mb-3 text-base font-bold text-gray-900">
+                <p className="text-sm font-semibold text-red-900">
                   {locale === 'he'
                     ? `לא נמצאו תוצאות עבור "${subcategoryName}" ב${neighborhoodName}`
                     : `Не найдено результатов для "${subcategoryName}" в ${neighborhoodName}`}
                 </p>
-                <p className="mb-2 text-sm text-gray-700">
-                  {locale === 'he'
-                    ? `מציג במקום ${businesses.length} עסקים מסוגים אחרים בקטגוריית:`
-                    : `Показано вместо этого ${businesses.length} предприятий других типов в категории:`}
-                </p>
-                <p className="mb-3 text-lg font-extrabold text-blue-700">
-                  {categoryName} • {neighborhoodName}
-                </p>
               </div>
             </div>
-
-            {/* Action Button */}
-            <Link
-              href={`/${locale}`}
-              className="block rounded-lg border-2 border-primary-600 bg-primary-600 px-5 py-3 text-center font-bold text-white shadow-sm transition hover:bg-primary-700 active:scale-[0.98]"
-            >
-              {locale === 'he' ? '🔍 חיפוש חדש' : '🔍 Новый поиск'}
-            </Link>
           </div>
-        </div>
+
+          {/* PRIMARY FALLBACK: Same subcategory + All city */}
+          {hasPrimaryFallback && (
+            <div className="mb-8">
+              {/* Section Header */}
+              <div className="mb-4 flex items-center gap-3 rounded-lg border-2 border-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50 px-5 py-4">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-lg font-bold text-blue-900">
+                    {subcategoryName} {locale === 'he' ? 'בכל נתניה' : 'во всей Нетании'}
+                  </p>
+                  <p className="text-sm text-blue-700">
+                    {locale === 'he'
+                      ? `מציג ${primaryFallbackBusinesses.length} תוצאות`
+                      : `Показано ${primaryFallbackBusinesses.length} результатов`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Primary Results Grid */}
+              <SearchResultsClient
+                businesses={primaryFallbackBusinesses}
+                locale={locale}
+                showSubcategories={false}
+                showNeighborhoodBadges={true}
+              />
+            </div>
+          )}
+
+          {/* SECONDARY FALLBACK: Other subcategories + Same neighborhood */}
+          {hasSecondaryFallback && (
+            <details className="group mb-8" open={!hasPrimaryFallback}>
+              <summary className="mb-4 flex cursor-pointer items-center gap-3 rounded-lg border-2 border-purple-300 bg-gradient-to-r from-purple-50 to-pink-50 px-5 py-4 transition hover:bg-purple-100">
+                <div className="flex-shrink-0">
+                  <svg className="h-6 w-6 text-purple-600" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <p className="text-lg font-bold text-purple-900">
+                    {locale === 'he'
+                      ? `עסקים נוספים בקטגוריית "${categoryName}" ב${neighborhoodName}`
+                      : `Дополнительные предприятия в категории "${categoryName}" в ${neighborhoodName}`}
+                  </p>
+                  <p className="text-sm text-purple-700">
+                    {locale === 'he'
+                      ? `${secondaryFallbackBusinesses.length} תוצאות זמינות`
+                      : `${secondaryFallbackBusinesses.length} результатов доступно`}
+                  </p>
+                </div>
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-purple-600 transition group-open:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </summary>
+
+              {/* Secondary Results Grid */}
+              <div className="rounded-lg border-2 border-purple-200 bg-white p-4">
+                <SearchResultsClient
+                  businesses={secondaryFallbackBusinesses}
+                  locale={locale}
+                  showSubcategories={true}
+                  showNeighborhoodBadges={false}
+                />
+              </div>
+            </details>
+          )}
+        </>
       )}
 
-      {/* No Results - Improved Empty State */}
-      {businesses.length === 0 && (
+      {/* No Results - Improved Empty State - Only show if no fallback results either */}
+      {businesses.length === 0 && !hasPrimaryFallback && !hasSecondaryFallback && (
         <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 py-12 text-center sm:p-12 sm:py-16">
           {/* Icon */}
           <div className="mb-6 rounded-full bg-gray-100 p-6">
@@ -390,12 +442,13 @@ export default async function SearchResultsPage({
         </div>
       )}
 
-      {/* Results with Filtering/Sorting */}
-      {businesses.length > 0 && (
+      {/* Normal Results with Filtering/Sorting (when not in fallback mode) */}
+      {businesses.length > 0 && !hasPrimaryFallback && !hasSecondaryFallback && (
         <SearchResultsClient
           businesses={businesses}
           locale={locale}
-          showSubcategories={autoExpandedSubcategory}
+          showSubcategories={false}
+          showNeighborhoodBadges={false}
         />
       )}
     </div>

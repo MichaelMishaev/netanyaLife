@@ -365,11 +365,12 @@ export default function AdminBusinessEditForm({
               {text.website}
             </label>
             <input
-              type="url"
+              type="text"
               name="websiteUrl"
               value={formData.websiteUrl}
               onChange={handleChange}
               dir="ltr"
+              placeholder="example.com or https://example.com"
               className="w-full rounded-lg border px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>

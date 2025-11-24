@@ -37,21 +37,6 @@ export async function getOwnerBusinesses() {
       },
     })
 
-    // Fetch pending businesses (submitted by owner but not yet approved)
-    const pendingBusinesses = await prisma.pendingBusiness.findMany({
-      where: {
-        submitter_email: session.email,
-        status: 'PENDING',
-      },
-      include: {
-        category: true,
-        neighborhood: true,
-      },
-      orderBy: {
-        created_at: 'desc',
-      },
-    })
-
     // Calculate average rating for approved businesses
     const businessesWithStats = businesses.map((business) => {
       const totalReviews = business.reviews.length
@@ -81,38 +66,7 @@ export async function getOwnerBusinesses() {
       }
     })
 
-    // Format pending businesses
-    const pendingWithInfo = pendingBusinesses.map((pending) => ({
-      id: pending.id,
-      name_he: pending.name,
-      name_ru: null,
-      slug_he: null,
-      category: {
-        name_he: pending.category?.name_he || '',
-        name_ru: pending.category?.name_ru || '',
-      },
-      neighborhood: {
-        name_he: pending.neighborhood.name_he,
-        name_ru: pending.neighborhood.name_ru,
-      },
-      is_visible: false,
-      is_verified: false,
-      averageRating: 0,
-      totalReviews: 0,
-      status: 'pending' as const,
-      created_at: pending.created_at,
-    }))
-
-    // Combine approved and pending, sort by created_at desc
-    const allBusinesses = [...businessesWithStats, ...pendingWithInfo].sort(
-      (a, b) => {
-        const aDate = 'created_at' in a ? new Date(a.created_at).getTime() : 0
-        const bDate = 'created_at' in b ? new Date(b.created_at).getTime() : 0
-        return bDate - aDate
-      }
-    )
-
-    return { success: true, businesses: allBusinesses }
+    return { success: true, businesses: businessesWithStats }
   } catch (error) {
     console.error('Error fetching owner businesses:', error)
     return { error: 'Failed to fetch businesses' }
@@ -149,7 +103,16 @@ export async function getBusinessForEdit(businessId: string) {
       return { error: 'You do not have permission to edit this business' }
     }
 
-    return { success: true, business }
+    // Check if there's already a pending edit
+    const pendingEdit = await prisma.pendingBusinessEdit.findFirst({
+      where: {
+        business_id: businessId,
+        owner_id: session.userId,
+        status: 'PENDING',
+      },
+    })
+
+    return { success: true, business, pendingEdit }
   } catch (error) {
     console.error('Error fetching business for edit:', error)
     return { error: 'Failed to fetch business' }
@@ -157,7 +120,7 @@ export async function getBusinessForEdit(businessId: string) {
 }
 
 /**
- * Update business details (only editable fields)
+ * Update business details (creates pending edit for admin approval)
  */
 export async function updateBusinessDetails(
   businessId: string,
@@ -200,31 +163,61 @@ export async function updateBusinessDetails(
       return { error: 'At least one contact method (phone or WhatsApp) is required' }
     }
 
-    // Update business (only editable fields)
-    await prisma.business.update({
-      where: { id: businessId },
-      data: {
-        description_he: data.description_he,
-        description_ru: data.description_ru,
-        phone: data.phone || null,
-        whatsapp_number: data.whatsapp_number || null,
-        website_url: data.website_url || null,
-        email: data.email || null,
-        opening_hours_he: data.opening_hours_he || null,
-        opening_hours_ru: data.opening_hours_ru || null,
-        address_he: data.address_he || null,
-        address_ru: data.address_ru || null,
-        updated_at: new Date(),
+    // Check if there's already a pending edit for this business
+    const existingPendingEdit = await prisma.pendingBusinessEdit.findFirst({
+      where: {
+        business_id: businessId,
+        owner_id: session.userId,
+        status: 'PENDING',
       },
     })
 
-    revalidatePath(`/[locale]/business-portal`)
-    revalidatePath(`/[locale]/business/${business.owner_id}`)
+    if (existingPendingEdit) {
+      // Update existing pending edit
+      await prisma.pendingBusinessEdit.update({
+        where: { id: existingPendingEdit.id },
+        data: {
+          description_he: data.description_he,
+          description_ru: data.description_ru,
+          phone: data.phone || null,
+          whatsapp_number: data.whatsapp_number || null,
+          website_url: data.website_url || null,
+          email: data.email || null,
+          opening_hours_he: data.opening_hours_he || null,
+          opening_hours_ru: data.opening_hours_ru || null,
+          address_he: data.address_he || null,
+          address_ru: data.address_ru || null,
+          updated_at: new Date(),
+        },
+      })
+    } else {
+      // Create new pending edit
+      await prisma.pendingBusinessEdit.create({
+        data: {
+          business_id: businessId,
+          owner_id: session.userId,
+          description_he: data.description_he,
+          description_ru: data.description_ru,
+          phone: data.phone || null,
+          whatsapp_number: data.whatsapp_number || null,
+          website_url: data.website_url || null,
+          email: data.email || null,
+          opening_hours_he: data.opening_hours_he || null,
+          opening_hours_ru: data.opening_hours_ru || null,
+          address_he: data.address_he || null,
+          address_ru: data.address_ru || null,
+          status: 'PENDING',
+        },
+      })
+    }
 
-    return { success: true }
+    revalidatePath(`/[locale]/business-portal`)
+    revalidatePath(`/[locale]/admin/pending-edits`)
+
+    return { success: true, isPending: true }
   } catch (error) {
-    console.error('Error updating business:', error)
-    return { error: 'Failed to update business' }
+    console.error('Error creating pending edit:', error)
+    return { error: 'Failed to submit edit for approval' }
   }
 }
 
@@ -357,6 +350,7 @@ export async function createOwnerBusiness(data: {
         serves_all_city: data.serves_all_city || false,
         submitter_email: owner?.email || null,
         submitter_phone: owner?.phone || null,
+        owner_id: session.userId, // Link to business owner for tracking
         status: 'PENDING',
         language: 'he', // Hebrew as default
       },
@@ -369,5 +363,205 @@ export async function createOwnerBusiness(data: {
   } catch (error) {
     console.error('Error creating pending business:', error)
     return { error: 'Failed to create business' }
+  }
+}
+
+/**
+ * Get rejected pending business for resubmission (verify ownership)
+ */
+export async function getRejectedPendingBusiness(pendingId: string) {
+  try {
+    const session = await getOwnerSession()
+
+    if (!session) {
+      return { error: 'Unauthorized' }
+    }
+
+    const pendingBusiness = await prisma.pendingBusiness.findUnique({
+      where: { id: pendingId },
+      include: {
+        category: true,
+        subcategory: true,
+        neighborhood: true,
+      },
+    })
+
+    if (!pendingBusiness) {
+      return { error: 'Business not found' }
+    }
+
+    // Verify ownership
+    if (pendingBusiness.owner_id !== session.userId) {
+      return { error: 'You do not have permission to edit this business' }
+    }
+
+    // Only allow editing rejected businesses
+    if (pendingBusiness.status !== 'REJECTED') {
+      return { error: 'This business is not rejected' }
+    }
+
+    return { success: true, business: pendingBusiness }
+  } catch (error) {
+    console.error('Error fetching rejected pending business:', error)
+    return { error: 'Failed to fetch business' }
+  }
+}
+
+/**
+ * Resubmit a rejected pending business with updates
+ */
+export async function resubmitPendingBusiness(
+  pendingId: string,
+  data: {
+    name?: string
+    description?: string
+    category_id?: string
+    subcategory_id?: string
+    neighborhood_id?: string
+    phone?: string
+    whatsapp_number?: string
+    website_url?: string
+    email?: string
+    opening_hours?: string
+    address?: string
+    serves_all_city?: boolean
+  }
+) {
+  try {
+    const session = await getOwnerSession()
+
+    if (!session) {
+      return { error: 'Unauthorized' }
+    }
+
+    // Verify ownership and status
+    const pendingBusiness = await prisma.pendingBusiness.findUnique({
+      where: { id: pendingId },
+      select: { owner_id: true, status: true },
+    })
+
+    if (!pendingBusiness) {
+      return { error: 'Business not found' }
+    }
+
+    if (pendingBusiness.owner_id !== session.userId) {
+      return { error: 'You do not have permission to edit this business' }
+    }
+
+    if (pendingBusiness.status !== 'REJECTED') {
+      return { error: 'This business is not rejected' }
+    }
+
+    // Validation: At least one of phone OR whatsapp_number must be provided
+    if (!data.phone && !data.whatsapp_number) {
+      return { error: 'At least one contact method (phone or WhatsApp) is required' }
+    }
+
+    // Update pending business and reset status to PENDING
+    await prisma.pendingBusiness.update({
+      where: { id: pendingId },
+      data: {
+        name: data.name,
+        description: data.description || null,
+        category_id: data.category_id,
+        subcategory_id: data.subcategory_id || null,
+        neighborhood_id: data.neighborhood_id,
+        phone: data.phone || null,
+        whatsapp_number: data.whatsapp_number || null,
+        website_url: data.website_url || null,
+        email: data.email || null,
+        opening_hours: data.opening_hours || null,
+        address: data.address || null,
+        serves_all_city: data.serves_all_city || false,
+        status: 'PENDING', // Reset to pending
+        rejection_reason: null, // Clear rejection reason
+        reviewed_at: null, // Clear review timestamp
+        reviewed_by: null, // Clear reviewer
+        updated_at: new Date(),
+      },
+    })
+
+    revalidatePath('/[locale]/business-portal')
+    revalidatePath('/[locale]/admin/pending')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error resubmitting pending business:', error)
+    return { error: 'Failed to resubmit business' }
+  }
+}
+
+/**
+ * Get pending edits for owner's businesses (for notification/status display)
+ */
+export async function getOwnerPendingEdits() {
+  try {
+    const session = await getOwnerSession()
+
+    if (!session) {
+      return { error: 'Unauthorized' }
+    }
+
+    const pendingEdits = await prisma.pendingBusinessEdit.findMany({
+      where: {
+        owner_id: session.userId,
+        status: { in: ['PENDING', 'REJECTED'] }, // Include pending and rejected
+      },
+      include: {
+        business: {
+          select: {
+            id: true,
+            name_he: true,
+            name_ru: true,
+          },
+        },
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    })
+
+    return { success: true, edits: pendingEdits }
+  } catch (error) {
+    console.error('Error fetching pending edits:', error)
+    return { error: 'Failed to fetch pending edits' }
+  }
+}
+
+/**
+ * Dismiss a rejected edit (remove it from the list)
+ */
+export async function dismissRejectedEdit(businessId: string) {
+  try {
+    const session = await getOwnerSession()
+
+    if (!session) {
+      return { error: 'Unauthorized' }
+    }
+
+    // Find the rejected edit for this business
+    const rejectedEdit = await prisma.pendingBusinessEdit.findFirst({
+      where: {
+        business_id: businessId,
+        owner_id: session.userId,
+        status: 'REJECTED',
+      },
+    })
+
+    if (!rejectedEdit) {
+      return { error: 'No rejected edit found' }
+    }
+
+    // Delete the rejected edit record
+    await prisma.pendingBusinessEdit.delete({
+      where: { id: rejectedEdit.id },
+    })
+
+    revalidatePath('/[locale]/business-portal')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error dismissing rejected edit:', error)
+    return { error: 'Failed to dismiss rejected edit' }
   }
 }

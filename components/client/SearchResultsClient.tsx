@@ -8,12 +8,14 @@ interface SearchResultsClientProps {
   businesses: any[]
   locale: string
   showSubcategories?: boolean
+  showNeighborhoodBadges?: boolean
 }
 
 export default function SearchResultsClient({
   businesses,
   locale,
   showSubcategories = false,
+  showNeighborhoodBadges = false,
 }: SearchResultsClientProps) {
   // Use 'default' to preserve server ordering initially (prevents hydration errors)
   const [sortOption, setSortOption] = useState<SortOption>('rating-high')
@@ -217,6 +219,7 @@ export default function SearchResultsClient({
                 business={business}
                 locale={locale}
                 showSubcategory={showSubcategories}
+                showNeighborhoodBadge={showNeighborhoodBadges}
               />
             </div>
           ))}
