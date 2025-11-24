@@ -202,15 +202,15 @@ export default function OwnerAddBusinessForm({
   // Show success message
   if (success) {
     return (
-      <div className="rounded-lg border border-green-200 bg-green-50 p-8 text-center">
-        <div className="mb-4 text-6xl">✓</div>
-        <h2 className="mb-2 text-2xl font-bold text-green-800">
-          {locale === 'he' ? 'העסק נוסף בהצלחה!' : 'Бизнес успешно добавлен!'}
+      <div className="rounded-lg border border-blue-200 bg-blue-50 p-8 text-center">
+        <div className="mb-4 text-6xl">⏳</div>
+        <h2 className="mb-2 text-2xl font-bold text-blue-800">
+          {locale === 'he' ? 'העסק נשלח לאישור!' : 'Бизнес отправлен на одобрение!'}
         </h2>
-        <p className="text-green-700">
+        <p className="text-blue-700">
           {locale === 'he'
-            ? 'העסק שלך נוסף ויופיע בלוח הבקרה שלך.'
-            : 'Ваш бизнес добавлен и появится в вашей панели управления.'}
+            ? 'העסק שלך נשלח לאישור מנהל ויופיע באתר לאחר אישור.'
+            : 'Ваш бизнес отправлен на одобрение администратора и появится на сайте после одобрения.'}
         </p>
       </div>
     )

@@ -252,7 +252,7 @@ export async function getBusinessStats(businessId: string) {
 }
 
 /**
- * Create a new business directly for the owner (bypasses pending approval)
+ * Create a new business for the owner (requires admin approval)
  */
 export async function createOwnerBusiness(data: {
   name_he: string
@@ -285,45 +285,41 @@ export async function createOwnerBusiness(data: {
       return { error: 'At least one contact method (phone or WhatsApp) is required' }
     }
 
-    // Generate unique slugs
-    const slug_he = await generateUniqueBusinessSlug(data.name_he, 'he')
-    const slug_ru = data.name_ru
-      ? await generateUniqueBusinessSlug(data.name_ru, 'ru')
-      : null
+    // Get owner details for submitter info
+    const owner = await prisma.businessOwner.findUnique({
+      where: { id: session.userId },
+      select: { email: true, phone: true },
+    })
 
-    // Create business directly (no pending approval needed)
-    const business = await prisma.business.create({
+    // Create pending business (requires admin approval)
+    // NOTE: PendingBusiness uses single-language fields, not bilingual
+    const pendingBusiness = await prisma.pendingBusiness.create({
       data: {
-        name_he: data.name_he,
-        name_ru: data.name_ru || null,
-        slug_he,
-        slug_ru,
-        description_he: data.description_he || null,
-        description_ru: data.description_ru || null,
-        city_id: data.city_id,
-        neighborhood_id: data.neighborhood_id,
+        name: data.name_he, // Primary name (Hebrew)
+        description: data.description_he || null,
         category_id: data.category_id,
         subcategory_id: data.subcategory_id || null,
+        neighborhood_id: data.neighborhood_id,
         phone: data.phone || null,
         whatsapp_number: data.whatsapp_number || null,
         website_url: data.website_url || null,
         email: data.email || null,
-        opening_hours_he: data.opening_hours_he || null,
-        opening_hours_ru: data.opening_hours_ru || null,
-        address_he: data.address_he || null,
-        address_ru: data.address_ru || null,
+        opening_hours: data.opening_hours_he || null,
+        address: data.address_he || null,
         serves_all_city: data.serves_all_city || false,
-        owner_id: session.userId, // Auto-link to logged-in owner
-        is_visible: true, // Immediately visible
-        is_verified: false, // Admin can verify later
+        submitter_email: owner?.email || null,
+        submitter_phone: owner?.phone || null,
+        status: 'PENDING',
+        language: 'he', // Hebrew as default
       },
     })
 
     revalidatePath('/[locale]/business-portal')
+    revalidatePath('/admin/pending')
 
-    return { success: true, businessId: business.id }
+    return { success: true, pendingBusinessId: pendingBusiness.id }
   } catch (error) {
-    console.error('Error creating business:', error)
+    console.error('Error creating pending business:', error)
     return { error: 'Failed to create business' }
   }
 }
