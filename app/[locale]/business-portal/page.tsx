@@ -93,13 +93,7 @@ export default async function BusinessPortalDashboard({ params }: PageProps) {
             {businesses.map((business) => (
               <div
                 key={business.id}
-                className={`rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg ${
-                  business.status === 'pending'
-                    ? 'border-2 border-yellow-300'
-                    : business.status === 'rejected'
-                      ? 'border-2 border-red-300'
-                      : ''
-                }`}
+                className="rounded-lg bg-white p-6 shadow-md transition hover:shadow-lg"
               >
                 <div className="mb-4">
                   <h3 className="text-xl font-bold text-gray-900">
@@ -116,9 +110,8 @@ export default async function BusinessPortalDashboard({ params }: PageProps) {
                   </p>
                 </div>
 
-                {/* Stats - Only show for approved businesses */}
-                {business.status === 'approved' ? (
-                  <>
+                {/* Stats */}
+                <>
                     <div className="mb-4 grid grid-cols-2 gap-4 rounded-lg bg-gray-50 p-4">
                       <div>
                         <p className="text-sm text-gray-600">{t('reviews')}</p>
@@ -209,62 +202,15 @@ export default async function BusinessPortalDashboard({ params }: PageProps) {
                       </div>
                     )}
                   </>
-                ) : business.status === 'pending' ? (
-                  <div className="mb-4 rounded-lg bg-yellow-50 p-4 text-center">
-                    <p className="text-sm font-medium text-yellow-800">
-                      ⏳{' '}
-                      {locale === 'he'
-                        ? 'ממתין לאישור מנהל'
-                        : 'Ожидает одобрения администратора'}
-                    </p>
-                  </div>
-                ) : business.status === 'rejected' ? (
-                  <div className="mb-4 rounded-lg bg-red-50 p-4">
-                    <p className="mb-2 text-center text-sm font-bold text-red-800">
-                      ✕{' '}
-                      {locale === 'he'
-                        ? 'נדחה על ידי המנהל'
-                        : 'Отклонено администратором'}
-                    </p>
-                    {business.rejection_reason && (
-                      <div className="mt-3 rounded border border-red-200 bg-white p-3">
-                        <p className="mb-1 text-xs font-medium text-red-700">
-                          {locale === 'he' ? 'סיבת הדחייה:' : 'Причина отклонения:'}
-                        </p>
-                        <p
-                          className="text-sm text-gray-700"
-                          dir={locale === 'he' ? 'rtl' : 'ltr'}
-                        >
-                          {business.rejection_reason}
-                        </p>
-                      </div>
-                    )}
-                    {business.reviewed_at && (
-                      <p className="mt-2 text-center text-xs text-gray-500">
-                        {new Date(business.reviewed_at).toLocaleDateString(locale)}
-                      </p>
-                    )}
-                  </div>
-                ) : null}
 
                 {/* Badges */}
                 <div className="mb-4 flex flex-wrap gap-2">
-                  {business.status === 'pending' && (
-                    <span className="rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-800">
-                      ⏳ {locale === 'he' ? 'ממתין לאישור' : 'Ожидает одобрения'}
-                    </span>
-                  )}
-                  {business.status === 'rejected' && (
-                    <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800">
-                      ✕ {locale === 'he' ? 'נדחה' : 'Отклонено'}
-                    </span>
-                  )}
-                  {business.status === 'approved' && businessesWithPendingEdits.has(business.id) && (
+                  {businessesWithPendingEdits.has(business.id) && (
                     <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
                       ⏳ {locale === 'he' ? 'עדכונים ממתינים' : 'Обновления ожидают'}
                     </span>
                   )}
-                  {business.status === 'approved' && rejectedEditsMap.has(business.id) && (
+                  {rejectedEditsMap.has(business.id) && (
                     <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800">
                       ❌ {locale === 'he' ? 'עדכונים נדחו' : 'Обновления отклонены'}
                     </span>
@@ -274,7 +220,7 @@ export default async function BusinessPortalDashboard({ params }: PageProps) {
                       {locale === 'he' ? '✓ מאומת' : '✓ Проверен'}
                     </span>
                   )}
-                  {business.status === 'approved' && !business.is_visible && (
+                  {!business.is_visible && (
                     <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800">
                       {locale === 'he' ? 'מוסתר' : 'Скрыт'}
                     </span>
@@ -283,36 +229,19 @@ export default async function BusinessPortalDashboard({ params }: PageProps) {
 
                 {/* Actions */}
                 <div className="flex gap-2">
-                  {business.status === 'approved' ? (
-                    <>
-                      <Link
-                        href={`/${locale}/business-portal/business/${business.id}`}
-                        className="flex-1 rounded-lg bg-primary-600 px-4 py-2 text-center text-sm font-medium text-white transition hover:bg-primary-700"
-                      >
-                        {locale === 'he' ? 'ערוך' : 'Редактировать'}
-                      </Link>
-                      <Link
-                        href={`/${locale}/business/${business.slug_he}`}
-                        className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 transition hover:bg-gray-50"
-                        target="_blank"
-                      >
-                        {locale === 'he' ? 'צפה' : 'Просмотр'}
-                      </Link>
-                    </>
-                  ) : business.status === 'rejected' ? (
-                    <Link
-                      href={`/${locale}/business-portal/resubmit/${business.id}`}
-                      className="flex-1 rounded-lg bg-red-600 px-4 py-2 text-center text-sm font-medium text-white transition hover:bg-red-700"
-                    >
-                      {locale === 'he' ? 'ערוך ושלח שוב' : 'Редактировать и отправить снова'}
-                    </Link>
-                  ) : (
-                    <div className="flex-1 rounded-lg border border-gray-300 bg-gray-50 px-4 py-2 text-center text-sm font-medium text-gray-400">
-                      {locale === 'he'
-                        ? 'פעולות יהיו זמינות לאחר אישור'
-                        : 'Действия будут доступны после одобрения'}
-                    </div>
-                  )}
+                  <Link
+                    href={`/${locale}/business-portal/business/${business.id}`}
+                    className="flex-1 rounded-lg bg-primary-600 px-4 py-2 text-center text-sm font-medium text-white transition hover:bg-primary-700"
+                  >
+                    {locale === 'he' ? 'ערוך' : 'Редактировать'}
+                  </Link>
+                  <Link
+                    href={`/${locale}/business/${business.slug_he}`}
+                    className="flex-1 rounded-lg border border-gray-300 px-4 py-2 text-center text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                    target="_blank"
+                  >
+                    {locale === 'he' ? 'צפה' : 'Просмотр'}
+                  </Link>
                 </div>
               </div>
             ))}
