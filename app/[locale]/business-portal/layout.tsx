@@ -56,9 +56,14 @@ export default async function BusinessPortalLayout({ children, params }: LayoutP
                 href={`/${locale}`}
                 className="flex items-center gap-2 text-primary-600 transition hover:text-primary-700"
               >
-                <svg className="h-7 w-7" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="h-6 w-6 sm:h-7 sm:w-7" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                 </svg>
+                {/* Mobile: Short brand name */}
+                <span className="text-base font-bold sm:hidden">
+                  {isRTL ? 'נתניה לוקאל' : 'Netanya'}
+                </span>
+                {/* Desktop: Full brand with subtitle */}
                 <div className="hidden flex-col sm:flex">
                   <span className="text-lg font-bold leading-tight">
                     {isRTL ? 'נתניה לוקאל' : 'Netanya Local'}
