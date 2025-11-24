@@ -20,18 +20,10 @@ export default function PendingBusinessCard({
   const [isApproving, setIsApproving] = useState(false)
   const [isRejecting, setIsRejecting] = useState(false)
 
-  const name =
-    locale === 'he'
-      ? business.name_he || business.name_ru
-      : business.name_ru || business.name_he
-  const description =
-    locale === 'he'
-      ? business.description_he || business.description_ru
-      : business.description_ru || business.description_he
-  const address =
-    locale === 'he'
-      ? business.address_he || business.address_ru
-      : business.address_ru || business.address_he
+  // PendingBusiness uses single-language fields (name, description, address)
+  const name = business.name
+  const description = business.description
+  const address = business.address
   const categoryName =
     locale === 'he' ? business.category.name_he : business.category.name_ru
   const subcategoryName = business.subcategory
