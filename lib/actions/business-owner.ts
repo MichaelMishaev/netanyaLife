@@ -6,7 +6,7 @@ import prisma from '@/lib/prisma'
 import { generateUniqueBusinessSlug } from '@/lib/utils/slug'
 
 /**
- * Get all businesses owned by the current business owner
+ * Get all businesses owned by the current business owner (approved + pending)
  */
 export async function getOwnerBusinesses() {
   try {
@@ -16,6 +16,7 @@ export async function getOwnerBusinesses() {
       return { error: 'Unauthorized' }
     }
 
+    // Fetch approved businesses
     const businesses = await prisma.business.findMany({
       where: {
         owner_id: session.userId,
@@ -36,7 +37,22 @@ export async function getOwnerBusinesses() {
       },
     })
 
-    // Calculate average rating for each business
+    // Fetch pending businesses (submitted by owner but not yet approved)
+    const pendingBusinesses = await prisma.pendingBusiness.findMany({
+      where: {
+        submitter_email: session.email,
+        status: 'PENDING',
+      },
+      include: {
+        category: true,
+        neighborhood: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    })
+
+    // Calculate average rating for approved businesses
     const businessesWithStats = businesses.map((business) => {
       const totalReviews = business.reviews.length
       const averageRating =
@@ -61,10 +77,42 @@ export async function getOwnerBusinesses() {
         is_verified: business.is_verified,
         averageRating,
         totalReviews,
+        status: 'approved' as const,
       }
     })
 
-    return { success: true, businesses: businessesWithStats }
+    // Format pending businesses
+    const pendingWithInfo = pendingBusinesses.map((pending) => ({
+      id: pending.id,
+      name_he: pending.name,
+      name_ru: null,
+      slug_he: null,
+      category: {
+        name_he: pending.category?.name_he || '',
+        name_ru: pending.category?.name_ru || '',
+      },
+      neighborhood: {
+        name_he: pending.neighborhood.name_he,
+        name_ru: pending.neighborhood.name_ru,
+      },
+      is_visible: false,
+      is_verified: false,
+      averageRating: 0,
+      totalReviews: 0,
+      status: 'pending' as const,
+      created_at: pending.created_at,
+    }))
+
+    // Combine approved and pending, sort by created_at desc
+    const allBusinesses = [...businessesWithStats, ...pendingWithInfo].sort(
+      (a, b) => {
+        const aDate = 'created_at' in a ? new Date(a.created_at).getTime() : 0
+        const bDate = 'created_at' in b ? new Date(b.created_at).getTime() : 0
+        return bDate - aDate
+      }
+    )
+
+    return { success: true, businesses: allBusinesses }
   } catch (error) {
     console.error('Error fetching owner businesses:', error)
     return { error: 'Failed to fetch businesses' }
