@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **DO NOT CHANGE THE FOOTER** (`components/server/Footer.tsx`) unless explicitly instructed by the user.
 
+**LOCKED SCREENS**: Components/pages listed in `/Users/michaelmishayev/Desktop/Projects/netanyaBusiness/docs/lockedScreens.md` are **NOT ALLOWED to be modified** without explicit user permission. Always check this file before making changes to any UI component.
+
 **IMAGE GENERATION**: For all image generation tasks, use instructions from `/Users/michaelmishayev/Desktop/Projects/netanyaBusiness/docs/3rdParty/ideogram.md`
 
 ## Project Overview

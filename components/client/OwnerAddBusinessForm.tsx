@@ -48,6 +48,7 @@ export default function OwnerAddBusinessForm({
     categoryId: '',
     subcategoryId: '',
     neighborhoodId: '',
+    servesAllCity: false,
     description_he: '',
     description_ru: '',
     phone: '',
@@ -170,6 +171,7 @@ export default function OwnerAddBusinessForm({
         opening_hours_ru: formData.openingHours_ru || undefined,
         address_he: formData.address_he || undefined,
         address_ru: formData.address_ru || undefined,
+        serves_all_city: formData.servesAllCity,
       })
 
       if (result.success) {
@@ -387,6 +389,30 @@ export default function OwnerAddBusinessForm({
         {fieldErrors.neighborhoodId && (
           <p className="mt-2 text-sm font-medium text-red-600">{fieldErrors.neighborhoodId}</p>
         )}
+      </div>
+
+      {/* Serves All City Checkbox */}
+      <div className="flex items-start gap-3">
+        <input
+          type="checkbox"
+          id="servesAllCity"
+          name="servesAllCity"
+          checked={formData.servesAllCity}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, servesAllCity: e.target.checked }))
+          }
+          className="mt-1 h-5 w-5 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+        />
+        <label htmlFor="servesAllCity" className="text-base text-gray-700">
+          <span className="font-semibold">
+            {locale === 'he' ? 'משרת את כל נתניה' : 'Обслуживает всю Нетанию'}
+          </span>
+          <span className="block text-sm text-gray-500">
+            {locale === 'he'
+              ? 'סמן אם העסק מספק שירות בכל אזורי העיר'
+              : 'Отметьте, если бизнес обслуживает все районы города'}
+          </span>
+        </label>
       </div>
 
       {/* Description */}

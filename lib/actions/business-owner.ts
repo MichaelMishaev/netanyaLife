@@ -271,6 +271,7 @@ export async function createOwnerBusiness(data: {
   opening_hours_ru?: string
   address_he?: string
   address_ru?: string
+  serves_all_city?: boolean
 }) {
   try {
     const session = await getOwnerSession()
@@ -311,6 +312,7 @@ export async function createOwnerBusiness(data: {
         opening_hours_ru: data.opening_hours_ru || null,
         address_he: data.address_he || null,
         address_ru: data.address_ru || null,
+        serves_all_city: data.serves_all_city || false,
         owner_id: session.userId, // Auto-link to logged-in owner
         is_visible: true, // Immediately visible
         is_verified: false, // Admin can verify later
