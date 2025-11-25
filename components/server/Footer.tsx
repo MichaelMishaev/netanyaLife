@@ -87,14 +87,11 @@ export default async function Footer() {
 
             <div>
               <h3 className="mb-4 font-bold">יצירת קשר</h3>
-              <p className="text-sm text-gray-600">
-                netanya-local@example.com
-              </p>
               <a
                 href="https://wa.me/9720555020829"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 inline-flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-600"
+                className="inline-flex items-center gap-2 rounded-lg bg-green-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-green-600"
                 aria-label="WhatsApp תמיכה"
               >
                 <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">

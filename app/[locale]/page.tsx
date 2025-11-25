@@ -91,6 +91,19 @@ export default async function Home({
             <p className="text-lg text-gray-700 md:text-xl animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               {t('hero.subtitle')}
             </p>
+            <div className="mt-6 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+              <a
+                href="https://netanya.life/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm text-gray-600 transition-all hover:text-purple-600 hover:underline"
+              >
+                <span>{t('hero.sponsor')}</span>
+                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+              </a>
+            </div>
           </section>
 
           {/* Search Section with Card */}

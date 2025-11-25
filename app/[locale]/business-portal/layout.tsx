@@ -62,12 +62,12 @@ export default async function BusinessPortalLayout({ children, params }: LayoutP
                 </svg>
                 {/* Mobile: Short brand name */}
                 <span className="text-base font-bold sm:hidden">
-                  {isRTL ? 'נתניה לוקאל' : 'Netanya'}
+                  {isRTL ? 'קהילת נתניה' : 'Netanya'}
                 </span>
                 {/* Desktop: Full brand with subtitle */}
                 <div className="hidden flex-col sm:flex">
                   <span className="text-lg font-bold leading-tight">
-                    {isRTL ? 'נתניה לוקאל' : 'Netanya Local'}
+                    {isRTL ? 'קהילת נתניה' : 'Netanya Local'}
                   </span>
                   <span className="text-xs text-gray-500">
                     {isRTL ? 'פורטל בעלי עסקים' : 'Портал владельцев'}
