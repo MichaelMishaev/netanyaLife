@@ -37,6 +37,21 @@ export async function getOwnerBusinesses() {
       },
     })
 
+    // Fetch pending and rejected businesses submitted by owner
+    const pendingBusinesses = await prisma.pendingBusiness.findMany({
+      where: {
+        owner_id: session.userId,
+        status: { in: ['PENDING', 'REJECTED'] },
+      },
+      include: {
+        category: true,
+        neighborhood: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    })
+
     // Calculate average rating for approved businesses
     const businessesWithStats = businesses.map((business) => {
       const totalReviews = business.reviews.length
@@ -63,10 +78,44 @@ export async function getOwnerBusinesses() {
         averageRating,
         totalReviews,
         status: 'approved' as const,
+        created_at: business.created_at,
       }
     })
 
-    return { success: true, businesses: businessesWithStats }
+    // Format pending and rejected businesses
+    const pendingWithInfo = pendingBusinesses.map((pending) => ({
+      id: pending.id,
+      name_he: pending.name,
+      name_ru: null,
+      slug_he: null,
+      category: {
+        name_he: pending.category?.name_he || '',
+        name_ru: pending.category?.name_ru || '',
+      },
+      neighborhood: {
+        name_he: pending.neighborhood.name_he,
+        name_ru: pending.neighborhood.name_ru,
+      },
+      is_visible: false,
+      is_verified: false,
+      averageRating: 0,
+      totalReviews: 0,
+      status: pending.status.toLowerCase() as 'pending' | 'rejected',
+      created_at: pending.created_at,
+      rejection_reason: pending.rejection_reason,
+      reviewed_at: pending.reviewed_at,
+    }))
+
+    // Combine approved, pending, and rejected businesses, sort by created_at desc
+    const allBusinesses = [...businessesWithStats, ...pendingWithInfo].sort(
+      (a, b) => {
+        const aDate = new Date(a.created_at).getTime()
+        const bDate = new Date(b.created_at).getTime()
+        return bDate - aDate
+      }
+    )
+
+    return { success: true, businesses: allBusinesses }
   } catch (error) {
     console.error('Error fetching owner businesses:', error)
     return { error: 'Failed to fetch businesses' }
