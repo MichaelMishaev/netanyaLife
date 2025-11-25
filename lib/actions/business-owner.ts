@@ -443,21 +443,26 @@ export async function createOwnerBusiness(data: {
 
     // Parse Prisma errors for user-friendly messages
     if (error && typeof error === 'object' && 'code' in error) {
-      const prismaError = error as { code: string; meta?: { target?: string[] } }
+      const prismaError = error as { code: string; meta?: { target?: string[]; field_name?: string } }
 
       // Handle specific Prisma error codes
       if (prismaError.code === 'P2002') {
         return { error: 'A business with similar details already exists. Please check your information.' }
       } else if (prismaError.code === 'P2003') {
-        const target = prismaError.meta?.target?.[0]
-        if (target === 'category_id') {
+        const target = prismaError.meta?.target?.[0] || prismaError.meta?.field_name
+        console.error('P2003 Foreign key constraint failed. Target:', target, 'Full error:', error)
+
+        if (target === 'category_id' || target?.includes('category')) {
           return { error: 'Invalid category. Please refresh the page and select a valid category.' }
-        } else if (target === 'subcategory_id') {
+        } else if (target === 'subcategory_id' || target?.includes('subcategory')) {
           return { error: 'Invalid subcategory. Please refresh the page and select a valid subcategory.' }
-        } else if (target === 'neighborhood_id') {
+        } else if (target === 'neighborhood_id' || target?.includes('neighborhood')) {
           return { error: 'Invalid neighborhood. Please refresh the page and select a valid neighborhood.' }
+        } else if (target === 'owner_id' || target?.includes('owner')) {
+          return { error: 'Your account session is invalid. Please log out and log in again.' }
         }
-        return { error: 'Invalid selection. Please refresh the page and try again.' }
+        // Include target field name in error for debugging
+        return { error: `Invalid selection (${target || 'unknown'}). Please refresh the page and try again.` }
       } else if (prismaError.code === 'P2000') {
         return { error: 'One or more fields contain too much text. Please shorten your input.' }
       } else if (prismaError.code === 'P2001') {
