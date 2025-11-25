@@ -4,8 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 4700",
-    "build": "prisma migrate deploy && prisma generate && next build",
+    "build": "next build",
     "postinstall": "prisma generate",
+    "migrate:deploy": "prisma migrate deploy",
     "build:analyze": "ANALYZE=true next build",
     "start": "next start -p ${PORT:-4700}",
     "lint": "next lint",

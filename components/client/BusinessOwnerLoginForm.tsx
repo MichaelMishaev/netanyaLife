@@ -53,9 +53,16 @@ export default function BusinessOwnerLoginForm({ locale, redirectTo }: BusinessO
         return
       }
 
+      // Log for debugging
+      console.log('Auth response:', { success: data.success, redirect: data.redirect })
+
       if (data.success && data.redirect) {
         // Use full page redirect to ensure cookie is picked up
         window.location.href = data.redirect
+      } else {
+        // If we got success but no redirect, something is wrong
+        console.error('Missing redirect in success response:', data)
+        setError(t('errors.serverError'))
       }
     } catch (err) {
       setError(t('errors.serverError'))
