@@ -6,9 +6,13 @@ export async function POST(request: NextRequest) {
     // Clear owner session cookie
     await clearOwnerSession()
 
+    // Get locale from referer or default to 'he'
+    const referer = request.headers.get('referer') || ''
+    const locale = referer.includes('/ru/') ? 'ru' : 'he'
+
     return NextResponse.json({
       success: true,
-      redirect: '/he/business-login',
+      redirect: `/${locale}`,
     })
   } catch (error) {
     console.error('Business owner logout error:', error)

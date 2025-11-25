@@ -51,8 +51,8 @@ export default function DismissRejectedEditButton({
             ? 'מבטל...'
             : 'Отмена...'
           : locale === 'he'
-            ? 'בטל הודעה'
-            : 'Отменить уведомление'}
+            ? 'בטל בקשה לעדכון'
+            : 'Отменить запрос на обновление'}
       </button>
 
       {error && (
@@ -74,7 +74,7 @@ export default function DismissRejectedEditButton({
 
             {/* Title */}
             <h3 className="mb-2 text-center text-xl font-bold text-gray-900">
-              {locale === 'he' ? 'בטל הודעת דחייה' : 'Отменить уведомление об отклонении'}
+              {locale === 'he' ? 'בטל בקשה לעדכון' : 'Отменить запрос на обновление'}
             </h3>
 
             {/* Message */}
@@ -96,7 +96,7 @@ export default function DismissRejectedEditButton({
                 onClick={handleDismiss}
                 className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-medium text-white transition hover:bg-red-700"
               >
-                {locale === 'he' ? 'כן, בטל הודעה' : 'Да, отменить'}
+                {locale === 'he' ? 'כן, בטל בקשה' : 'Да, отменить'}
               </button>
             </div>
           </div>

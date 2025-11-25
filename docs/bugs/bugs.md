@@ -97,6 +97,123 @@ When you encounter a bug during development:
 
 ## Resolved Bugs (✅ RESOLVED)
 
+## BUG-007: Logout Redirecting to Business Login Instead of Home Page
+
+**Status**: ✅ RESOLVED
+**Date Found**: 2025-11-25
+**Date Fixed**: 2025-11-25
+**Component**: Business Owner Logout API (app/api/auth/owner/logout/route.ts)
+**Severity**: 🟢 Medium
+
+### Description
+When business owners logged out from the business portal, they were redirected to the business login page (`/he/business-login`) instead of the home page. This prevented users from continuing to browse the public site after logout.
+
+### Steps to Reproduce
+1. Log in as a business owner at `/he/business-login`
+2. Navigate to business portal (`/he/business-portal`)
+3. Click logout button
+4. Observe redirect to `/he/business-login`
+5. Expected: Redirect to home page (`/he`)
+
+### Expected Behavior
+After logout, users should be redirected to the home page (`/${locale}`) so they can continue browsing the public business directory without needing to log back in.
+
+### Actual Behavior
+The logout API endpoint hardcoded a redirect to `/he/business-login`, forcing users back to the login page even if they didn't want to log in again.
+
+### Error Messages/Logs
+```json
+// API Response
+{
+  "success": true,
+  "redirect": "/he/business-login"
+}
+```
+
+### Environment
+- OS: macOS 14.5 (Darwin 24.5.0)
+- Browser: All browsers
+- Node: v18+
+- Next.js: 14.2.33
+
+### Root Cause
+The logout endpoint had a hardcoded redirect path to `/he/business-login` without considering:
+1. User's current locale (Hebrew vs Russian)
+2. Standard UX pattern of returning to home page after logout
+3. Allowing users to continue browsing the public site
+
+The logout flow was designed for admin-style panels where quick re-login is expected, not for a public-facing business directory where users may want to browse after logout.
+
+### Solution
+Modified the logout endpoint to:
+1. Detect the current locale from the request `referer` header
+2. Extract whether user was on `/he/` or `/ru/` routes
+3. Redirect to home page (`/${locale}`) instead of login page
+4. Default to `'he'` if locale detection fails
+
+This follows standard UX patterns for public-facing applications and maintains language consistency.
+
+### Code Changes
+```typescript
+// Before (broken) - app/api/auth/owner/logout/route.ts:4-17
+export async function POST(request: NextRequest) {
+  try {
+    // Clear owner session cookie
+    await clearOwnerSession()
+
+    return NextResponse.json({
+      success: true,
+      redirect: '/he/business-login',
+    })
+  } catch (error) {
+    console.error('Business owner logout error:', error)
+    return NextResponse.json(
+      { error: 'Logout failed. Please try again.' },
+      { status: 500 }
+    )
+  }
+}
+
+// After (fixed) - app/api/auth/owner/logout/route.ts:4-24
+export async function POST(request: NextRequest) {
+  try {
+    // Clear owner session cookie
+    await clearOwnerSession()
+
+    // Get locale from referer or default to 'he'
+    const referer = request.headers.get('referer') || ''
+    const locale = referer.includes('/ru/') ? 'ru' : 'he'
+
+    return NextResponse.json({
+      success: true,
+      redirect: `/${locale}`,
+    })
+  } catch (error) {
+    console.error('Business owner logout error:', error)
+    return NextResponse.json(
+      { error: 'Logout failed. Please try again.' },
+      { status: 500 }
+    )
+  }
+}
+```
+
+### Files Changed
+- `app/api/auth/owner/logout/route.ts` (lines 9-15)
+
+### Prevention Tips
+1. **Follow standard UX patterns** - Public-facing apps should redirect to home after logout, not login
+2. **Detect user locale** - Use referer header or request context to maintain language
+3. **Consider user intent** - Users logging out may want to continue browsing, not re-authenticate
+4. **Test full user flows** - Verify logout behavior matches expected UX patterns
+5. **Document redirect behavior** - Make it clear where users land after authentication actions
+
+### Related Issues
+- UX Pattern: Post-logout navigation in public vs admin applications
+- i18n: Maintaining locale across authentication state changes
+
+---
+
 ## BUG-006: Generic Error Messages on Business Creation Failure
 
 **Status**: ✅ RESOLVED
@@ -796,8 +913,8 @@ export default function SearchResultsClient({ businesses, locale }) {
 | Status | Count |
 |--------|-------|
 | 🔴 OPEN | 0 |
-| ✅ RESOLVED | 6 |
-| **TOTAL** | 6 |
+| ✅ RESOLVED | 7 |
+| **TOTAL** | 7 |
 
 ---
 
