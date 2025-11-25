@@ -251,3 +251,4 @@ npm run format                # Format with Prettier
 - *(To be created)* `app/[lang]/layout.tsx` - Root layout with accessibility provider
 - while developing create automation i  parallel
 - when have bugs, documante in '/Users/michaelmishayev/Desktop/Projects/netanyaBusiness/docs/bugs/bugs.md' the bug and the woring solution
+- never delete data from prod database onlky if i asked to

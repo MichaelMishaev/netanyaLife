@@ -1,10 +1,10 @@
 # QA Automation Suite
 
-This directory contains E2E automation tests for the Netanya Local business directory platform.
+This directory contains documentation for E2E automation tests for the Netanya Local business directory platform.
 
 ## Test: Business Registration & Approval Flow
 
-**File**: `business-registration-approval.spec.ts`
+**File**: `/tests/e2e/specs/business-registration-approval.spec.ts`
 
 ### What This Test Does
 

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { formatPhoneForWhatsApp } from '@/lib/utils/phone'
+import { useAnalytics } from '@/contexts/AnalyticsContext'
 
 interface BusinessCardProps {
   business: {
@@ -40,6 +41,7 @@ interface BusinessCardProps {
 export default function BusinessCard({ business, locale, showSubcategory = false, showNeighborhoodBadge = false }: BusinessCardProps) {
   const t = useTranslations('business')
   const tResults = useTranslations('results')
+  const { trackEvent } = useAnalytics()
 
   const name = locale === 'he' ? business.name_he : (business.name_ru || business.name_he)
   const description = locale === 'he' ? business.description_he : (business.description_ru || business.description_he)
@@ -213,7 +215,14 @@ export default function BusinessCard({ business, locale, showSubcategory = false
           {business.phone && (
             <a
               href={`tel:${business.phone}`}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                trackEvent('cta_clicked', {
+                  type: 'call',
+                  businessId: business.id,
+                  businessName: name,
+                })
+              }}
               className="flex items-center justify-center gap-1.5 rounded-md bg-primary-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-primary-700 active:scale-95 md:text-sm"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -227,7 +236,14 @@ export default function BusinessCard({ business, locale, showSubcategory = false
               href={`https://wa.me/${formatPhoneForWhatsApp(business.whatsapp_number)}`}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation()
+                trackEvent('cta_clicked', {
+                  type: 'whatsapp',
+                  businessId: business.id,
+                  businessName: name,
+                })
+              }}
               className="flex items-center justify-center gap-1.5 rounded-md bg-green-600 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-green-700 active:scale-95 md:text-sm"
             >
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">

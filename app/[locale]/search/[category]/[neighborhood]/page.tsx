@@ -175,8 +175,10 @@ export default async function SearchResultsPage({
   let businesses: Awaited<ReturnType<typeof getSearchResults>> = []
   let primaryFallbackBusinesses: Awaited<ReturnType<typeof getSearchResults>> = []
   let secondaryFallbackBusinesses: Awaited<ReturnType<typeof getSearchResults>> = []
+  let citywideFallbackBusinesses: Awaited<ReturnType<typeof getSearchResults>> = []
   let hasPrimaryFallback = false
   let hasSecondaryFallback = false
+  let hasCitywideFallback = false
   let totalCount = 0
 
   try {
@@ -210,6 +212,22 @@ export default async function SearchResultsPage({
         locale,
       })
       hasSecondaryFallback = secondaryFallbackBusinesses.length > 0
+    }
+
+    // CITYWIDE FALLBACK: No results in neighborhood (for basic category search without subcategory)
+    // Show first 4 from all city automatically
+    if (businesses.length === 0 && !subcategory && neighborhood && !hasPrimaryFallback) {
+      const allCityResults = await getSearchResults({
+        categoryId: category.id,
+        subcategoryId: undefined,
+        neighborhoodId: undefined, // All neighborhoods
+        cityId: city.id,
+        locale,
+      })
+
+      // Take first 4 only
+      citywideFallbackBusinesses = allCityResults.slice(0, 4)
+      hasCitywideFallback = citywideFallbackBusinesses.length > 0
     }
 
     // Get total count (with current filters)
@@ -272,7 +290,7 @@ export default async function SearchResultsPage({
         </h1>
 
         {/* Subcategory Badge */}
-        {subcategoryName && !hasPrimaryFallback && !hasSecondaryFallback && (
+        {subcategoryName && !hasPrimaryFallback && !hasSecondaryFallback && !hasCitywideFallback && (
           <div className="mb-2 flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-primary-100 px-3 py-1 text-sm font-medium text-primary-700">
               <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -283,12 +301,62 @@ export default async function SearchResultsPage({
           </div>
         )}
 
-        {!hasPrimaryFallback && !hasSecondaryFallback && (
+        {!hasPrimaryFallback && !hasSecondaryFallback && !hasCitywideFallback && (
           <p className="text-sm text-gray-600 md:text-base">
             {t('results', { count: totalCount })}
           </p>
         )}
       </div>
+
+      {/* CITYWIDE FALLBACK: Basic category search with no neighborhood results */}
+      {hasCitywideFallback && neighborhood && !subcategory && (
+        <div className="mb-8">
+          {/* Alert Banner - No results in selected neighborhood */}
+          <div className="mb-6 rounded-xl border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 px-5 py-4">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <svg className="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-orange-900">
+                  {locale === 'he'
+                    ? `לא נמצאו ${categoryName} ב${neighborhoodName}`
+                    : `Не найдено ${categoryName} в ${neighborhoodName}`}
+                </p>
+                <p className="text-xs text-orange-700 mt-0.5">
+                  {locale === 'he'
+                    ? `מציגים ${citywideFallbackBusinesses.length} תוצאות מכל נתניה`
+                    : `Показаны ${citywideFallbackBusinesses.length} результата со всей Нетании`}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Citywide Results */}
+          <SearchResultsClient
+            businesses={citywideFallbackBusinesses}
+            locale={locale}
+            showSubcategories={false}
+            showNeighborhoodBadges={true}
+          />
+
+          {/* View All Results Link */}
+          <div className="mt-6 text-center">
+            <Link
+              href={`/${locale}/search/${categorySlug}/all`}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-primary-600 bg-white px-6 py-3 font-medium text-primary-700 transition hover:bg-primary-50 active:scale-[0.98]"
+            >
+              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+              </svg>
+              <span>{locale === 'he' ? 'צפה בכל התוצאות בנתניה' : 'Посмотреть все результаты в Нетании'}</span>
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Two-Tier Fallback System */}
       {(hasPrimaryFallback || hasSecondaryFallback) && subcategoryName && neighborhood && (
@@ -387,7 +455,7 @@ export default async function SearchResultsPage({
       )}
 
       {/* No Results - Improved Empty State - Only show if no fallback results either */}
-      {businesses.length === 0 && !hasPrimaryFallback && !hasSecondaryFallback && (
+      {businesses.length === 0 && !hasPrimaryFallback && !hasSecondaryFallback && !hasCitywideFallback && (
         <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50 p-8 py-12 text-center sm:p-12 sm:py-16">
           {/* Icon */}
           <div className="mb-6 rounded-full bg-gray-100 p-6">
@@ -443,7 +511,7 @@ export default async function SearchResultsPage({
       )}
 
       {/* Normal Results with Filtering/Sorting (when not in fallback mode) */}
-      {businesses.length > 0 && !hasPrimaryFallback && !hasSecondaryFallback && (
+      {businesses.length > 0 && !hasPrimaryFallback && !hasSecondaryFallback && !hasCitywideFallback && (
         <SearchResultsClient
           businesses={businesses}
           locale={locale}

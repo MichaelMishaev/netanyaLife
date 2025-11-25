@@ -1,7 +1,7 @@
 # Bug Tracking & Solutions
 
 **Purpose**: Document bugs encountered during development and their working solutions
-**Last Updated**: 2025-11-16
+**Last Updated**: 2025-11-25
 
 ---
 
@@ -96,6 +96,162 @@ When you encounter a bug during development:
 ---
 
 ## Resolved Bugs (✅ RESOLVED)
+
+## BUG-006: Generic Error Messages on Business Creation Failure
+
+**Status**: ✅ RESOLVED
+**Date Found**: 2025-11-25
+**Date Fixed**: 2025-11-25
+**Component**: createOwnerBusiness (lib/actions/business-owner.ts)
+**Severity**: 🟡 High
+
+### Description
+When business owners attempted to add a new business through the business portal (`/he/business-portal/add`), form submission failures showed a generic "Failed to create business" error message without any explanation of what went wrong. This left users confused and unable to fix validation errors or data issues.
+
+### Steps to Reproduce
+1. Log in as a business owner
+2. Navigate to `/he/business-portal/add`
+3. Fill out the business form with any invalid data (e.g., invalid category ID, missing required fields)
+4. Submit the form
+5. Observe generic error message: "Failed to create business"
+6. No specific information about what field failed or how to fix it
+
+### Expected Behavior
+Users should receive specific, actionable error messages that explain:
+- Which field has an issue
+- What the problem is (e.g., "Invalid category selected")
+- How to fix it (e.g., "Please refresh the page and select a valid category")
+
+### Actual Behavior
+All database errors, validation failures, and constraint violations were caught in a generic try-catch block and returned the same unhelpful message: "Failed to create business". The actual error details were only logged to the server console, invisible to the user.
+
+### Error Messages/Logs
+```
+Error creating pending business: [various Prisma errors]
+Response to client: { error: 'Failed to create business' }
+```
+
+### Environment
+- OS: macOS 14.5 (Darwin 24.5.0)
+- Browser: All browsers (server-side issue)
+- Node: v18+
+- Next.js: 14.2.33
+- Prisma: Latest
+
+### Root Cause
+The `createOwnerBusiness` function in `lib/actions/business-owner.ts` had a generic catch block that:
+1. Logged the actual error to console (line 413)
+2. Returned a generic error message to the user (line 414)
+3. Did not parse Prisma error codes
+4. Did not validate foreign key references before insertion
+
+This meant users couldn't understand:
+- If their category/subcategory/neighborhood selection was invalid
+- If they had duplicate business data
+- If their input was too long for database fields
+- Any other specific validation failures
+
+### Solution
+Implemented comprehensive error handling with:
+
+1. **Pre-validation**: Check that category, subcategory, and neighborhood exist before attempting database insertion
+2. **Prisma error parsing**: Parse specific Prisma error codes and return user-friendly messages:
+   - `P2002`: Unique constraint violation → "A business with similar details already exists"
+   - `P2003`: Foreign key constraint → "Invalid category/subcategory/neighborhood"
+   - `P2000`: Value too long → "One or more fields contain too much text"
+   - `P2001`: Required field missing → "Required data is missing"
+3. **Actionable guidance**: Each error message includes instructions on how to fix the issue
+
+### Code Changes
+```typescript
+// Before (broken) - lib/actions/business-owner.ts:413-414
+} catch (error) {
+  console.error('Error creating pending business:', error)
+  return { error: 'Failed to create business' }
+}
+
+// After (fixed) - lib/actions/business-owner.ts:378-470
+// Validate category exists
+const categoryExists = await prisma.category.findUnique({
+  where: { id: data.category_id },
+})
+
+if (!categoryExists) {
+  return { error: 'Invalid category selected. Please refresh the page and try again.' }
+}
+
+// Validate subcategory exists (if provided)
+if (data.subcategory_id) {
+  const subcategoryExists = await prisma.subcategory.findUnique({
+    where: { id: data.subcategory_id },
+  })
+
+  if (!subcategoryExists) {
+    return { error: 'Invalid subcategory selected. Please refresh the page and try again.' }
+  }
+}
+
+// Validate neighborhood exists
+const neighborhoodExists = await prisma.neighborhood.findUnique({
+  where: { id: data.neighborhood_id },
+})
+
+if (!neighborhoodExists) {
+  return { error: 'Invalid neighborhood selected. Please refresh the page and try again.' }
+}
+
+// ... business creation ...
+
+} catch (error) {
+  console.error('Error creating pending business:', error)
+
+  // Parse Prisma errors for user-friendly messages
+  if (error && typeof error === 'object' && 'code' in error) {
+    const prismaError = error as { code: string; meta?: { target?: string[] } }
+
+    // Handle specific Prisma error codes
+    if (prismaError.code === 'P2002') {
+      return { error: 'A business with similar details already exists. Please check your information.' }
+    } else if (prismaError.code === 'P2003') {
+      const target = prismaError.meta?.target?.[0]
+      if (target === 'category_id') {
+        return { error: 'Invalid category. Please refresh the page and select a valid category.' }
+      } else if (target === 'subcategory_id') {
+        return { error: 'Invalid subcategory. Please refresh the page and select a valid subcategory.' }
+      } else if (target === 'neighborhood_id') {
+        return { error: 'Invalid neighborhood. Please refresh the page and select a valid neighborhood.' }
+      }
+      return { error: 'Invalid selection. Please refresh the page and try again.' }
+    } else if (prismaError.code === 'P2000') {
+      return { error: 'One or more fields contain too much text. Please shorten your input.' }
+    } else if (prismaError.code === 'P2001') {
+      return { error: 'Required data is missing. Please fill in all required fields.' }
+    }
+  }
+
+  return { error: 'Failed to create business. Please try again or contact support if the problem persists.' }
+}
+```
+
+### Files Changed
+- `lib/actions/business-owner.ts` (lines 378-470)
+
+### Commits
+- `c5f1a7d` - fix: improve error handling for business creation with detailed messages
+
+### Prevention Tips
+1. **Always validate foreign key references** before insertion to catch invalid IDs early
+2. **Parse database-specific error codes** (Prisma, SQL, etc.) for user-friendly messages
+3. **Never show generic error messages** - Users need to know what went wrong and how to fix it
+4. **Include actionable guidance** - Tell users what to do next (e.g., "refresh the page")
+5. **Log detailed errors server-side** while showing safe messages to users (don't expose internals)
+6. **Test error scenarios** - Try submitting invalid data to ensure errors are helpful
+
+### Related Issues
+- Prisma Error Reference: https://www.prisma.io/docs/reference/api-reference/error-reference
+- User Experience: Actionable error messages improve conversion rates
+
+---
 
 ## BUG-005: Recently Viewed Count Mismatch on Mobile
 
@@ -640,8 +796,8 @@ export default function SearchResultsClient({ businesses, locale }) {
 | Status | Count |
 |--------|-------|
 | 🔴 OPEN | 0 |
-| ✅ RESOLVED | 5 |
-| **TOTAL** | 5 |
+| ✅ RESOLVED | 6 |
+| **TOTAL** | 6 |
 
 ---
 
@@ -702,5 +858,5 @@ export default function SearchResultsClient({ businesses, locale }) {
 
 ---
 
-**Last Updated**: 2025-11-16
+**Last Updated**: 2025-11-25
 **Maintained By**: Development Team
