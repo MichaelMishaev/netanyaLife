@@ -375,6 +375,35 @@ export async function createOwnerBusiness(data: {
       return { error: 'At least one contact method (phone or WhatsApp) is required' }
     }
 
+    // Validate category exists
+    const categoryExists = await prisma.category.findUnique({
+      where: { id: data.category_id },
+    })
+
+    if (!categoryExists) {
+      return { error: 'Invalid category selected. Please refresh the page and try again.' }
+    }
+
+    // Validate subcategory exists (if provided)
+    if (data.subcategory_id) {
+      const subcategoryExists = await prisma.subcategory.findUnique({
+        where: { id: data.subcategory_id },
+      })
+
+      if (!subcategoryExists) {
+        return { error: 'Invalid subcategory selected. Please refresh the page and try again.' }
+      }
+    }
+
+    // Validate neighborhood exists
+    const neighborhoodExists = await prisma.neighborhood.findUnique({
+      where: { id: data.neighborhood_id },
+    })
+
+    if (!neighborhoodExists) {
+      return { error: 'Invalid neighborhood selected. Please refresh the page and try again.' }
+    }
+
     // Get owner details for submitter info
     const owner = await prisma.businessOwner.findUnique({
       where: { id: session.userId },
@@ -411,7 +440,32 @@ export async function createOwnerBusiness(data: {
     return { success: true, pendingBusinessId: pendingBusiness.id }
   } catch (error) {
     console.error('Error creating pending business:', error)
-    return { error: 'Failed to create business' }
+
+    // Parse Prisma errors for user-friendly messages
+    if (error && typeof error === 'object' && 'code' in error) {
+      const prismaError = error as { code: string; meta?: { target?: string[] } }
+
+      // Handle specific Prisma error codes
+      if (prismaError.code === 'P2002') {
+        return { error: 'A business with similar details already exists. Please check your information.' }
+      } else if (prismaError.code === 'P2003') {
+        const target = prismaError.meta?.target?.[0]
+        if (target === 'category_id') {
+          return { error: 'Invalid category. Please refresh the page and select a valid category.' }
+        } else if (target === 'subcategory_id') {
+          return { error: 'Invalid subcategory. Please refresh the page and select a valid subcategory.' }
+        } else if (target === 'neighborhood_id') {
+          return { error: 'Invalid neighborhood. Please refresh the page and select a valid neighborhood.' }
+        }
+        return { error: 'Invalid selection. Please refresh the page and try again.' }
+      } else if (prismaError.code === 'P2000') {
+        return { error: 'One or more fields contain too much text. Please shorten your input.' }
+      } else if (prismaError.code === 'P2001') {
+        return { error: 'Required data is missing. Please fill in all required fields.' }
+      }
+    }
+
+    return { error: 'Failed to create business. Please try again or contact support if the problem persists.' }
   }
 }
 
