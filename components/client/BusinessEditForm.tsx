@@ -32,6 +32,7 @@ export default function BusinessEditForm({ locale, business }: BusinessEditFormP
   const [success, setSuccess] = useState(false)
   const [isPending, setIsPending] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
   // State for opening hours
   const [openingHoursHe, setOpeningHoursHe] = useState(business.opening_hours_he || '')
@@ -321,12 +322,56 @@ export default function BusinessEditForm({ locale, business }: BusinessEditFormP
 
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={() => setShowCancelConfirm(true)}
           className="rounded-lg border border-gray-300 px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50"
         >
           {locale === 'he' ? 'ביטול' : 'Отмена'}
         </button>
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      {showCancelConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl" dir={locale === 'he' ? 'rtl' : 'ltr'}>
+            {/* Icon */}
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+                <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h3 className="mb-2 text-center text-xl font-bold text-gray-900">
+              {locale === 'he' ? 'ביטול שינויים' : 'Отменить изменения'}
+            </h3>
+
+            {/* Message */}
+            <p className="mb-6 text-center text-sm text-gray-600">
+              {locale === 'he'
+                ? 'כל השינויים שביצעת יאבדו. האם אתה בטוח שברצונך לבטל?'
+                : 'Все внесенные изменения будут потеряны. Вы уверены, что хотите отменить?'}
+            </p>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowCancelConfirm(false)}
+                className="flex-1 rounded-lg border border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 transition hover:bg-gray-50"
+              >
+                {locale === 'he' ? 'המשך עריכה' : 'Продолжить редактирование'}
+              </button>
+              <button
+                onClick={() => router.back()}
+                className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-medium text-white transition hover:bg-red-700"
+              >
+                {locale === 'he' ? 'כן, בטל שינויים' : 'Да, отменить'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   )
 }
