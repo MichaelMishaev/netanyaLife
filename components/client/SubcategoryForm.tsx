@@ -101,7 +101,6 @@ export default function SubcategoryForm({
         'ר': 'r', 'ש': 'sh', 'ת': 't'
       }
 
-      // eslint-disable-next-line prefer-const
       const generatedSlug = value
         .trim()
         .split('')
