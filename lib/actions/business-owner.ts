@@ -375,6 +375,17 @@ export async function createOwnerBusiness(data: {
       return { error: 'At least one contact method (phone or WhatsApp) is required' }
     }
 
+    // Validate business owner exists (critical check to prevent foreign key errors)
+    const ownerExists = await prisma.businessOwner.findUnique({
+      where: { id: session.userId },
+    })
+
+    if (!ownerExists) {
+      return {
+        error: 'Your business owner account is missing from the database. Please log out, clear your cookies, and register a new account.'
+      }
+    }
+
     // Validate category exists
     const categoryExists = await prisma.category.findUnique({
       where: { id: data.category_id },
