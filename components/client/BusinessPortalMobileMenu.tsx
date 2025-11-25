@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 interface NavLink {
   href: string
@@ -21,7 +22,26 @@ export default function BusinessPortalMobileMenu({
   navLinks,
 }: BusinessPortalMobileMenuProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const router = useRouter()
   const isRTL = locale === 'he'
+
+  const handleLogout = async () => {
+    setIsLoggingOut(true)
+    try {
+      const response = await fetch('/api/auth/owner/logout', {
+        method: 'POST',
+      })
+      const data = await response.json()
+
+      if (data.success && data.redirect) {
+        router.push(data.redirect)
+      }
+    } catch (error) {
+      console.error('Logout failed:', error)
+      setIsLoggingOut(false)
+    }
+  }
 
   return (
     <div className="md:hidden">
@@ -118,17 +138,24 @@ export default function BusinessPortalMobileMenu({
 
             {/* Bottom Actions */}
             <div className="absolute bottom-0 left-0 right-0 border-t bg-gray-50 p-4">
-              <form action="/api/auth/owner/logout" method="POST">
-                <button
-                  type="submit"
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 transition hover:bg-gray-100"
-                >
-                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  <span>{isRTL ? 'התנתק' : 'Выйти'}</span>
-                </button>
-              </form>
+              <button
+                onClick={handleLogout}
+                disabled={isLoggingOut}
+                className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-3 font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                <span>
+                  {isLoggingOut
+                    ? isRTL
+                      ? 'מתנתק...'
+                      : 'Выход...'
+                    : isRTL
+                      ? 'התנתק'
+                      : 'Выйти'}
+                </span>
+              </button>
             </div>
           </div>
         </>
