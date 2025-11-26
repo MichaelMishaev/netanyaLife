@@ -8,6 +8,7 @@ import { getNeighborhoodBySlug, getNetanyaCity } from '@/lib/queries/neighborhoo
 import SearchResultsClient from '@/components/client/SearchResultsClient'
 import Breadcrumbs from '@/components/server/Breadcrumbs'
 import BackButton from '@/components/client/BackButton'
+import ViewAllCityButton from '@/components/client/ViewAllCityButton'
 
 interface SearchResultsPageProps {
   params: {
@@ -512,12 +513,25 @@ export default async function SearchResultsPage({
 
       {/* Normal Results with Filtering/Sorting (when not in fallback mode) */}
       {businesses.length > 0 && !hasPrimaryFallback && !hasSecondaryFallback && !hasCitywideFallback && (
-        <SearchResultsClient
-          businesses={businesses}
-          locale={locale}
-          showSubcategories={false}
-          showNeighborhoodBadges={false}
-        />
+        <>
+          <SearchResultsClient
+            businesses={businesses}
+            locale={locale}
+            showSubcategories={false}
+            showNeighborhoodBadges={false}
+          />
+
+          {/* View All City Button - Show when neighborhood is selected */}
+          {neighborhood && (
+            <ViewAllCityButton
+              href={`/${locale}/search/${categorySlug}/all${subcategory ? `?subcategory=${subcategory.slug}` : ''}`}
+              locale={locale}
+              categoryName={categoryName}
+              neighborhoodName={neighborhoodName}
+              currentCount={businesses.length}
+            />
+          )}
+        </>
       )}
     </div>
   )
