@@ -97,6 +97,125 @@ When you encounter a bug during development:
 
 ## Resolved Bugs (✅ RESOLVED)
 
+## BUG-008: Neighborhood Selection Not Saving to localStorage - Always Routes to Center
+
+**Status**: ✅ RESOLVED
+**Date Found**: 2025-11-27
+**Date Fixed**: 2025-11-27
+**Component**: SearchForm, PopularCategoryCard, CategorySelectionGrid
+**Severity**: 🔴 Critical
+
+### Description
+When users selected a neighborhood (e.g., "North"/צפון) in the homepage search form and then clicked on a popular category card or category from the grid, the search would always route to "Center" (מרכז) instead of the selected neighborhood. This broke a core user flow and made the neighborhood selection effectively useless when navigating via category cards.
+
+### Steps to Reproduce
+1. Visit homepage
+2. Click "North" (צפון) neighborhood button in the search form (but don't submit the form)
+3. Scroll down and click any popular category card (e.g., "Electricians")
+4. Observe search results page URL: `/he/search/electricians/center`
+5. Expected: Should route to `/he/search/electricians/tsafon` (North)
+6. Actual: Always routes to "Center" (מרכז), the first neighborhood in the database
+
+### Expected Behavior
+When a user selects a neighborhood in the search form and then clicks a category card, the category card should route to the selected neighborhood, maintaining user context across components.
+
+### Actual Behavior
+Clicking a category card always routed to the first neighborhood in the database (Center/מרכז), regardless of which neighborhood the user had selected in the search form.
+
+### Environment
+- OS: macOS 14.5 (Darwin 24.5.0)
+- Browser: All browsers
+- Node: v18+
+- Next.js: 14.2.33
+
+### Root Cause
+The `SearchForm` component (`components/client/SearchForm.tsx`) only saved form values to localStorage in the `handleSubmit` function (line 236), which runs when the user clicks the "Search" button.
+
+**The broken flow:**
+1. User clicks neighborhood button (e.g., "North") → `setNeighborhoodSlug('tsafon')` is called (line 428)
+2. State updates, but localStorage is NOT updated
+3. User scrolls down and clicks a popular category card
+4. `PopularCategoryCard` reads from localStorage → finds nothing or old value
+5. Defaults to `neighborhoods[0]?.slug` (which is "Center"/מרכז)
+6. Routes to `/he/search/electricians/center` instead of `/he/search/electricians/tsafon`
+
+**The core issue:** Neighborhood selection didn't save to localStorage until form submission, but users could navigate away via category cards before submitting.
+
+### Solution
+Implemented immediate localStorage synchronization in SearchForm:
+
+1. **Added `isInitialMount` ref** (line 62): Tracks whether component has finished initial setup
+2. **Added mount completion effect** (lines 167-170): Marks initial mount as complete after first render
+3. **Added neighborhood sync effect** (lines 172-186): Saves neighborhood to localStorage immediately when it changes, but skips during initial mount to avoid saving geolocation/restored values
+
+### Code Changes
+```typescript
+// Before (broken) - components/client/SearchForm.tsx:60-62
+const [valuesRestored, setValuesRestored] = useState(false)
+const categoryRef = useRef<HTMLSelectElement>(null)
+const neighborhoodRef = useRef<HTMLSelectElement>(null)
+// ❌ No ref to track initial mount
+// ❌ No effect to save neighborhood changes to localStorage
+
+// After (fixed) - components/client/SearchForm.tsx:59-62
+const [valuesRestored, setValuesRestored] = useState(false)
+const categoryRef = useRef<HTMLSelectElement>(null)
+const neighborhoodRef = useRef<HTMLSelectElement>(null)
+const isInitialMount = useRef(true) // ✅ NEW: Track initial mount
+
+// ---
+
+// Before (broken): No effect to save neighborhood changes
+// localStorage was only saved in handleSubmit (when user clicks search button)
+
+// After (fixed) - components/client/SearchForm.tsx:167-186
+// Mark initial mount as complete after first render
+useEffect(() => {
+  isInitialMount.current = false
+}, [])
+
+// Save neighborhood selection to localStorage immediately (for cross-component consistency)
+// This ensures PopularCategoryCard and other components can read the latest selection
+useEffect(() => {
+  // Skip during initial mount (prevents saving geolocation/restored values)
+  // After that, save any neighborhood change to localStorage
+  if (!isInitialMount.current && typeof window !== 'undefined' && neighborhoodSlug) {
+    const currentValues = localStorage.getItem('lastSearchFormValues')
+    const parsed = currentValues ? JSON.parse(currentValues) : {}
+
+    localStorage.setItem('lastSearchFormValues', JSON.stringify({
+      ...parsed,
+      neighborhoodSlug
+    }))
+  }
+}, [neighborhoodSlug])
+
+// ---
+
+// Also fixed CategorySelectionGrid "All City" button:
+// Before: onClick={() => handleNeighborhoodSelect(neighborhoods[0]?.slug || '')}
+// After:  onClick={() => handleNeighborhoodSelect('all')}
+```
+
+### Files Changed
+- `components/client/SearchForm.tsx` (lines 62, 167-186)
+- `components/client/CategorySelectionGrid.tsx` (lines 3, 35-56, 139)
+
+### Prevention Tips
+1. **Save user selections immediately** - Don't wait for form submission if users can navigate away before submitting
+2. **Use localStorage for cross-component state** - When components depend on shared user context, use localStorage to maintain consistency
+3. **Track initial mount state** - Use refs to skip effects during initial setup when restoring/loading default values
+4. **Test cross-component flows** - Always test navigating between components without submitting forms
+5. **Watch for default values** - Be careful when components use `array[0]` as defaults - users might expect their selection to persist
+6. **Document localStorage schema** - Make it clear what data is saved to localStorage and when
+
+### Related Issues
+- UX Pattern: Maintaining user context across component boundaries
+- State Management: localStorage for cross-component state synchronization
+- Routing: Special route parameters for aggregate views
+
+---
+
 ## BUG-007: Logout Redirecting to Business Login Instead of Home Page
 
 **Status**: ✅ RESOLVED
@@ -913,8 +1032,8 @@ export default function SearchResultsClient({ businesses, locale }) {
 | Status | Count |
 |--------|-------|
 | 🔴 OPEN | 0 |
-| ✅ RESOLVED | 7 |
-| **TOTAL** | 7 |
+| ✅ RESOLVED | 8 |
+| **TOTAL** | 8 |
 
 ---
 

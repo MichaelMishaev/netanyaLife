@@ -52,46 +52,58 @@ export default function SearchForm({
   const { trackEvent } = useAnalytics()
   const [categorySlug, setCategorySlug] = useState('')
   const [subcategorySlug, setSubcategorySlug] = useState('')
-  const [neighborhoodSlug, setNeighborhoodSlug] = useState(neighborhoods[0]?.slug || '') // Default to first neighborhood
+  const [neighborhoodSlug, setNeighborhoodSlug] = useState('') // Empty by default
   const [error, setError] = useState('')
   const [recentSearches, setRecentSearches] = useState<RecentSearch[]>([])
   const [variant, setVariant] = useState<'control' | 'treatment'>('treatment')
   const [valuesRestored, setValuesRestored] = useState(false)
   const categoryRef = useRef<HTMLSelectElement>(null)
   const neighborhoodRef = useRef<HTMLSelectElement>(null)
+  const isInitialMount = useRef(true)
 
   // Get subcategories for selected category
   const selectedCategory = categories.find(c => c.slug === categorySlug)
   const availableSubcategories = selectedCategory?.subcategories || []
 
-  // Load recent searches and restore last form values on mount
+  // Load recent searches and restore form values on back navigation
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const recent = getRecentSearches()
       setRecentSearches(recent.slice(0, 3)) // Show max 3
 
-      // Restore last search form values
-      const lastFormValues = localStorage.getItem('lastSearchFormValues')
-      if (lastFormValues) {
-        try {
-          const parsed = JSON.parse(lastFormValues)
-          if (parsed.categorySlug) {
-            setCategorySlug(parsed.categorySlug)
-          }
-          if (parsed.subcategorySlug) {
-            setSubcategorySlug(parsed.subcategorySlug)
-          }
-          if (parsed.neighborhoodSlug) {
-            // Verify the neighborhood still exists
-            const validNeighborhood = neighborhoods.find(n => n.slug === parsed.neighborhoodSlug)
-            if (validNeighborhood) {
-              setNeighborhoodSlug(parsed.neighborhoodSlug)
+      // Detect if user arrived via back/forward navigation
+      const isBackForwardNavigation =
+        window.performance?.navigation?.type === 2 || // Legacy API
+        (window.performance?.getEntriesByType?.('navigation')?.[0] as PerformanceNavigationTiming | undefined)?.type === 'back_forward' // New API
+
+      if (isBackForwardNavigation) {
+        // User pressed back/forward - restore their last choice
+        const lastFormValues = localStorage.getItem('lastSearchFormValues')
+        if (lastFormValues) {
+          try {
+            const parsed = JSON.parse(lastFormValues)
+            if (parsed.categorySlug) {
+              setCategorySlug(parsed.categorySlug)
             }
+            if (parsed.subcategorySlug) {
+              setSubcategorySlug(parsed.subcategorySlug)
+            }
+            if (parsed.neighborhoodSlug) {
+              // Verify the neighborhood still exists
+              const validNeighborhood = neighborhoods.find(n => n.slug === parsed.neighborhoodSlug)
+              if (validNeighborhood) {
+                setNeighborhoodSlug(parsed.neighborhoodSlug)
+              }
+            }
+            setValuesRestored(true)
+          } catch (e) {
+            console.error('Error restoring form values:', e)
           }
-          setValuesRestored(true)
-        } catch (e) {
-          console.error('Error restoring form values:', e)
         }
+      } else {
+        // Fresh page load or refresh - clear everything (empty state)
+        localStorage.removeItem('lastSearchFormValues')
+        // All filters remain empty - geolocation will handle neighborhood if user approves
       }
     }
   }, [neighborhoods])
@@ -151,6 +163,27 @@ export default function SearchForm({
 
     autoDetectLocation()
   }, [neighborhoods, trackEvent])
+
+  // Mark initial mount as complete after first render
+  useEffect(() => {
+    isInitialMount.current = false
+  }, [])
+
+  // Save neighborhood selection to localStorage immediately (for cross-component consistency)
+  // This ensures PopularCategoryCard and other components can read the latest selection
+  useEffect(() => {
+    // Skip during initial mount (prevents saving geolocation/restored values)
+    // After that, save any neighborhood change to localStorage
+    if (!isInitialMount.current && typeof window !== 'undefined' && neighborhoodSlug) {
+      const currentValues = localStorage.getItem('lastSearchFormValues')
+      const parsed = currentValues ? JSON.parse(currentValues) : {}
+
+      localStorage.setItem('lastSearchFormValues', JSON.stringify({
+        ...parsed,
+        neighborhoodSlug
+      }))
+    }
+  }, [neighborhoodSlug])
 
   // Set custom validation messages for category
   useEffect(() => {
@@ -253,11 +286,16 @@ export default function SearchForm({
   // Check if any filters are applied
   const hasFiltersApplied = categorySlug !== '' || subcategorySlug !== ''
 
-  // Clear all filters
+  // Clear all filters - reset to empty state
   const handleClearFilters = () => {
     setCategorySlug('')
     setSubcategorySlug('')
     setError('')
+
+    // Clear localStorage when user manually clears
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('lastSearchFormValues')
+    }
   }
 
   return (
@@ -392,11 +430,11 @@ export default function SearchForm({
               </select>
             </div>
           ) : (
-            /* TREATMENT: New Segmented Buttons Design - All 4 in single row */
+            /* TREATMENT: New Segmented Buttons Design - Responsive grid */
             <div
               role="radiogroup"
               aria-labelledby="neighborhood-label"
-              className="grid grid-cols-4 gap-2"
+              className="grid grid-cols-2 sm:grid-cols-4 gap-2"
             >
               {neighborhoods.map((hood) => (
                 <button
