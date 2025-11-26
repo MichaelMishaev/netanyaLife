@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 interface Business {
   id: string
@@ -22,22 +22,56 @@ export default function LatestBusinessesCarousel({
   locale,
 }: LatestBusinessesCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(true)
+  const containerRef = useRef<HTMLDivElement>(null)
 
-  // Auto-scroll every 4 seconds
+  // Create infinite loop by triplicating the array
+  // This ensures smooth loop without jumps
+  const infiniteBusinesses = [...businesses, ...businesses, ...businesses]
+
+  // Start from the middle copy to allow seamless backward loop
+  const startIndex = businesses.length
+
+  useEffect(() => {
+    // Set initial position to middle copy (without animation)
+    setCurrentIndex(startIndex)
+    setIsTransitioning(false)
+
+    const timer = setTimeout(() => {
+      setIsTransitioning(true)
+    }, 50)
+
+    return () => clearTimeout(timer)
+  }, [startIndex])
+
+  // Auto-scroll every 3.5 seconds
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => {
-        // Move to next business, loop back to start if at end
-        const nextIndex = prevIndex + 1
-        return nextIndex >= businesses.length ? 0 : nextIndex
-      })
-    }, 4000) // Change every 4 seconds
+      setCurrentIndex((prev) => prev + 1)
+    }, 3500)
 
     return () => clearInterval(interval)
-  }, [businesses.length])
+  }, [])
 
-  // Create extended list for seamless loop (duplicate businesses for smooth transition)
-  const extendedBusinesses = [...businesses, ...businesses.slice(0, 3)]
+  // Handle seamless loop reset
+  useEffect(() => {
+    if (currentIndex >= businesses.length * 2) {
+      // Reached end of second copy, jump back to start of second copy
+      const timer = setTimeout(() => {
+        setIsTransitioning(false)
+        setCurrentIndex(startIndex)
+
+        setTimeout(() => {
+          setIsTransitioning(true)
+        }, 50)
+      }, 1000) // Wait for transition to complete
+
+      return () => clearTimeout(timer)
+    }
+  }, [currentIndex, businesses.length, startIndex])
+
+  // Calculate which business from original array is currently shown
+  const displayIndex = currentIndex % businesses.length
 
   return (
     <div className="rounded-xl border border-gray-200/50 bg-white/60 shadow-sm backdrop-blur-sm">
@@ -48,18 +82,24 @@ export default function LatestBusinessesCarousel({
         </h3>
       </div>
 
-      {/* Latest Businesses List with Scrolling Animation */}
-      <div className="overflow-hidden">
+      {/* Carousel Container - Fixed height for 3 items */}
+      <div
+        ref={containerRef}
+        className="relative overflow-hidden"
+        style={{ height: '195px' }} // ~65px per item × 3 = 195px
+      >
         <div
-          className="divide-y divide-gray-100 p-2 transition-transform duration-1000 ease-in-out"
+          className="divide-y divide-gray-100"
           style={{
-            transform: `translateY(-${currentIndex * 33.33}%)`,
+            transform: `translateY(-${currentIndex * 65}px)`,
+            transition: isTransitioning ? 'transform 1000ms ease-in-out' : 'none',
           }}
         >
-          {extendedBusinesses.map((business, index) => (
+          {infiniteBusinesses.map((business, index) => (
             <div
               key={`${business.id}-${index}`}
-              className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-gray-50/50"
+              className="flex items-center justify-between px-6 py-3 transition-colors hover:bg-gray-50/50"
+              style={{ minHeight: '65px' }}
             >
               <div className="flex min-w-0 flex-col">
                 <div className="truncate text-sm font-semibold text-gray-800">
@@ -84,12 +124,12 @@ export default function LatestBusinessesCarousel({
       </div>
 
       {/* Pagination Dots */}
-      <div className="flex items-center justify-center gap-1.5 px-6 py-3">
+      <div className="flex items-center justify-center gap-1.5 border-t border-gray-100 px-6 py-3">
         {businesses.map((_, index) => (
           <div
             key={index}
             className={`h-1.5 rounded-full transition-all duration-300 ${
-              index === currentIndex % businesses.length
+              index === displayIndex
                 ? 'w-6 bg-primary-600'
                 : 'w-1.5 bg-gray-300'
             }`}
