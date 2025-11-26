@@ -3,6 +3,7 @@ import { getCategories } from '@/lib/queries/categories'
 import { getNeighborhoods, getNetanyaCity } from '@/lib/queries/neighborhoods'
 import SearchForm from '@/components/client/SearchForm'
 import RecentlyViewed from '@/components/client/RecentlyViewed'
+import HomepageStats from '@/components/server/HomepageStats'
 import { Metadata } from 'next'
 
 export async function generateMetadata({
@@ -115,6 +116,11 @@ export default async function Home({
                 locale={locale}
               />
             </div>
+          </section>
+
+          {/* Homepage Stats Section */}
+          <section className="flex justify-center animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+            <HomepageStats locale={locale} />
           </section>
         </div>
       </div>

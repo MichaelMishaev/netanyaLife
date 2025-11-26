@@ -234,16 +234,47 @@ async function main() {
   // ============================================================================
   console.log('\n⚙️  Seeding admin settings...')
 
-  const topPinnedCount = await prisma.adminSettings.upsert({
-    where: { key: 'top_pinned_count' },
-    update: {},
-    create: {
+  const settings = [
+    {
       key: 'top_pinned_count',
       value: '4',
       description: 'Number of pinned businesses to show at top of search results',
     },
-  })
-  console.log(`✅ Setting: ${topPinnedCount.key} = ${topPinnedCount.value}`)
+    {
+      key: 'show_homepage_stats',
+      value: 'true',
+      description: 'Show/hide the stats section on homepage (businesses, reviews, neighborhoods count)',
+    },
+    {
+      key: 'stats_business_threshold',
+      value: '1',
+      description: 'Minimum number of visible businesses required to show stats section',
+    },
+    {
+      key: 'show_business_count',
+      value: 'true',
+      description: 'Show business count in homepage stats',
+    },
+    {
+      key: 'show_review_count',
+      value: 'true',
+      description: 'Show total review count in homepage stats',
+    },
+    {
+      key: 'show_neighborhood_count',
+      value: 'true',
+      description: 'Show neighborhood count in homepage stats',
+    },
+  ]
+
+  for (const setting of settings) {
+    const created = await prisma.adminSettings.upsert({
+      where: { key: setting.key },
+      update: {},
+      create: setting,
+    })
+    console.log(`✅ Setting: ${created.key} = ${created.value}`)
+  }
 
   // ============================================================================
   // 6. SAMPLE BUSINESSES (for testing)
@@ -485,7 +516,7 @@ async function main() {
   console.log(`   - ${businesses.length} sample businesses`)
   console.log(`   - ${reviewsData.length} sample reviews`)
   console.log(`   - 1 admin user (${adminEmail})`)
-  console.log(`   - 1 admin setting`)
+  console.log(`   - ${settings.length} admin settings`)
 }
 
 main()
