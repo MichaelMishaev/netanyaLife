@@ -16,15 +16,15 @@ export async function POST(request: NextRequest) {
 
     // 1. Seed city
     const city = await prisma.city.upsert({
-      where: { name_en: 'Netanya' },
+      where: { slug: 'netanya' },
       update: {},
       create: {
         name_he: 'נתניה',
         name_ru: 'Нетания',
-        name_en: 'Netanya',
+        slug: 'netanya',
       },
     })
-    console.log('✅ City seeded:', city.name_en)
+    console.log('✅ City seeded:', city.slug)
 
     // 2. Seed neighborhoods
     const neighborhoodsData = [
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       success: true,
       message: 'Database seeded successfully',
       data: {
-        city: city.name_en,
+        city: city.slug,
         neighborhoods: neighborhoodsData.length,
         categories: categoriesData.length,
       },
