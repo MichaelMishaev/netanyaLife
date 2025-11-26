@@ -1,6 +1,6 @@
 ---
 name: accessibility-auditor
-description: WCAG AA accessibility compliance auditor for Netanya Local. MUST BE USED for accessibility testing, Israeli W3C compliance, and inclusive design verification.
+description: WCAG AA accessibility compliance auditor for קהילת נתניה. MUST BE USED for accessibility testing, Israeli W3C compliance, and inclusive design verification.
 tools: Read, Grep, Glob, Bash
 model: haiku
 ---

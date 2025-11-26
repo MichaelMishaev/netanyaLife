@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const t = await getTranslations({ locale: params.locale, namespace: 'businessOwner.login' })
 
   return {
-    title: `${t('title')} | Netanya Local`,
+    title: `${t('title')} | ${params.locale === 'he' ? 'קהילת נתניה' : 'Сообщество Нетании'}`,
     description: t('subtitle'),
   }
 }

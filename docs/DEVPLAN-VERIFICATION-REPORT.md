@@ -169,8 +169,8 @@ export interface FilterOptions {
 **Share Text Format**:
 ```typescript
 const shareText = locale === 'he'
-  ? `מצאתי את ${businessName} דרך Netanya Local 🎯\n${businessUrl}`
-  : `Нашел(а) ${businessName} через Netanya Local 🎯\n${businessUrl}`
+  ? `מצאתי את ${businessName} דרך קהילת נתניה 🎯\n${businessUrl}`
+  : `Нашел(а) ${businessName} через קהילת נתניה 🎯\n${businessUrl}`
 ```
 
 **DevPlan Requirement**: ✅ MATCH
@@ -339,7 +339,7 @@ export async function generateMetadata({
 - ✅ title
 - ✅ description
 - ✅ url
-- ✅ siteName: 'Netanya Local'
+- ✅ siteName: 'קהילת נתניה'
 - ✅ locale (he_IL / ru_RU)
 - ✅ alternateLocale
 - ✅ type: 'website'
@@ -404,7 +404,7 @@ alternates: {
 - `app/[locale]/search/[category]/[neighborhood]/page.tsx:82` → `/og-image.png`
 
 **Impact**: Medium - Social media previews will show broken images
-**Recommendation**: Create default OG images with Netanya Local branding
+**Recommendation**: Create default OG images with קהילת נתניה branding
 
 **DevPlan Requirement**: ⚠️ PARTIAL MATCH (referenced but not created)
 **Reference**: `05-component-architecture.md:1110-1114`, `06-implementation-priorities.md:665,677`
@@ -446,7 +446,7 @@ const assistant = Assistant({
 **Features**:
 - ✅ Hides navigation, buttons, interactive elements
 - ✅ Shows essential content only
-- ✅ Attribution footer: "מקור: Netanya Local - netanyalocal.com"
+- ✅ Attribution footer: "מקור: קהילת נתניה - netanyalocal.com"
 - ✅ Link URLs printed after links
 - ✅ Page break controls
 - ✅ Optimized for printing business details
@@ -574,7 +574,7 @@ export default function ResultsHeader({
 
 **What to do**:
 1. Create `public/og-image.png` (1200x630px)
-   - Netanya Local logo
+   - קהילת נתניה logo
    - "מדריך העסקים של נתניה"
    - Gradient blue background
 

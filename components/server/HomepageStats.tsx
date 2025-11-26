@@ -101,12 +101,12 @@ export default async function HomepageStats({ locale }: HomepageStatsProps) {
     <div className="w-full max-w-2xl space-y-4" dir={locale === 'he' ? 'rtl' : 'ltr'}>
       {/* Business Count - Standalone (if enabled) */}
       {showBusinessCount && (
-        <div className="flex items-center justify-center gap-3 rounded-xl border border-primary-200 bg-gradient-to-r from-primary-50 to-blue-50 px-8 py-5 shadow-sm">
-          <div className="text-4xl font-bold text-primary-600">
+        <div className="flex items-center justify-center gap-2 rounded-lg border border-primary-200 bg-gradient-to-r from-primary-50 to-blue-50 px-4 py-2.5 shadow-sm">
+          <div className="text-2xl font-bold text-primary-600">
             {formatCount(businessCount)}
           </div>
-          <div className="text-lg font-semibold text-gray-700">
-            {locale === 'he' ? 'עסקים מאומתים' : 'Проверенных предприятий'}
+          <div className="text-sm font-semibold text-gray-700">
+            {locale === 'he' ? 'עסקים שהצטרפו' : 'Присоединившихся бизнесов'}
           </div>
         </div>
       )}

@@ -659,7 +659,7 @@ module.exports = withPWA({
 **Manifest** (`public/manifest.json`):
 ```json
 {
-  "name": "Netanya Local – מדריך עסקים בנתניה",
+  "name": "קהילת נתניה – מדריך עסקים בנתניה",
   "short_name": "NetanyaLocal",
   "lang": "he",
   "dir": "rtl",

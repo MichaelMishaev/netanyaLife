@@ -67,7 +67,7 @@ export default async function BusinessPortalLayout({ children, params }: LayoutP
                 {/* Desktop: Full brand with subtitle */}
                 <div className="hidden flex-col sm:flex">
                   <span className="text-lg font-bold leading-tight">
-                    {isRTL ? 'קהילת נתניה' : 'Netanya Local'}
+                    {isRTL ? 'קהילת נתניה' : 'Сообщество Нетании'}
                   </span>
                   <span className="text-xs text-gray-500">
                     {isRTL ? 'פורטל בעלי עסקים' : 'Портал владельцев'}

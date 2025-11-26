@@ -1,6 +1,6 @@
-# Netanya Local - Project Summary
+# קהילת נתניה - Project Summary
 
-**Project**: Netanya Local Business Directory
+**Project**: קהילת נתניה Business Directory
 **Status**: ✅ Production Ready
 **Version**: 1.0.0
 **Completion Date**: November 15, 2025

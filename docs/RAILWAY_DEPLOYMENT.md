@@ -1,6 +1,6 @@
 # Railway Deployment Guide
 
-**Project**: Netanya Local Business Directory
+**Project**: קהילת נתניה Business Directory
 **Platform**: Railway
 **Date**: 2025-11-15
 **Status**: Production Ready 🚀

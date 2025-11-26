@@ -1,4 +1,4 @@
-# Quick Reference - Netanya Local V2.0
+# Quick Reference - קהילת נתניה V2.0
 
 **Read Time**: 5 minutes
 **Purpose**: Fast overview for busy developers
@@ -9,7 +9,7 @@
 
 | Aspect | Details |
 |--------|---------|
-| **Name** | Netanya Local - קהילת נתניה |
+| **Name** | קהילת נתניה - קהילת נתניה |
 | **Type** | Hyper-local business directory PWA |
 | **Users** | Netanya residents only |
 | **Languages** | Hebrew (RTL) + Russian (LTR) |

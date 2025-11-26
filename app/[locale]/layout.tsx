@@ -31,7 +31,7 @@ const PWAInstaller = dynamicImport(
 )
 
 export const metadata: Metadata = {
-  title: 'Netanya Local - קהילת נתניה',
+  title: 'קהילת נתניה',
   description:
     'מדריך עסקים מקומיים בנתניה - Local business directory for Netanya residents',
   metadataBase: new URL('https://netanya.business'),
@@ -43,16 +43,16 @@ export const metadata: Metadata = {
     apple: '/apple-touch-icon.png',
   },
   openGraph: {
-    title: 'Netanya Local - קהילת נתניה',
+    title: 'קהילת נתניה',
     description: 'מדריך עסקים מקומיים בנתניה - Local business directory for Netanya residents',
     url: 'https://netanya.business',
-    siteName: 'Netanya Local',
+    siteName: 'קהילת נתניה',
     images: [
       {
         url: '/og-image.png',
         width: 1024,
         height: 1024,
-        alt: 'Netanya Local Logo',
+        alt: 'קהילת נתניה',
       },
     ],
     locale: 'he_IL',
@@ -60,7 +60,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Netanya Local - קהילת נתניה',
+    title: 'קהילת נתניה',
     description: 'מדריך עסקים מקומיים בנתניה - Local business directory for Netanya residents',
     images: ['/og-image.png'],
   },
@@ -109,7 +109,7 @@ export default async function LocaleLayout({
           name="apple-mobile-web-app-status-bar-style"
           content="default"
         />
-        <meta name="apple-mobile-web-app-title" content="Netanya Local" />
+        <meta name="apple-mobile-web-app-title" content="קהילת נתניה" />
       </head>
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         {/* Google Analytics */}

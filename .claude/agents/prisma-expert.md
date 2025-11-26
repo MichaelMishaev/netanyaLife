@@ -1,6 +1,6 @@
 ---
 name: prisma-expert
-description: Prisma ORM and PostgreSQL database specialist for Netanya Local. Use proactively for schema design, query optimization, and database operations.
+description: Prisma ORM and PostgreSQL database specialist for קהילת נתניה. Use proactively for schema design, query optimization, and database operations.
 tools: Read, Edit, Bash, Grep, Glob
 model: sonnet
 ---

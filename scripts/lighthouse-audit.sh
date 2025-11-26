@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Lighthouse Audit Script for Netanya Local
+# Lighthouse Audit Script for קהילת נתניה
 # Audits all key pages and generates reports
 
 echo "🔍 Running Lighthouse audits on all key pages..."

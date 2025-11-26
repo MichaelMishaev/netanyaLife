@@ -4,20 +4,47 @@
  */
 
 export const CATEGORY_ICONS: Record<string, string> = {
-  // Existing categories based on seed data
+  // Trade Services
   'electricians': '⚡',
   'plumbers': '🚰',
   'locksmiths': '🔐',
   'painters': '🎨',
   'cleaners': '🧹',
+  'cleaning': '🧹',
   'movers': '📦',
   'gardeners': '🌿',
+  'gardening': '🌿',
   'handyman': '🔧',
   'pest-control': '🐛',
   'appliance-repair': '🔌',
   'carpenters': '🪚',
   'roofers': '🏠',
-  // Add more as needed
+  'ac-technicians': '❄️',
+  'electricians-industrial': '⚙️',
+  'sewing': '🧵',
+
+  // Health & Medical
+  'health-wellness': '🧘',
+  'doctors': '⚕️',
+
+  // Education & Learning
+  'education-learning': '🎓',
+  'tutors': '📚',
+
+  // Consulting & Professional Services
+  'financial-consulting': '💰',
+  'digital-consulting': '💻',
+  'lawyers': '⚖️',
+  'business-services': '💼',
+  'real-estate': '🏢',
+
+  // Personal & Lifestyle
+  'hair-beauty-cosmetics': '💇',
+  'food-events-activities': '🎉',
+  'transportation': '🚗',
+  'home-services': '🏡',
+  'personal-electronics': '📱',
+  'environment-animals': '🐾',
 }
 
 /**

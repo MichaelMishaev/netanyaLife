@@ -326,7 +326,7 @@ describe('Search Results Ordering', () => {
 🏙️ {Business Name}
 {Category} • {Neighborhood}
 
-✨ נמצא ב-Netanya Local - מדריך העסקים של נתניה
+✨ נמצא ב-קהילת נתניה - מדריך העסקים של נתניה
 {URL}
 ```
 
@@ -720,7 +720,7 @@ test('offline fallback shows when offline')
     display: none !important;
   }
   .business-detail:after {
-    content: "מקור: Netanya Local - netanyalocal.com";
+    content: "מקור: קהילת נתניה - netanyalocal.com";
   }
 }
 ```

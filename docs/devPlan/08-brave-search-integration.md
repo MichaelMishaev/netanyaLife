@@ -247,7 +247,7 @@ export async function braveLocalSearch(params: BraveLocalSearchParams) {
 
 ---
 
-## Use Cases in Netanya Local Project
+## Use Cases in קהילת נתניה Project
 
 ### 1. Business Discovery Enhancement
 When a user searches for a service type in a neighborhood, supplement our database results with live Brave Local Search results:

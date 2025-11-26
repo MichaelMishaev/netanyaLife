@@ -126,7 +126,7 @@ export async function GET() {
             }}
           >
             <div style={{ display: 'flex' }}>📍</div>
-            <div style={{ display: 'flex' }}>Netanya Local</div>
+            <div style={{ display: 'flex' }}>קהילת נתניה</div>
           </div>
         </div>
 

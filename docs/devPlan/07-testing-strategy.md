@@ -551,7 +551,7 @@ test.describe('PWA Functionality', () => {
       fetch('/manifest.json').then(r => r.json())
     )
 
-    expect(manifest.name).toBe('Netanya Local – מדריך עסקים בנתניה')
+    expect(manifest.name).toBe('קהילת נתניה – מדריך עסקים בנתניה')
     expect(manifest.short_name).toBe('NetanyaLocal')
     expect(manifest.lang).toBe('he')
     expect(manifest.dir).toBe('rtl')

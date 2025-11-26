@@ -1,6 +1,6 @@
 # Search Form UX Redesign - Detailed Specification
 
-**Project**: Netanya Local
+**Project**: קהילת נתניה
 **Date**: 2025-11-17
 **Design Version**: 2.0 (Improved Mobile-First)
 **Status**: Implementation Ready

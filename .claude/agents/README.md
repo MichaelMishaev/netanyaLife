@@ -1,6 +1,6 @@
-# Netanya Local - Custom Subagents
+# קהילת נתניה - Custom Subagents
 
-This directory contains specialized AI subagents for the Netanya Local project. These agents are automatically available in Claude Code and will be invoked when relevant tasks are detected.
+This directory contains specialized AI subagents for the קהילת נתניה project. These agents are automatically available in Claude Code and will be invoked when relevant tasks are detected.
 
 ## Available Subagents
 
@@ -168,7 +168,7 @@ Each agent has specific tool permissions:
 
 ## Project-Specific Context
 
-All agents include Netanya Local project context:
+All agents include קהילת נתניה project context:
 - Bilingual (Hebrew RTL + Russian LTR)
 - Next.js 14 App Router
 - Prisma ORM + PostgreSQL
@@ -209,5 +209,5 @@ These agents are checked into version control so your team benefits from them. A
 ---
 
 **Created**: November 15, 2025
-**Project**: Netanya Local Business Directory
+**Project**: קהילת נתניה Business Directory
 **Total Agents**: 6 specialized subagents

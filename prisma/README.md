@@ -1,6 +1,6 @@
 # Prisma Database Schema
 
-This folder contains the database schema and migrations for Netanya Local.
+This folder contains the database schema and migrations for קהילת נתניה.
 
 ## Schema Overview
 

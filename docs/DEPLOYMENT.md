@@ -1,6 +1,6 @@
-# Railway Deployment Guide - Netanya Local
+# Railway Deployment Guide - קהילת נתניה
 
-This guide covers the deployment process for the Netanya Local application on Railway.
+This guide covers the deployment process for the קהילת נתניה application on Railway.
 
 ## Prerequisites
 

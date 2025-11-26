@@ -21,8 +21,8 @@ export default function ShareButton({
 
   const shareText =
     locale === 'he'
-      ? `מצאתי את ${businessName} דרך Netanya Local 🎯\n${businessUrl}`
-      : `Нашел(а) ${businessName} через Netanya Local 🎯\n${businessUrl}`
+      ? `מצאתי את ${businessName} דרך קהילת נתניה 🎯\n${businessUrl}`
+      : `Нашел(а) ${businessName} через Сообщество Нетании 🎯\n${businessUrl}`
 
   const showToastMessage = (message: string, type: 'success' | 'error' = 'success') => {
     setToastMessage(message)

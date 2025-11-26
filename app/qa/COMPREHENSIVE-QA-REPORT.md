@@ -1,4 +1,4 @@
-# Comprehensive QA Testing Report - Netanya Local
+# Comprehensive QA Testing Report - קהילת נתניה
 **Date**: 2025-11-25
 **Tested Version**: Main branch (HEAD: dc60ae6)
 **Scope**: Admin → Business → User chain business logic
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-The Netanya Local project demonstrates **mature, well-architected code** with comprehensive error handling, data validation, and business logic implementation. The recent focus on error message improvements and database constraint validation has significantly strengthened the user experience.
+The קהילת נתניה project demonstrates **mature, well-architected code** with comprehensive error handling, data validation, and business logic implementation. The recent focus on error message improvements and database constraint validation has significantly strengthened the user experience.
 
 **Key Metrics**:
 - ✅ Critical business logic: Implemented correctly

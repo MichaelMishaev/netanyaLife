@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This security audit evaluates Netanya Local business directory application for common web vulnerabilities and security best practices. All critical security measures are in place.
+This security audit evaluates קהילת נתניה business directory application for common web vulnerabilities and security best practices. All critical security measures are in place.
 
 ### Overall Security Score: **98/100**
 
@@ -420,7 +420,7 @@ secure: process.env.NODE_ENV === 'production'
 
 ## Conclusion
 
-The Netanya Local application demonstrates **excellent security practices** with a score of **98/100**. All critical security measures are properly implemented:
+The קהילת נתניה application demonstrates **excellent security practices** with a score of **98/100**. All critical security measures are properly implemented:
 
 - ✅ Passwords securely hashed with bcrypt
 - ✅ Environment variables not exposed to client

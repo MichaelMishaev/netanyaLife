@@ -1,6 +1,6 @@
 ---
 name: admin-tester
-description: Admin panel testing specialist for Netanya Local. Use proactively to test admin CRUD operations, authentication, and business management workflows.
+description: Admin panel testing specialist for קהילת נתניה. Use proactively to test admin CRUD operations, authentication, and business management workflows.
 tools: Read, Bash, Grep, Glob
 model: haiku
 ---

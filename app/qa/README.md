@@ -1,6 +1,6 @@
 # QA Automation Suite
 
-This directory contains documentation for E2E automation tests for the Netanya Local business directory platform.
+This directory contains documentation for E2E automation tests for the קהילת נתניה business directory platform.
 
 ## Test: Business Registration & Approval Flow
 

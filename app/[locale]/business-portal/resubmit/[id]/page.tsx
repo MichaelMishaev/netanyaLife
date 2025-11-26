@@ -17,7 +17,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   return {
-    title: `${params.locale === 'he' ? 'ערוך ושלח שוב' : 'Редактировать и отправить снова'} | Netanya Local`,
+    title: `${params.locale === 'he' ? 'ערוך ושלח שוב' : 'Редактировать и отправить снова'} | ${params.locale === 'he' ? 'קהילת נתניה' : 'Сообщество Нетании'}`,
   }
 }
 

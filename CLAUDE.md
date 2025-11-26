@@ -12,7 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Netanya Local** - Hyper-local business directory exclusively for Netanya residents, divided by neighborhoods.
+**קהילת נתניה (Netanya Community)** - Hyper-local business directory exclusively for Netanya residents, divided by neighborhoods.
 
 - **Target City**: נתניה (Netanya, Israel)
 - **Primary Language**: Hebrew (RTL)
@@ -115,8 +115,8 @@ Admin (Protected):
 **manifest.webmanifest**:
 ```json
 {
-  "name": "Netanya Local – מדריך עסקים בנתניה",
-  "short_name": "NetanyaLocal",
+  "name": "קהילת נתניה – מדריך עסקים בנתניה",
+  "short_name": "קהילת נתניה",
   "lang": "he",
   "start_url": "/he",
   "display": "standalone",

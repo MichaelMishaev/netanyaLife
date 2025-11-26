@@ -1,6 +1,6 @@
 # Browser Compatibility Checklist
 
-This document tracks browser compatibility testing for Netanya Local business directory.
+This document tracks browser compatibility testing for קהילת נתניה business directory.
 
 ## Test Environment
 

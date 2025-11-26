@@ -71,7 +71,7 @@ export async function generateMetadata({
       title,
       description: metaDescription,
       url,
-      siteName: 'Netanya Local',
+      siteName: locale === 'he' ? 'קהילת נתניה' : 'Сообщество Нетании',
       locale: locale === 'he' ? 'he_IL' : 'ru_RU',
       alternateLocale: locale === 'he' ? 'ru_RU' : 'he_IL',
       type: 'website',

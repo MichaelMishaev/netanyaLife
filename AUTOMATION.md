@@ -72,7 +72,7 @@ This will show you a menu:
 
 ```
 ╔══════════════════════════════════════════════════════╗
-║  Netanya Local - E2E Automation Test Runner         ║
+║  קהילת נתניה - E2E Automation Test Runner         ║
 ╔══════════════════════════════════════════════════════╗
 
 Choose a test suite to run:
@@ -291,6 +291,6 @@ ls test-results/automation/
 
 ---
 
-**Created for**: Netanya Local Business Directory
+**Created for**: קהילת נתניה Business Directory
 **Automation Coverage**: Category search, business submission, user journeys, i18n
 **Last Updated**: 2025

@@ -92,7 +92,7 @@ export async function GET() {
               display: 'flex',
             }}
           >
-            Netanya Local
+            קהילת נתניה
           </div>
 
           {/* Subtitle in Hebrew */}

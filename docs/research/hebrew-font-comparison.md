@@ -194,7 +194,7 @@ Bold (700):     א ב ג ד ה ו ז ח ט
 <nav class="bg-blue-600 text-white p-4">
   <!-- Logo (XL, Bold) -->
   <div class="text-xl font-bold mb-4">
-    Netanya Local
+    קהילת נתניה
   </div>
 
   <!-- Menu items (Base, Medium) -->

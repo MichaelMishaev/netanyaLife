@@ -30,8 +30,8 @@ export async function generateMetadata({
 
   const title =
     locale === 'he'
-      ? 'הוסף עסק - Netanya Local | רשום את העסק שלך בנתניה'
-      : 'Добавить бизнес - Netanya Local | Зарегистрируйте свой бизнес в Нетании'
+      ? 'הוסף עסק - קהילת נתניה | רשום את העסק שלך בנתניה'
+      : 'Добавить бизнес - Сообщество Нетании | Зарегистрируйте свой бизнес в Нетании'
 
   const description =
     locale === 'he'
@@ -53,7 +53,7 @@ export async function generateMetadata({
       title,
       description,
       url,
-      siteName: 'Netanya Local',
+      siteName: locale === 'he' ? 'קהילת נתניה' : 'Сообщество Нетании',
       locale: locale === 'he' ? 'he_IL' : 'ru_RU',
       alternateLocale: locale === 'he' ? 'ru_RU' : 'he_IL',
       type: 'website',
@@ -62,7 +62,7 @@ export async function generateMetadata({
           url: `${baseUrl}/og-image.png`,
           width: 1200,
           height: 630,
-          alt: 'Netanya Local - Add Business',
+          alt: locale === 'he' ? 'קהילת נתניה' : 'Сообщество Нетании',
         },
       ],
     },

@@ -109,7 +109,7 @@ const truncatedDesc = business.description
 **Features Implemented** (Beyond Original Request):
 - ✅ WhatsApp share with pre-filled text
 - ✅ Copy link with attribution
-- ✅ **Attribution text**: "✨ נמצא ב-Netanya Local - מדריך העסקים של נתניה"
+- ✅ **Attribution text**: "✨ נמצא ב-קהילת נתניה - מדריך העסקים של נתניה"
 - ✅ Web Share API (native mobile share)
 - ✅ Fallback custom dialog for desktop
 - ✅ Visual preview of share text
@@ -121,7 +121,7 @@ const truncatedDesc = business.description
 🏙️ {Business Name}
 {Category} • {Neighborhood}
 
-✨ נמצא ב-Netanya Local - מדריך העסקים של נתניה
+✨ נמצא ב-קהילת נתניה - מדריך העסקים של נתניה
 {URL}
 ```
 
@@ -241,7 +241,7 @@ const handleBack = () => {
 - Shows full URLs for links
 - Grayscale conversion
 - Page break handling
-- **Attribution footer**: "מקור: Netanya Local - netanyalocal.com"
+- **Attribution footer**: "מקור: קהילת נתניה - netanyalocal.com"
 - Optimized margins (@page { margin: 2cm; })
 
 **Hidden on Print**:
@@ -276,7 +276,7 @@ const handleBack = () => {
   url: 'https://netanyalocal.com/he/business/yossi-electrician',
   title: 'יוסי החשמלאי - חשמלאים בנתניה',
   description: '...',
-  siteName: 'Netanya Local',
+  siteName: 'קהילת נתניה',
   images: [{ url: '...', width: 1200, height: 630 }]
 }
 ```

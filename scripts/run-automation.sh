@@ -16,7 +16,7 @@ NC='\033[0m' # No Color
 mkdir -p test-results/automation
 
 echo -e "${BLUE}╔══════════════════════════════════════════════════════╗${NC}"
-echo -e "${BLUE}║  Netanya Local - E2E Automation Test Runner         ║${NC}"
+echo -e "${BLUE}║  קהילת נתניה - E2E Automation Test Runner         ║${NC}"
 echo -e "${BLUE}╔══════════════════════════════════════════════════════╗${NC}"
 echo ""
 

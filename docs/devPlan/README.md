@@ -1,4 +1,4 @@
-# Netanya Local - Development Plan V2.0
+# קהילת נתניה - Development Plan V2.0
 
 **Status**: ✅ Production Ready
 **Version**: 2.0 (Final)

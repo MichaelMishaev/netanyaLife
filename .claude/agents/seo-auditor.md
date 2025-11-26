@@ -1,6 +1,6 @@
 ---
 name: seo-auditor
-description: SEO and structured data auditor for Netanya Local. Use proactively to verify Open Graph tags, Twitter Cards, hreflang tags, and LocalBusiness schema compliance.
+description: SEO and structured data auditor for קהילת נתניה. Use proactively to verify Open Graph tags, Twitter Cards, hreflang tags, and LocalBusiness schema compliance.
 tools: Read, Grep, Glob, Bash
 model: haiku
 ---
@@ -32,7 +32,7 @@ You are an SEO specialist focused on local business SEO and structured data comp
 - [ ] `og:title` - Business name with context
 - [ ] `og:description` - Compelling description with stats
 - [ ] `og:url` - Full URL with locale
-- [ ] `og:siteName` - "Netanya Local"
+- [ ] `og:siteName` - "קהילת נתניה"
 - [ ] `og:locale` - "he_IL" or "ru_RU"
 - [ ] `og:alternateLocale` - Other language
 - [ ] `og:type` - "website" or "business.business"

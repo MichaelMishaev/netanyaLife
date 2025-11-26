@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-**Project**: Netanya Local - Hyper-local business directory
+**Project**: קהילת נתניה - Hyper-local business directory
 **Target**: Israeli market (Hebrew RTL primary, Russian LTR secondary)
 **Key Requirements**: Mobile-first PWA, SEO, Accessibility (WCAG AA), Analytics, Bilingual
 

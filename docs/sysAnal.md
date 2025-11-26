@@ -1,5 +1,5 @@
 1. Product Overview
-Name (placeholder): “Netanya Local” (you can rename later)
+Name (placeholder): “קהילת נתניה” (you can rename later)
 Goal: Hyper-local business directory only for Netanya residents, divided by neighborhoods.
 Main language: Hebrew (RTL)
 Secondary: Russian (LTR)
@@ -280,7 +280,7 @@ created_at
 5. PWA & SEO
 PWA
 manifest.webmanifest:
-name: “Netanya Local – מדריך עסקים בנתניה”
+name: “קהילת נתניה – מדריך עסקים בנתניה”
 short_name: “NetanyaLocal”
 lang: he
 start_url: /he

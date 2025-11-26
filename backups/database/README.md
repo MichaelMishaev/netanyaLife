@@ -1,6 +1,6 @@
 # Database Backups
 
-This folder contains database backups for the Netanya Local project.
+This folder contains database backups for the קהילת נתניה project.
 
 ## Backup Files
 

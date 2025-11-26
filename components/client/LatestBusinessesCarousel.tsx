@@ -23,6 +23,7 @@ export default function LatestBusinessesCarousel({
 }: LatestBusinessesCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isTransitioning, setIsTransitioning] = useState(true)
+  const [isPaused, setIsPaused] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Create infinite loop by triplicating the array
@@ -44,14 +45,16 @@ export default function LatestBusinessesCarousel({
     return () => clearTimeout(timer)
   }, [startIndex])
 
-  // Auto-scroll every 3.5 seconds
+  // Auto-scroll every 3.5 seconds (only if not paused)
   useEffect(() => {
+    if (isPaused) return
+
     const interval = setInterval(() => {
       setCurrentIndex((prev) => prev + 1)
     }, 3500)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [isPaused])
 
   // Handle seamless loop reset
   useEffect(() => {
@@ -75,11 +78,29 @@ export default function LatestBusinessesCarousel({
 
   return (
     <div className="rounded-xl border border-gray-200/50 bg-white/60 shadow-sm backdrop-blur-sm">
-      {/* Section Header */}
-      <div className="border-b border-gray-100 px-6 py-3">
+      {/* Section Header with Pause Button */}
+      <div className="border-b border-gray-100 px-6 py-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold text-gray-700">
           {locale === 'he' ? 'הצטרפו לאחרונה' : 'Недавно присоединились'}
         </h3>
+        <button
+          onClick={() => setIsPaused(!isPaused)}
+          className="flex items-center gap-1 rounded px-2 py-1 text-xs text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          aria-label={isPaused ? (locale === 'he' ? 'המשך' : 'Возобновить') : (locale === 'he' ? 'עצור' : 'Приостановить')}
+          title={isPaused ? (locale === 'he' ? 'המשך גלילה אוטומטית' : 'Возобновить автоматическую прокрутку') : (locale === 'he' ? 'עצור גלילה אוטומטית' : 'Приостановить автоматическую прокрутку')}
+        >
+          {isPaused ? (
+            // Play icon
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+            </svg>
+          ) : (
+            // Pause icon
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+          )}
+        </button>
       </div>
 
       {/* Carousel Container - Fixed height for 3 items */}

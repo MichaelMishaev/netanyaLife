@@ -1,4 +1,4 @@
-# Implementation Gap Analysis - Netanya Local
+# Implementation Gap Analysis - קהילת נתניה
 
 **Date**: November 15, 2025
 **Version**: V1.0 Complete, V2.0 Incomplete
@@ -8,7 +8,7 @@
 
 ## Executive Summary
 
-The Netanya Local project is **production-ready for V1.0 core functionality** but **missing all V2.0 enhancement features** outlined in the devPlan.
+The קהילת נתניה project is **production-ready for V1.0 core functionality** but **missing all V2.0 enhancement features** outlined in the devPlan.
 
 - ✅ **Can launch now**: Search, admin, PWA, accessibility all work
 - ❌ **Cannot market as "V2.0"**: Missing FilterSheet, ShareButton, Breadcrumbs, RecentlyViewed

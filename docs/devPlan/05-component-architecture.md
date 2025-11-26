@@ -613,8 +613,8 @@ export function ShareButton({ business, url, locale }) {
 
   // Generate share text with attribution
   const shareText = locale === 'he'
-    ? `🏙️ ${business.name}\n${business.category} • ${business.neighborhood}\n\n✨ נמצא ב-Netanya Local - מדריך העסקים של נתניה\n${url}`
-    : `🏙️ ${business.name}\n${business.category} • ${business.neighborhood}\n\n✨ Found on Netanya Local - Netanya's Business Directory\n${url}`
+    ? `🏙️ ${business.name}\n${business.category} • ${business.neighborhood}\n\n✨ נמצא ב-קהילת נתניה - מדריך העסקים של נתניה\n${url}`
+    : `🏙️ ${business.name}\n${business.category} • ${business.neighborhood}\n\n✨ Found on קהילת נתניה - Netanya's Business Directory\n${url}`
 
   const handleWhatsAppShare = () => {
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`
@@ -1024,7 +1024,7 @@ export default function BusinessDetailPage({ business }) {
 
   /* Add attribution footer */
   .business-detail:after {
-    content: "מקור: Netanya Local - netanyalocal.com";
+    content: "מקור: קהילת נתניה - netanyalocal.com";
     display: block;
     text-align: center;
     font-size: 0.8em;
@@ -1079,7 +1079,7 @@ export async function generateMetadata({ params: { locale, slug } }) {
       url,
       title,
       description,
-      siteName: 'Netanya Local',
+      siteName: 'קהילת נתניה',
       images: [
         {
           url: imageUrl,
@@ -1109,7 +1109,7 @@ export async function generateMetadata({ params: { locale, slug } }) {
 
 **Default OG Image** (`public/og-default.jpg`):
 - Size: 1200x630px
-- Content: Netanya Local logo + "מדריך העסקים של נתניה"
+- Content: קהילת נתניה logo + "מדריך העסקים של נתניה"
 - Background: Gradient blue to match brand
 
 ---
