@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma'
+import LatestBusinessesCarousel from '@/components/client/LatestBusinessesCarousel'
 
 interface HomepageStatsProps {
   locale: string
@@ -55,7 +56,7 @@ export default async function HomepageStats({ locale }: HomepageStatsProps) {
   // Check threshold
   if (businessCount < threshold) return null
 
-  // Fetch latest 3 businesses
+  // Fetch latest 10 businesses for carousel
   const latestBusinesses = await prisma.business.findMany({
     where: { is_visible: true, deleted_at: null },
     include: {
@@ -67,7 +68,7 @@ export default async function HomepageStats({ locale }: HomepageStatsProps) {
       },
     },
     orderBy: { created_at: 'desc' },
-    take: 3,
+    take: 10,
   })
 
   // Format counts with milestone thresholds
@@ -133,43 +134,8 @@ export default async function HomepageStats({ locale }: HomepageStatsProps) {
         </div>
       )}
 
-      {/* Latest Joined Section */}
-      <div className="rounded-xl border border-gray-200/50 bg-white/60 shadow-sm backdrop-blur-sm">
-        {/* Section Header */}
-        <div className="border-b border-gray-100 px-6 py-3">
-          <h3 className="text-sm font-semibold text-gray-700">
-            {locale === 'he' ? 'הצטרפו לאחרונה' : 'Недавно присоединились'}
-          </h3>
-        </div>
-
-        {/* Latest Businesses List */}
-        <div className="divide-y divide-gray-100 p-2">
-          {latestBusinesses.map((business) => (
-            <div
-              key={business.id}
-              className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-gray-50/50"
-            >
-              <div className="flex min-w-0 flex-col">
-                <div className="truncate text-sm font-semibold text-gray-800">
-                  {locale === 'he' ? business.name_he : business.name_ru || business.name_he}
-                </div>
-                <div className="truncate text-xs text-gray-500">
-                  {business.category
-                    ? locale === 'he'
-                      ? business.category.name_he
-                      : business.category.name_ru
-                    : ''}
-                </div>
-              </div>
-              <div className="flex-shrink-0">
-                <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                  {locale === 'he' ? 'חדש' : 'Новый'}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Latest Joined Section - Animated Carousel */}
+      <LatestBusinessesCarousel businesses={latestBusinesses} locale={locale} />
     </div>
   )
 }
