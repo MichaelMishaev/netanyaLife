@@ -9,6 +9,7 @@ import { ClientProviders } from '@/components/providers/ClientProviders'
 import Header from '@/components/server/Header'
 import Footer from '@/components/server/Footer'
 import ConditionalHeader from '@/components/client/ConditionalHeader'
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import '../globals.css'
 
 // Load Assistant font (optimized for Hebrew - used by Zap.co.il)
@@ -111,6 +112,8 @@ export default async function LocaleLayout({
         <meta name="apple-mobile-web-app-title" content="Netanya Local" />
       </head>
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
+        {/* Google Analytics */}
+        <GoogleAnalytics />
         <NextIntlClientProvider messages={messages}>
           <ClientProviders locale={locale}>
             {/* PWA Service Worker */}
