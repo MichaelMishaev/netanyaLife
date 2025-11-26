@@ -73,10 +73,12 @@ export async function POST(request: NextRequest) {
 
     // 4. Create admin settings if not exists
     await prisma.adminSettings.upsert({
-      where: { id: 1 },
+      where: { key: 'top_pinned_count' },
       update: {},
       create: {
-        top_pinned_count: 3,
+        key: 'top_pinned_count',
+        value: '3',
+        description: 'Number of pinned businesses to show first in search results',
       },
     })
     console.log('✅ Admin settings seeded')
