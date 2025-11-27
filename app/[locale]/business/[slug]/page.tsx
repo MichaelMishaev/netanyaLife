@@ -75,8 +75,6 @@ export async function generateMetadata({
       locale: locale === 'he' ? 'he_IL' : 'ru_RU',
       alternateLocale: locale === 'he' ? 'ru_RU' : 'he_IL',
       type: 'website',
-      publishedTime: business.created_at.toISOString(),
-      modifiedTime: business.updated_at.toISOString(),
       images: [
         {
           url: `${baseUrl}/og-image-business.png`,
