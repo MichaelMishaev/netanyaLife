@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { ReactNode } from 'react'
+import NeighborhoodSelectionModal from './NeighborhoodSelectionModal'
 
 interface Category {
   id: string
@@ -32,28 +33,6 @@ export default function CategorySelectionGrid({
 }: CategorySelectionGridProps) {
   const router = useRouter()
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
-  const [defaultNeighborhood, setDefaultNeighborhood] = useState<string>(neighborhoods[0]?.slug || '')
-
-  // Load last selected neighborhood from localStorage
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const lastFormValues = localStorage.getItem('lastSearchFormValues')
-      if (lastFormValues) {
-        try {
-          const parsed = JSON.parse(lastFormValues)
-          if (parsed.neighborhoodSlug) {
-            // Verify the neighborhood still exists
-            const validNeighborhood = neighborhoods.find(n => n.slug === parsed.neighborhoodSlug)
-            if (validNeighborhood) {
-              setDefaultNeighborhood(parsed.neighborhoodSlug)
-            }
-          }
-        } catch (e) {
-          console.error('Error reading last neighborhood:', e)
-        }
-      }
-    }
-  }, [neighborhoods])
 
   const handleCategoryClick = (category: Category) => {
     setSelectedCategory(category)
@@ -95,64 +74,15 @@ export default function CategorySelectionGrid({
       </div>
 
       {/* Neighborhood Selection Modal */}
-      {selectedCategory && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          onClick={handleCancel}
-        >
-          <div
-            className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Modal Header */}
-            <div className="mb-6 text-center">
-              {selectedCategory.icon && (
-                <div className="mb-3 text-5xl">{selectedCategory.icon}</div>
-              )}
-              <h2 className="mb-2 text-2xl font-bold text-gray-900">
-                {locale === 'he' ? selectedCategory.name_he : selectedCategory.name_ru}
-              </h2>
-              <p className="text-gray-600">
-                {locale === 'he'
-                  ? 'באיזו שכונה אתה מחפש?'
-                  : 'В каком районе вы ищете?'}
-              </p>
-            </div>
-
-            {/* Neighborhood Buttons */}
-            <div className="space-y-3">
-              {neighborhoods.map((neighborhood) => {
-                const name = locale === 'he' ? neighborhood.name_he : neighborhood.name_ru
-                return (
-                  <button
-                    key={neighborhood.id}
-                    onClick={() => handleNeighborhoodSelect(neighborhood.slug)}
-                    className="w-full rounded-lg border-2 border-gray-200 bg-white px-4 py-3 text-center font-medium text-gray-900 transition-all hover:border-primary-500 hover:bg-primary-50 hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                  >
-                    {name}
-                  </button>
-                )
-              })}
-
-              {/* All City Option - Searches across all neighborhoods */}
-              <button
-                onClick={() => handleNeighborhoodSelect('all')}
-                className="w-full rounded-lg border-2 border-primary-500 bg-primary-50 px-4 py-3 text-center font-semibold text-primary-700 transition-all hover:bg-primary-100 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-              >
-                {locale === 'he' ? 'כל נתניה' : 'Вся Нетания'}
-              </button>
-            </div>
-
-            {/* Cancel Button */}
-            <button
-              onClick={handleCancel}
-              className="mt-4 w-full rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-            >
-              {locale === 'he' ? 'ביטול' : 'Отмена'}
-            </button>
-          </div>
-        </div>
-      )}
+      <NeighborhoodSelectionModal
+        isOpen={!!selectedCategory}
+        onClose={handleCancel}
+        onSelect={handleNeighborhoodSelect}
+        neighborhoods={neighborhoods}
+        locale={locale}
+        categoryName={selectedCategory ? (locale === 'he' ? selectedCategory.name_he : selectedCategory.name_ru) : undefined}
+        categoryIcon={selectedCategory?.icon}
+      />
     </>
   )
 }

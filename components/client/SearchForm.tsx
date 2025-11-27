@@ -157,6 +157,28 @@ export default function SearchForm({
               neighborhood: detectedSlug,
             })
           }
+        } else {
+          // Geolocation denied or failed - default to 'merkaz' (Center)
+          const defaultNeighborhood = neighborhoods.find((n) => n.slug === 'merkaz')
+          if (defaultNeighborhood) {
+            setNeighborhoodSlug('merkaz')
+
+            // Track default fallback
+            trackEvent('geolocation_denied_default_merkaz', {
+              neighborhood: 'merkaz',
+            })
+          }
+        }
+      } else {
+        // Geolocation not supported - default to 'merkaz' (Center)
+        const defaultNeighborhood = neighborhoods.find((n) => n.slug === 'merkaz')
+        if (defaultNeighborhood) {
+          setNeighborhoodSlug('merkaz')
+
+          // Track geolocation not supported
+          trackEvent('geolocation_not_supported_default_merkaz', {
+            neighborhood: 'merkaz',
+          })
         }
       }
     }

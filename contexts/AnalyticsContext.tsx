@@ -17,6 +17,8 @@ export type EventType =
   | 'search_form_view'
   | 'geolocation_detected'
   | 'recent_search_clicked'
+  | 'geolocation_denied_default_merkaz'
+  | 'geolocation_not_supported_default_merkaz'
 
 export interface EventProperties {
   [key: string]: string | number | boolean | null | undefined

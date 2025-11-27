@@ -170,7 +170,7 @@ export default async function Home({
                       categoryName={name}
                       icon={icon}
                       locale={locale}
-                      defaultNeighborhoodSlug={neighborhoods[0]?.slug || ''}
+                      neighborhoods={neighborhoods}
                     />
                   )
                 })}

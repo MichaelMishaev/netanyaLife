@@ -71,13 +71,9 @@ export default async function HomepageStats({ locale }: HomepageStatsProps) {
     take: 10,
   })
 
-  // Format counts with milestone thresholds
+  // Format counts - always show exact count
   const formatCount = (count: number): string => {
-    if (count < 50) return count.toString()
-    if (count < 100) return '50+'
-    if (count < 200) return '100+'
-    if (count < 500) return '200+'
-    return '500+'
+    return count.toString()
   }
 
   // Build additional stats array (review + neighborhood)

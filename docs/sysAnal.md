@@ -59,6 +59,12 @@ Options:
 דרום נתניה
 מזרח נתניה
 (optional) כל נתניה
+
+**Default Behavior (Geolocation):**
+- On initial page load, system attempts to detect user's location via browser geolocation API
+- If user approves → neighborhood auto-selected based on GPS coordinates
+- If user denies or geolocation not supported → **defaults to "מרכז" (merkaz/Center)**
+- Previous selection persists in localStorage and overrides geolocation on return visits
 Button:
 Full-width, primary: חיפוש
 Below search:
