@@ -8,6 +8,7 @@ import PopularCategoryCard from '@/components/client/PopularCategoryCard'
 import Link from 'next/link'
 import { getCategoryIcon } from '@/lib/utils/categoryIcons'
 import { Metadata } from 'next'
+import { generateOrganizationSchema, generateWebSiteSchema } from '@/lib/seo/structured-data'
 
 export async function generateMetadata({
   params: { locale },
@@ -81,8 +82,23 @@ export default async function Home({
   // Get popular categories (is_popular = true, limit 6)
   const popularCategories = categories.filter(cat => cat.is_popular).slice(0, 6)
 
+  // Generate structured data for SEO
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://netanya.business'
+  const organizationSchema = generateOrganizationSchema(baseUrl, locale)
+  const websiteSchema = generateWebSiteSchema(baseUrl)
+
   return (
     <>
+      {/* SEO: Organization & WebSite Structured Data (2025 Standard) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+
       {/* Hero Section - Simplified Background */}
       <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
         {/* Simplified decorative element - single subtle circle */}

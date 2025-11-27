@@ -1,8 +1,17 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getOwnerSession } from '@/lib/auth-owner.server'
 import BusinessPortalMobileMenu from '@/components/client/BusinessPortalMobileMenu'
 import BusinessPortalUserMenu from '@/components/client/BusinessPortalUserMenu'
 import Link from 'next/link'
+
+// Prevent business portal pages from being indexed
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 interface LayoutProps {
   children: React.ReactNode

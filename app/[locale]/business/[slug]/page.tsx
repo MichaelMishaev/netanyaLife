@@ -7,7 +7,7 @@ import ShareButton from '@/components/client/ShareButton'
 import Breadcrumbs from '@/components/server/Breadcrumbs'
 import BusinessViewTracker from '@/components/client/BusinessViewTracker'
 import BackButton from '@/components/client/BackButton'
-import { generateLocalBusinessSchema } from '@/lib/seo/structured-data'
+import { generateLocalBusinessSchema, generateBreadcrumbSchema, generateReviewSchema } from '@/lib/seo/structured-data'
 import CTAButtons from '@/components/client/CTAButtons'
 
 interface BusinessDetailPageProps {
@@ -75,6 +75,8 @@ export async function generateMetadata({
       locale: locale === 'he' ? 'he_IL' : 'ru_RU',
       alternateLocale: locale === 'he' ? 'ru_RU' : 'he_IL',
       type: 'website',
+      publishedTime: business.created_at.toISOString(),
+      modifiedTime: business.updated_at.toISOString(),
       images: [
         {
           url: `${baseUrl}/og-image-business.png`,
@@ -134,7 +136,7 @@ export default async function BusinessDetailPage({
     businessUrl
   )
 
-  // Breadcrumb items
+  // Breadcrumb items for visual and structured data
   const breadcrumbItems = business.category
     ? [
         {
@@ -165,6 +167,15 @@ export default async function BusinessDetailPage({
         },
       ]
 
+  // Generate BreadcrumbList schema for SEO
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://netanyalocal.com'
+  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems, baseUrl)
+
+  // Generate Review schemas for each review
+  const reviewSchemas = business.reviews.map((review) =>
+    generateReviewSchema(review as any, name, locale)
+  )
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* LocalBusiness structured data for SEO */}
@@ -172,6 +183,21 @@ export default async function BusinessDetailPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       />
+
+      {/* BreadcrumbList structured data for SEO (2025 Standard) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
+      {/* Review structured data for SEO (2025 Standard) */}
+      {reviewSchemas.map((reviewSchema, index) => (
+        <script
+          key={`review-${index}`}
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewSchema) }}
+        />
+      ))}
 
       {/* Track business view */}
       {business.category && (

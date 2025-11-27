@@ -30,6 +30,15 @@ const PWAInstaller = dynamicImport(
   { ssr: false }
 )
 
+// Viewport configuration (Next.js 14+ standard - separate from metadata)
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
+  themeColor: '#2563eb',
+}
+
 export const metadata: Metadata = {
   title: 'קהילת נתניה',
   description:
@@ -42,6 +51,25 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-touch-icon.png',
   },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION || '',
+    yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION || '',
+    other: {
+      'msvalidate.01': process.env.NEXT_PUBLIC_BING_VERIFICATION || '',
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   openGraph: {
     title: 'קהילת נתניה',
     description: 'מדריך עסקים מקומיים בנתניה - Local business directory for Netanya residents',
@@ -50,8 +78,8 @@ export const metadata: Metadata = {
     images: [
       {
         url: '/og-image.png',
-        width: 1024,
-        height: 1024,
+        width: 1200,
+        height: 630,
         alt: 'קהילת נתניה',
       },
     ],
@@ -99,17 +127,29 @@ export default async function LocaleLayout({
       className={assistant.className}
     >
       <head>
+        {/* PWA Manifest */}
         <link rel="manifest" href="/manifest.webmanifest" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+        {/* Theme & Mobile App Config */}
         <meta name="theme-color" content="#2563eb" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
-        <meta
-          name="apple-mobile-web-app-status-bar-style"
-          content="default"
-        />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="קהילת נתניה" />
+
+        {/* Geo Meta Tags for Local SEO */}
+        <meta name="geo.region" content="IL-HA" />
+        <meta name="geo.placename" content="Netanya" />
+        <meta name="geo.position" content="32.3215;34.8532" />
+        <meta name="ICBM" content="32.3215, 34.8532" />
+
+        {/* Performance: Preconnect & DNS Prefetch for External Resources */}
+        <link rel="preconnect" href="https://www.google-analytics.com" />
+        <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body className="flex min-h-screen flex-col" suppressHydrationWarning>
         {/* Google Analytics */}

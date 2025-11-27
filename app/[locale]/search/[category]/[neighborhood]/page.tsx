@@ -9,6 +9,7 @@ import SearchResultsClient from '@/components/client/SearchResultsClient'
 import Breadcrumbs from '@/components/server/Breadcrumbs'
 import BackButton from '@/components/client/BackButton'
 import ViewAllCityButton from '@/components/client/ViewAllCityButton'
+import { generateBreadcrumbSchema, generateCollectionPageSchema } from '@/lib/seo/structured-data'
 
 interface SearchResultsPageProps {
   params: {
@@ -278,8 +279,38 @@ export default async function SearchResultsPage({
       : []),
   ]
 
+  // Generate structured data for SEO (2025 Standard)
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://netanyalocal.com'
+  const currentUrl = `${baseUrl}/${locale}/search/${categorySlug}/${neighborhoodSlug}`
+  const breadcrumbSchema = generateBreadcrumbSchema(breadcrumbItems, baseUrl)
+
+  const metaDescription = locale === 'he'
+    ? `מצא את ה${categoryName} הכי טובים ב${neighborhoodName}, נתניה. ${totalCount} עסקים מומלצים עם ביקורות אמיתיות.`
+    : `Найдите лучших ${categoryName} в ${neighborhoodName}, Нетания. ${totalCount} рекомендуемых предприятий с настоящими отзывами.`
+
+  const collectionPageSchema = generateCollectionPageSchema(
+    categoryName,
+    neighborhoodName,
+    metaDescription,
+    currentUrl,
+    totalCount,
+    breadcrumbSchema
+  )
+
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* BreadcrumbList structured data for SEO (2025 Standard) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+
+      {/* CollectionPage structured data for SEO (2025 Standard) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionPageSchema) }}
+      />
+
       {/* Breadcrumbs */}
       <Breadcrumbs items={breadcrumbItems} locale={locale} />
 

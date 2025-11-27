@@ -1,9 +1,18 @@
+import type { Metadata } from 'next'
 import { getSession } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import AdminLogoutButton from '@/components/client/AdminLogoutButton'
 import AdminMobileMenu from '@/components/client/AdminMobileMenu'
 import { getPendingBusinessCount, getPendingCategoryRequestCount, getPendingEditsCount } from '@/lib/queries/businesses'
+
+// Prevent admin pages from being indexed
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 
 export default async function AdminLayout({
   children,
