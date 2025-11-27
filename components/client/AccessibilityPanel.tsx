@@ -13,9 +13,11 @@ export default function AccessibilityPanel() {
     fontSize,
     highContrast,
     underlineLinks,
+    colorMode,
     setFontSize,
     toggleHighContrast,
     toggleUnderlineLinks,
+    setColorMode,
   } = useAccessibility()
 
   const handleOpen = () => {
@@ -35,6 +37,11 @@ export default function AccessibilityPanel() {
 
   const handleUnderlineToggle = () => {
     toggleUnderlineLinks()
+  }
+
+  const handleColorModeChange = (mode: 'light' | 'dark' | 'auto') => {
+    setColorMode(mode)
+    trackEvent('accessibility_color_mode_changed', { mode })
   }
 
   return (
@@ -120,6 +127,48 @@ export default function AccessibilityPanel() {
                   aria-pressed={fontSize === 'large'}
                 >
                   {t('fontSizes.large')}
+                </button>
+              </div>
+            </div>
+
+            {/* Color Mode (Dark Mode) */}
+            <div className="mb-6">
+              <label className="mb-2 block font-medium text-gray-700">
+                {t('colorMode')}
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleColorModeChange('light')}
+                  className={`flex-1 rounded-lg border px-4 py-2 transition ${
+                    colorMode === 'light'
+                      ? 'border-primary-600 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 hover:bg-gray-50'
+                  }`}
+                  aria-pressed={colorMode === 'light'}
+                >
+                  ☀️ {t('colorModes.light')}
+                </button>
+                <button
+                  onClick={() => handleColorModeChange('dark')}
+                  className={`flex-1 rounded-lg border px-4 py-2 transition ${
+                    colorMode === 'dark'
+                      ? 'border-primary-600 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 hover:bg-gray-50'
+                  }`}
+                  aria-pressed={colorMode === 'dark'}
+                >
+                  🌙 {t('colorModes.dark')}
+                </button>
+                <button
+                  onClick={() => handleColorModeChange('auto')}
+                  className={`flex-1 rounded-lg border px-4 py-2 transition ${
+                    colorMode === 'auto'
+                      ? 'border-primary-600 bg-primary-50 text-primary-700'
+                      : 'border-gray-300 hover:bg-gray-50'
+                  }`}
+                  aria-pressed={colorMode === 'auto'}
+                >
+                  🔄 {t('colorModes.auto')}
                 </button>
               </div>
             </div>

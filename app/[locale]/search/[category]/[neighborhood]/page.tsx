@@ -303,9 +303,22 @@ export default async function SearchResultsPage({
         )}
 
         {!hasPrimaryFallback && !hasSecondaryFallback && !hasCitywideFallback && (
-          <p className="text-sm text-gray-600 md:text-base">
-            {t('results', { count: totalCount })}
-          </p>
+          <>
+            <p className="text-sm text-gray-600 md:text-base">
+              {t('results', { count: totalCount })}
+            </p>
+            {/* ARIA live region for screen readers */}
+            <div
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="sr-only"
+            >
+              {locale === 'he'
+                ? `נמצאו ${totalCount} תוצאות עבור ${displayName} ב${neighborhoodName}`
+                : `Найдено ${totalCount} результатов для ${displayName} в ${neighborhoodName}`}
+            </div>
+          </>
         )}
       </div>
 
@@ -333,6 +346,17 @@ export default async function SearchResultsPage({
                     : `Показаны ${citywideFallbackBusinesses.length} результата со всей Нетании`}
                 </p>
               </div>
+            </div>
+            {/* ARIA live region for citywide fallback */}
+            <div
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="sr-only"
+            >
+              {locale === 'he'
+                ? `לא נמצאו ${categoryName} ב${neighborhoodName}. מציגים ${citywideFallbackBusinesses.length} תוצאות מכל נתניה.`
+                : `Не найдено ${categoryName} в ${neighborhoodName}. Показаны ${citywideFallbackBusinesses.length} результата со всей Нетании.`}
             </div>
           </div>
 
@@ -484,6 +508,18 @@ export default async function SearchResultsPage({
               ? `לא מצאנו ${categoryName.toLowerCase()} ב${neighborhoodName}. נסה לחפש בכל העיר או לבחור קטגוריה אחרת.`
               : `Мы не нашли ${categoryName.toLowerCase()} в ${neighborhoodName}. Попробуйте поискать по всему городу или выберите другую категорию.`}
           </p>
+
+          {/* ARIA live region for no results */}
+          <div
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+            className="sr-only"
+          >
+            {locale === 'he'
+              ? `לא נמצאו תוצאות עבור ${categoryName} ב${neighborhoodName}`
+              : `Не найдено результатов для ${categoryName} в ${neighborhoodName}`}
+          </div>
 
           {/* Actions */}
           <div className="flex flex-col gap-3 sm:flex-row">

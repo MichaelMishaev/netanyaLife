@@ -5,8 +5,14 @@ import Script from 'next/script'
 export default function GoogleAnalytics() {
   const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
-  // Only load GA in production or if explicitly enabled
-  if (!GA_MEASUREMENT_ID || process.env.NODE_ENV !== 'production') {
+  // Validate GA_MEASUREMENT_ID format (must start with G- or GT-)
+  const isValidGAId = GA_MEASUREMENT_ID && /^(G|GT)-[A-Z0-9]+$/.test(GA_MEASUREMENT_ID)
+
+  // Only load GA in production with valid measurement ID
+  if (!isValidGAId || process.env.NODE_ENV !== 'production') {
+    if (process.env.NODE_ENV === 'production' && !isValidGAId) {
+      console.warn('[GA] Invalid or missing NEXT_PUBLIC_GA_MEASUREMENT_ID:', GA_MEASUREMENT_ID)
+    }
     return null
   }
 

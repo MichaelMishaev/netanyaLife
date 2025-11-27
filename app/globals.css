@@ -68,6 +68,53 @@
   .skip-link {
     @apply fixed left-0 top-0 z-[100] -translate-y-full bg-primary-600 px-4 py-2 text-white transition focus:translate-y-0;
   }
+
+  /* Dark Mode Support */
+  html.dark {
+    @apply bg-gray-900 text-gray-100;
+  }
+
+  html.dark body {
+    @apply bg-gray-900 text-gray-100;
+  }
+
+  html.dark .bg-white {
+    @apply bg-gray-800;
+  }
+
+  html.dark .bg-gray-50 {
+    @apply bg-gray-800;
+  }
+
+  html.dark .bg-gray-100 {
+    @apply bg-gray-700;
+  }
+
+  html.dark .text-gray-900 {
+    @apply text-gray-100;
+  }
+
+  html.dark .text-gray-700 {
+    @apply text-gray-300;
+  }
+
+  html.dark .text-gray-600 {
+    @apply text-gray-400;
+  }
+
+  html.dark .border-gray-200 {
+    @apply border-gray-700;
+  }
+
+  html.dark .border-gray-300 {
+    @apply border-gray-600;
+  }
+
+  html.dark .bg-gradient-to-r,
+  html.dark .bg-gradient-to-br,
+  html.dark .bg-gradient-to-l {
+    @apply opacity-90;
+  }
 }
 
 @layer utilities {
@@ -90,7 +137,7 @@
     display: none; /* Chrome, Safari, and Opera */
   }
 
-  /* Fade-in-up animation for search results */
+  /* Animations with Reduced Motion Support */
   @keyframes fade-in-up {
     from {
       opacity: 0;
@@ -102,11 +149,6 @@
     }
   }
 
-  .animate-fade-in-up {
-    animation: fade-in-up 0.4s ease-out;
-  }
-
-  /* Fade-in animation for hero */
   @keyframes fade-in {
     from {
       opacity: 0;
@@ -116,11 +158,6 @@
     }
   }
 
-  .animate-fade-in {
-    animation: fade-in 0.6s ease-out;
-  }
-
-  /* Floating animation for decorative elements */
   @keyframes float {
     0%, 100% {
       transform: translateY(0px);
@@ -130,11 +167,6 @@
     }
   }
 
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  /* Pulse animation for emphasis */
   @keyframes pulse-soft {
     0%, 100% {
       opacity: 1;
@@ -144,11 +176,6 @@
     }
   }
 
-  .animate-pulse-soft {
-    animation: pulse-soft 2s ease-in-out infinite;
-  }
-
-  /* Gradient background animations */
   @keyframes gradient-shift {
     0%, 100% {
       background-position: 0% 50%;
@@ -158,12 +185,6 @@
     }
   }
 
-  .animate-gradient {
-    background-size: 200% 200%;
-    animation: gradient-shift 8s ease infinite;
-  }
-
-  /* Slide-down animation for notifications */
   @keyframes slide-down {
     from {
       opacity: 0;
@@ -175,11 +196,6 @@
     }
   }
 
-  .animate-slide-down {
-    animation: slide-down 0.3s ease-out;
-  }
-
-  /* Scale-in animation for modals/dialogs */
   @keyframes scale-in {
     from {
       opacity: 0;
@@ -191,8 +207,93 @@
     }
   }
 
-  .animate-scale-in {
-    animation: scale-in 0.2s ease-out;
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  /* Apply animations only when user hasn't requested reduced motion */
+  @media (prefers-reduced-motion: no-preference) {
+    .animate-fade-in-up {
+      animation: fade-in-up 0.4s ease-out;
+    }
+
+    .animate-fade-in {
+      animation: fade-in 0.6s ease-out;
+    }
+
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    .animate-pulse-soft {
+      animation: pulse-soft 2s ease-in-out infinite;
+    }
+
+    .animate-gradient {
+      background-size: 200% 200%;
+      animation: gradient-shift 8s ease infinite;
+    }
+
+    .animate-slide-down {
+      animation: slide-down 0.3s ease-out;
+    }
+
+    .animate-scale-in {
+      animation: scale-in 0.2s ease-out;
+    }
+
+    .animate-shimmer {
+      animation: shimmer 2s infinite linear;
+    }
+  }
+
+  /* Reduced motion: Disable all animations and transitions */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+
+    .animate-fade-in-up,
+    .animate-fade-in,
+    .animate-float,
+    .animate-pulse-soft,
+    .animate-gradient,
+    .animate-slide-down,
+    .animate-scale-in,
+    .animate-shimmer {
+      animation: none !important;
+    }
+  }
+
+  /* Shimmer skeleton effect */
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      #f0f0f0 0%,
+      #f8f8f8 50%,
+      #f0f0f0 100%
+    );
+    background-size: 1000px 100%;
+  }
+
+  html.dark .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      #374151 0%,
+      #4b5563 50%,
+      #374151 100%
+    );
+    background-size: 1000px 100%;
   }
 }
 

@@ -290,6 +290,12 @@
       "medium": "בינוני",
       "large": "גדול"
     },
+    "colorMode": "מצב תצוגה",
+    "colorModes": {
+      "light": "בהיר",
+      "dark": "כהה",
+      "auto": "אוטומטי"
+    },
     "contrast": "ניגודיות גבוהה",
     "underlineLinks": "הדגש קישורים",
     "keyboardNav": "ניווט במקלדת"

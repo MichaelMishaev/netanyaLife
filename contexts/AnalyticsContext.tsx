@@ -14,6 +14,7 @@ export type EventType =
   | 'accessibility_opened'
   | 'accessibility_font_changed'
   | 'accessibility_contrast_toggled'
+  | 'accessibility_color_mode_changed'
   | 'search_form_view'
   | 'geolocation_detected'
   | 'recent_search_clicked'

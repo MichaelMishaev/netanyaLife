@@ -3,17 +3,20 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
 type FontSize = 'normal' | 'medium' | 'large'
+type ColorMode = 'light' | 'dark' | 'auto'
 
 interface AccessibilitySettings {
   fontSize: FontSize
   highContrast: boolean
   underlineLinks: boolean
+  colorMode: ColorMode
 }
 
 interface AccessibilityContextType extends AccessibilitySettings {
   setFontSize: (size: FontSize) => void
   toggleHighContrast: () => void
   toggleUnderlineLinks: () => void
+  setColorMode: (mode: ColorMode) => void
 }
 
 const AccessibilityContext = createContext<AccessibilityContextType | undefined>(
@@ -32,6 +35,7 @@ export function AccessibilityProvider({
     fontSize: 'normal',
     highContrast: false,
     underlineLinks: false,
+    colorMode: 'auto',
   })
 
   // Set mounted state and load settings from localStorage
@@ -65,6 +69,36 @@ export function AccessibilityProvider({
       root.style.fontSize = '16px'
     }
 
+    // Color mode (dark mode)
+    const applyColorMode = () => {
+      if (settings.colorMode === 'auto') {
+        const systemPrefersDark = window.matchMedia(
+          '(prefers-color-scheme: dark)'
+        ).matches
+        if (systemPrefersDark) {
+          root.classList.add('dark')
+        } else {
+          root.classList.remove('dark')
+        }
+      } else if (settings.colorMode === 'dark') {
+        root.classList.add('dark')
+      } else {
+        root.classList.remove('dark')
+      }
+    }
+
+    applyColorMode()
+
+    // Listen for system color scheme changes when in auto mode
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleChange = () => {
+      if (settings.colorMode === 'auto') {
+        applyColorMode()
+      }
+    }
+
+    mediaQuery.addEventListener('change', handleChange)
+
     // High contrast
     if (settings.highContrast) {
       root.classList.add('high-contrast')
@@ -77,6 +111,10 @@ export function AccessibilityProvider({
       root.classList.add('underline-links')
     } else {
       root.classList.remove('underline-links')
+    }
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange)
     }
   }, [mounted, settings])
 
@@ -92,6 +130,10 @@ export function AccessibilityProvider({
     setSettings((prev) => ({ ...prev, underlineLinks: !prev.underlineLinks }))
   }
 
+  const setColorMode = (mode: ColorMode) => {
+    setSettings((prev) => ({ ...prev, colorMode: mode }))
+  }
+
   return (
     <AccessibilityContext.Provider
       value={{
@@ -99,6 +141,7 @@ export function AccessibilityProvider({
         setFontSize,
         toggleHighContrast,
         toggleUnderlineLinks,
+        setColorMode,
       }}
     >
       {children}
