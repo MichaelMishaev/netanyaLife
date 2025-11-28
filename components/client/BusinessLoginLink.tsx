@@ -31,13 +31,12 @@ export default function BusinessLoginLink({ ownerSession }: BusinessLoginLinkPro
   return (
     <Link
       href={`/${locale}/business-login`}
-      className="flex items-center gap-1.5 rounded-md bg-primary-600 px-2.5 py-1.5 text-xs font-semibold text-white transition hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:px-3 sm:py-1 sm:text-sm"
+      className="flex items-center gap-1.5 rounded-md bg-primary-600 px-3 py-2 text-xs font-semibold text-white shadow-md transition hover:bg-primary-700 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:px-4 sm:py-2 sm:text-sm"
     >
-      <svg className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="currentColor" viewBox="0 0 24 24">
+      <svg className="h-4 w-4 sm:h-4 sm:w-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
         <path d="M12 7V3H2v18h20V7H12zM6 19H4v-2h2v2zm0-4H4v-2h2v2zm0-4H4V9h2v2zm0-4H4V5h2v2zm4 12H8v-2h2v2zm0-4H8v-2h2v2zm0-4H8V9h2v2zm0-4H8V5h2v2zm10 12h-8v-2h2v-2h-2v-2h2v-2h-2V9h8v10zm-2-8h-2v2h2v-2zm0 4h-2v2h2v-2z"/>
       </svg>
-      <span className="hidden sm:inline">{t('businessLogin')}</span>
-      <span className="sm:hidden">{locale === 'he' ? 'עסקים' : 'Бизнес'}</span>
+      <span className="whitespace-nowrap">{t('businessLogin')}</span>
     </Link>
   )
 }
