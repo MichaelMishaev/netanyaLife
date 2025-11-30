@@ -36,25 +36,28 @@ export async function GET(request: NextRequest) {
     const businesses = await prisma.business.findMany();
     for (const b of businesses) {
       const fields = [
-        `"id"`, `"category_id"`, `"neighborhood_id"`, `"name_he"`, `"name_ru"`,
-        `"description_he"`, `"description_ru"`, `"address_he"`, `"address_ru"`,
-        `"phone"`, `"whatsapp_number"`, `"website_url"`, `"facebook_url"`,
-        `"instagram_url"`, `"tiktok_url"`,
-        `"opening_hours_he"`, `"opening_hours_ru"`, `"owner_id"`, `"is_visible"`,
-        `"is_verified"`, `"is_pinned"`, `"slug"`, `"created_at"`, `"updated_at"`
+        `"id"`, `"name_he"`, `"name_ru"`, `"slug_he"`, `"slug_ru"`,
+        `"description_he"`, `"description_ru"`, `"city_id"`, `"neighborhood_id"`,
+        `"address_he"`, `"address_ru"`, `"phone"`, `"whatsapp_number"`,
+        `"website_url"`, `"email"`, `"facebook_url"`, `"instagram_url"`, `"tiktok_url"`,
+        `"opening_hours_he"`, `"opening_hours_ru"`, `"is_visible"`, `"is_verified"`,
+        `"is_pinned"`, `"serves_all_city"`, `"is_test"`, `"owner_id"`, `"category_id"`,
+        `"subcategory_id"`, `"created_at"`, `"updated_at"`
       ];
       const values = [
-        `'${b.id}'`, `'${b.category_id}'`, `'${b.neighborhood_id}'`,
-        escapeString(b.name_he), escapeString(b.name_ru),
+        `'${b.id}'`, escapeString(b.name_he), escapeString(b.name_ru),
+        escapeString(b.slug_he), escapeString(b.slug_ru),
         escapeString(b.description_he), escapeString(b.description_ru),
+        escapeString(b.city_id), escapeString(b.neighborhood_id),
         escapeString(b.address_he), escapeString(b.address_ru),
         escapeString(b.phone), escapeString(b.whatsapp_number),
-        escapeString(b.website_url), escapeString(b.facebook_url),
-        escapeString(b.instagram_url), escapeString(b.tiktok_url),
+        escapeString(b.website_url), escapeString(b.email),
+        escapeString(b.facebook_url), escapeString(b.instagram_url), escapeString(b.tiktok_url),
         escapeString(b.opening_hours_he), escapeString(b.opening_hours_ru),
-        escapeString(b.owner_id),
         `${b.is_visible}`, `${b.is_verified}`, `${b.is_pinned}`,
-        escapeString(b.slug), `'${b.created_at.toISOString()}'`, `'${b.updated_at.toISOString()}'`
+        `${b.serves_all_city}`, `${b.is_test}`, escapeString(b.owner_id),
+        escapeString(b.category_id), escapeString(b.subcategory_id),
+        `'${b.created_at.toISOString()}'`, `'${b.updated_at.toISOString()}'`
       ];
       sql += `INSERT INTO "Business" (${fields.join(', ')}) VALUES (${values.join(', ')}) ON CONFLICT (id) DO NOTHING;\n`;
     }
