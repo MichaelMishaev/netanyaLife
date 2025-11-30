@@ -20,17 +20,17 @@ export async function GET(request: NextRequest) {
     // Export all data from all tables
     const cities = await prisma.city.findMany();
     for (const city of cities) {
-      sql += `INSERT INTO "City" ("id", "name_he", "name_ru", "slug_he", "slug_ru", "created_at", "updated_at") VALUES ('${city.id}', ${escapeString(city.name_he)}, ${escapeString(city.name_ru)}, ${escapeString(city.slug_he)}, ${escapeString(city.slug_ru)}, '${city.created_at.toISOString()}', '${city.updated_at.toISOString()}') ON CONFLICT (id) DO UPDATE SET "name_he"=EXCLUDED."name_he", "name_ru"=EXCLUDED."name_ru", "slug_he"=EXCLUDED."slug_he", "slug_ru"=EXCLUDED."slug_ru", "updated_at"=EXCLUDED."updated_at";\n`;
+      sql += `INSERT INTO "City" ("id", "name_he", "name_ru", "slug", "is_active", "created_at", "updated_at") VALUES ('${city.id}', ${escapeString(city.name_he)}, ${escapeString(city.name_ru)}, ${escapeString(city.slug)}, ${city.is_active}, '${city.created_at.toISOString()}', '${city.updated_at.toISOString()}') ON CONFLICT (id) DO UPDATE SET "name_he"=EXCLUDED."name_he", "name_ru"=EXCLUDED."name_ru", "slug"=EXCLUDED."slug", "is_active"=EXCLUDED."is_active", "updated_at"=EXCLUDED."updated_at";\n`;
     }
 
     const neighborhoods = await prisma.neighborhood.findMany();
     for (const n of neighborhoods) {
-      sql += `INSERT INTO "Neighborhood" ("id", "city_id", "name_he", "name_ru", "slug_he", "slug_ru", "created_at", "updated_at") VALUES ('${n.id}', '${n.city_id}', ${escapeString(n.name_he)}, ${escapeString(n.name_ru)}, ${escapeString(n.slug_he)}, ${escapeString(n.slug_ru)}, '${n.created_at.toISOString()}', '${n.updated_at.toISOString()}') ON CONFLICT (id) DO UPDATE SET "city_id"=EXCLUDED."city_id", "name_he"=EXCLUDED."name_he", "name_ru"=EXCLUDED."name_ru", "slug_he"=EXCLUDED."slug_he", "slug_ru"=EXCLUDED."slug_ru", "updated_at"=EXCLUDED."updated_at";\n`;
+      sql += `INSERT INTO "Neighborhood" ("id", "city_id", "name_he", "name_ru", "slug", "description_he", "description_ru", "is_active", "display_order", "created_at", "updated_at") VALUES ('${n.id}', '${n.city_id}', ${escapeString(n.name_he)}, ${escapeString(n.name_ru)}, ${escapeString(n.slug)}, ${escapeString(n.description_he)}, ${escapeString(n.description_ru)}, ${n.is_active}, ${n.display_order || 0}, '${n.created_at.toISOString()}', '${n.updated_at.toISOString()}') ON CONFLICT (id) DO UPDATE SET "city_id"=EXCLUDED."city_id", "name_he"=EXCLUDED."name_he", "name_ru"=EXCLUDED."name_ru", "slug"=EXCLUDED."slug", "updated_at"=EXCLUDED."updated_at";\n`;
     }
 
     const categories = await prisma.category.findMany();
     for (const c of categories) {
-      sql += `INSERT INTO "Category" ("id", "name_he", "name_ru", "slug_he", "slug_ru", "icon", "created_at", "updated_at") VALUES ('${c.id}', ${escapeString(c.name_he)}, ${escapeString(c.name_ru)}, ${escapeString(c.slug_he)}, ${escapeString(c.slug_ru)}, ${escapeString(c.icon)}, '${c.created_at.toISOString()}', '${c.updated_at.toISOString()}') ON CONFLICT (id) DO UPDATE SET "name_he"=EXCLUDED."name_he", "name_ru"=EXCLUDED."name_ru", "slug_he"=EXCLUDED."slug_he", "slug_ru"=EXCLUDED."slug_ru", "icon"=EXCLUDED."icon", "updated_at"=EXCLUDED."updated_at";\n`;
+      sql += `INSERT INTO "Category" ("id", "name_he", "name_ru", "slug", "icon_name", "description_he", "description_ru", "is_active", "is_popular", "display_order", "created_at", "updated_at") VALUES ('${c.id}', ${escapeString(c.name_he)}, ${escapeString(c.name_ru)}, ${escapeString(c.slug)}, ${escapeString(c.icon_name)}, ${escapeString(c.description_he)}, ${escapeString(c.description_ru)}, ${c.is_active}, ${c.is_popular}, ${c.display_order || 0}, '${c.created_at.toISOString()}', '${c.updated_at.toISOString()}') ON CONFLICT (id) DO UPDATE SET "name_he"=EXCLUDED."name_he", "name_ru"=EXCLUDED."name_ru", "slug"=EXCLUDED."slug", "icon_name"=EXCLUDED."icon_name", "updated_at"=EXCLUDED."updated_at";\n`;
     }
 
     const businesses = await prisma.business.findMany();
