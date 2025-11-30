@@ -69,3 +69,8 @@ lighthouse-test.json
 
 # 3rd Party API Docs (sensitive)
 docs/3rdParty/ideogram.md
+
+# Database Backups
+backups/
+*.sql
+*.dump
