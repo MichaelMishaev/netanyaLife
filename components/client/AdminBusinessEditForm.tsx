@@ -14,6 +14,9 @@ interface Business {
   whatsapp_number: string | null
   website_url: string | null
   email: string | null
+  instagram_url: string | null
+  facebook_url: string | null
+  tiktok_url: string | null
   address_he: string | null
   address_ru: string | null
   opening_hours_he: string | null
@@ -76,6 +79,9 @@ export default function AdminBusinessEditForm({
     whatsappNumber: business.whatsapp_number || '',
     websiteUrl: business.website_url || '',
     email: business.email || '',
+    instagramUrl: business.instagram_url || '',
+    facebookUrl: business.facebook_url || '',
+    tiktokUrl: business.tiktok_url || '',
     address_he: business.address_he || '',
     address_ru: business.address_ru || '',
     opening_hours_he: business.opening_hours_he || '',
@@ -384,6 +390,48 @@ export default function AdminBusinessEditForm({
               value={formData.email}
               onChange={handleChange}
               dir="ltr"
+              className="w-full rounded-lg border px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Instagram
+            </label>
+            <input
+              type="text"
+              name="instagramUrl"
+              value={formData.instagramUrl}
+              onChange={handleChange}
+              dir="ltr"
+              placeholder="instagram.com/username"
+              className="w-full rounded-lg border px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              Facebook
+            </label>
+            <input
+              type="text"
+              name="facebookUrl"
+              value={formData.facebookUrl}
+              onChange={handleChange}
+              dir="ltr"
+              placeholder="facebook.com/page"
+              className="w-full rounded-lg border px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-gray-700">
+              TikTok
+            </label>
+            <input
+              type="text"
+              name="tiktokUrl"
+              value={formData.tiktokUrl}
+              onChange={handleChange}
+              dir="ltr"
+              placeholder="tiktok.com/@username"
               className="w-full rounded-lg border px-4 py-2 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
             />
           </div>

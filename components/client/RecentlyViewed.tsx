@@ -10,11 +10,12 @@ interface RecentlyViewedProps {
 }
 
 export default function RecentlyViewed({ locale }: RecentlyViewedProps) {
-  const { recentlyViewed, clearRecentlyViewed } = useRecentlyViewed()
+  const { recentlyViewed, clearRecentlyViewed, isHydrated } = useRecentlyViewed()
   const t = useTranslations('home.recentlyViewed')
   const [showConfirmDialog, setShowConfirmDialog] = useState(false)
 
-  if (recentlyViewed.length === 0) {
+  // Don't render during SSR to prevent hydration mismatch
+  if (!isHydrated || recentlyViewed.length === 0) {
     return null
   }
 

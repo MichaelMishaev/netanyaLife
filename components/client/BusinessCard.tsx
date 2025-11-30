@@ -16,6 +16,9 @@ interface BusinessCardProps {
     description_ru: string | null
     phone: string | null
     whatsapp_number: string | null
+    instagram_url: string | null
+    facebook_url: string | null
+    tiktok_url: string | null
     is_verified: boolean
     is_pinned: boolean
     is_test: boolean
@@ -84,7 +87,7 @@ export default function BusinessCard({ business, locale, showSubcategory = false
     : 'from-primary-500 to-primary-600'
 
   return (
-    <div className="group relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md">
+    <div className="group relative flex h-full flex-col overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary-300 cursor-pointer">
       {/* Test Badge - Top Left */}
       {business.is_test && (
         <div className="absolute left-0 top-0 z-10">
@@ -105,8 +108,8 @@ export default function BusinessCard({ business, locale, showSubcategory = false
         </div>
       )}
 
-      {/* Left Accent Bar */}
-      <div className={`h-full w-1 flex-shrink-0 bg-gradient-to-b ${accentColor} absolute left-0 top-0`} />
+      {/* Left Accent Bar - Expands on hover */}
+      <div className={`h-full w-1 flex-shrink-0 bg-gradient-to-b ${accentColor} absolute left-0 top-0 transition-all duration-300 group-hover:w-1.5`} />
 
       {/* Clickable Card Content */}
       <Link href={`/${locale}/business/${slug}`} className={`block flex-grow p-3 pe-3 ps-4 md:p-4 md:ps-5 ${business.is_pinned || business.is_test ? 'pt-10 md:pt-12' : ''}`}>
@@ -207,6 +210,19 @@ export default function BusinessCard({ business, locale, showSubcategory = false
             {description}
           </p>
         )}
+
+        {/* View Details CTA - 2025 Best Practice */}
+        <div className="mt-auto flex items-center gap-2 text-sm font-medium text-primary-600 transition-all duration-200 group-hover:gap-3 group-hover:text-primary-700">
+          <span>{locale === 'he' ? 'לפרטים מלאים' : 'Подробнее'}</span>
+          <svg
+            className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={locale === 'he' ? 'M15 19l-7-7 7-7' : 'M9 5l7 7-7 7'} />
+          </svg>
+        </div>
       </Link>
 
       {/* Quick Action Buttons - Bottom */}

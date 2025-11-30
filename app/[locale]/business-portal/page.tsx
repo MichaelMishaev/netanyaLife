@@ -4,6 +4,7 @@ import { getOwnerBusinesses, getOwnerPendingEdits } from '@/lib/actions/business
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import DismissRejectedEditButton from '@/components/client/DismissRejectedEditButton'
+import DiscardRejectedBusinessButton from '@/components/client/DiscardRejectedBusinessButton'
 
 interface PageProps {
   params: {
@@ -244,6 +245,10 @@ export default async function BusinessPortalDashboard({ params }: PageProps) {
                         {new Date(business.reviewed_at).toLocaleDateString(locale)}
                       </p>
                     )}
+                    <DiscardRejectedBusinessButton
+                      businessId={business.id}
+                      locale={locale}
+                    />
                   </div>
                 ) : null}
 

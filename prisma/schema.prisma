@@ -160,6 +160,11 @@ model Business {
   website_url     String?        @db.VarChar(500)
   email           String?        @db.VarChar(255)
 
+  // Social Media (Optional)
+  instagram_url   String?        @db.VarChar(500)
+  facebook_url    String?        @db.VarChar(500)
+  tiktok_url      String?        @db.VarChar(500)
+
   // Operating Hours (JSON or structured text)
   opening_hours_he String?       @db.Text // "א׳-ה׳: 08:00-17:00, ו׳: 08:00-13:00"
   opening_hours_ru String?       @db.Text
@@ -220,6 +225,9 @@ model PendingBusinessEdit {
   whatsapp_number String?
   website_url     String?        @db.VarChar(500)
   email           String?        @db.VarChar(255)
+  instagram_url   String?        @db.VarChar(500)
+  facebook_url    String?        @db.VarChar(500)
+  tiktok_url      String?        @db.VarChar(500)
   opening_hours_he String?       @db.Text
   opening_hours_ru String?       @db.Text
   address_he      String?
@@ -258,6 +266,9 @@ model PendingBusiness {
   whatsapp_number String?
   website_url     String?
   email           String?
+  instagram_url   String?        @db.VarChar(500)
+  facebook_url    String?        @db.VarChar(500)
+  tiktok_url      String?        @db.VarChar(500)
 
   // Operating Hours
   opening_hours   String?        @db.Text

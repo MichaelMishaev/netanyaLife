@@ -130,6 +130,70 @@ export default function PendingBusinessCard({
           </div>
         </div>
 
+        {/* Social Media */}
+        {(business.instagram_url ||
+          business.facebook_url ||
+          business.tiktok_url) && (
+          <div>
+            <p className="text-sm font-medium text-gray-700">
+              {locale === 'he' ? 'רשתות חברתיות' : 'Социальные сети'}
+            </p>
+            <div className="space-y-1 text-sm text-gray-600">
+              {business.instagram_url && (
+                <div>
+                  📷{' '}
+                  <a
+                    href={
+                      business.instagram_url.startsWith('http')
+                        ? business.instagram_url
+                        : `https://${business.instagram_url}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-pink-600 hover:underline"
+                  >
+                    Instagram
+                  </a>
+                </div>
+              )}
+              {business.facebook_url && (
+                <div>
+                  👥{' '}
+                  <a
+                    href={
+                      business.facebook_url.startsWith('http')
+                        ? business.facebook_url
+                        : `https://${business.facebook_url}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline"
+                  >
+                    Facebook
+                  </a>
+                </div>
+              )}
+              {business.tiktok_url && (
+                <div>
+                  🎵{' '}
+                  <a
+                    href={
+                      business.tiktok_url.startsWith('http')
+                        ? business.tiktok_url
+                        : `https://${business.tiktok_url}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-900 hover:underline"
+                  >
+                    TikTok
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {address && (
           <div>
             <p className="text-sm font-medium text-gray-700">

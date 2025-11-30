@@ -4,11 +4,12 @@ import { cache } from 'react'
 /**
  * Get all active categories
  * Cached for performance
+ * Sorted alphabetically in Hebrew (א ב ג ד...)
  */
 export const getCategories = cache(async () => {
   return await prisma.category.findMany({
     where: { is_active: true },
-    orderBy: { display_order: 'asc' },
+    orderBy: { name_he: 'asc' },
     select: {
       id: true,
       name_he: true,
@@ -18,7 +19,7 @@ export const getCategories = cache(async () => {
       is_popular: true,
       subcategories: {
         where: { is_active: true },
-        orderBy: { display_order: 'asc' },
+        orderBy: { name_he: 'asc' },
         select: {
           id: true,
           name_he: true,
@@ -63,7 +64,7 @@ export const getCategoryBySlug = cache(async (slug: string) => {
       description_ru: true,
       subcategories: {
         where: { is_active: true },
-        orderBy: { display_order: 'asc' },
+        orderBy: { name_he: 'asc' },
         select: {
           id: true,
           name_he: true,
@@ -77,6 +78,7 @@ export const getCategoryBySlug = cache(async (slug: string) => {
 
 /**
  * Get subcategories for a specific category
+ * Sorted alphabetically in Hebrew (א ב ג ד...)
  */
 export const getSubcategoriesByCategory = cache(async (categoryId: string) => {
   return await prisma.subcategory.findMany({
@@ -84,7 +86,7 @@ export const getSubcategoriesByCategory = cache(async (categoryId: string) => {
       category_id: categoryId,
       is_active: true,
     },
-    orderBy: { display_order: 'asc' },
+    orderBy: { name_he: 'asc' },
     select: {
       id: true,
       name_he: true,

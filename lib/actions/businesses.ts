@@ -105,6 +105,9 @@ export async function submitPendingBusiness(locale: string, data: any) {
         phone: validated.phone || null,
         whatsapp_number: validated.whatsappNumber || null,
         website_url: validated.websiteUrl || null,
+        instagram_url: validated.instagramUrl || null,
+        facebook_url: validated.facebookUrl || null,
+        tiktok_url: validated.tiktokUrl || null,
 
         // Location Info
         address: validated.address || null,

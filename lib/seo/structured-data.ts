@@ -10,6 +10,9 @@ interface Business {
   whatsapp_number: string | null
   website_url: string | null
   email: string | null
+  instagram_url: string | null
+  facebook_url: string | null
+  tiktok_url: string | null
   opening_hours_he: string | null
   opening_hours_ru: string | null
   latitude: { toString(): string } | null
@@ -83,6 +86,33 @@ export function generateLocalBusinessSchema(
       ? business.category.name_he
       : business.category.name_ru
 
+  // Build sameAs array with all social media URLs
+  const sameAsUrls: string[] = []
+  if (business.website_url) {
+    const websiteUrl = business.website_url.startsWith('http')
+      ? business.website_url
+      : `https://${business.website_url}`
+    sameAsUrls.push(websiteUrl)
+  }
+  if (business.instagram_url) {
+    const instagramUrl = business.instagram_url.startsWith('http')
+      ? business.instagram_url
+      : `https://${business.instagram_url}`
+    sameAsUrls.push(instagramUrl)
+  }
+  if (business.facebook_url) {
+    const facebookUrl = business.facebook_url.startsWith('http')
+      ? business.facebook_url
+      : `https://${business.facebook_url}`
+    sameAsUrls.push(facebookUrl)
+  }
+  if (business.tiktok_url) {
+    const tiktokUrl = business.tiktok_url.startsWith('http')
+      ? business.tiktok_url
+      : `https://${business.tiktok_url}`
+    sameAsUrls.push(tiktokUrl)
+  }
+
   const schema: any = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
@@ -93,7 +123,7 @@ export function generateLocalBusinessSchema(
     ...(description && { description }),
     ...(business.phone && { telephone: business.phone }),
     ...(business.email && { email: business.email }),
-    ...(business.website_url && { sameAs: business.website_url }),
+    ...(sameAsUrls.length > 0 && { sameAs: sameAsUrls }),
     ...(business.price_range && { priceRange: business.price_range }),
     ...(address && {
       address: {

@@ -21,6 +21,7 @@ interface RecentlyViewedContextType {
   recentlyViewed: RecentlyViewedBusiness[]
   addToRecentlyViewed: (business: Omit<RecentlyViewedBusiness, 'viewedAt'>) => void
   clearRecentlyViewed: () => void
+  isHydrated: boolean
 }
 
 const RecentlyViewedContext = createContext<RecentlyViewedContextType | undefined>(
@@ -93,6 +94,7 @@ export function RecentlyViewedProvider({ children }: { children: ReactNode }) {
         recentlyViewed,
         addToRecentlyViewed,
         clearRecentlyViewed,
+        isHydrated,
       }}
     >
       {children}

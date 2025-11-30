@@ -156,5 +156,31 @@ However, ALWAYS ask before making significant architectural changes.
 
 ---
 
+## 🔒 LOCKED BEHAVIORS (DO NOT CHANGE)
+
+### Category & Subcategory Sorting
+**File**: `lib/queries/categories.ts`
+
+**LOCKED RULE**: Categories and subcategories MUST ALWAYS be sorted alphabetically by Hebrew name (`name_he: 'asc'`)
+
+```typescript
+// ✅ CORRECT - Alphabetical Hebrew (א ב ג ד...)
+orderBy: { name_he: 'asc' }
+
+// ❌ NEVER USE display_order or any other sorting
+orderBy: { display_order: 'asc' } // FORBIDDEN
+orderBy: { created_at: 'asc' }     // FORBIDDEN
+```
+
+**Applies to all category queries:**
+- `getCategories()` - Main categories
+- `getCategories().subcategories` - Subcategories within categories
+- `getCategoryBySlug().subcategories` - Subcategories for specific category
+- `getSubcategoriesByCategory()` - Standalone subcategory queries
+
+**Why locked**: User requirement for consistent Hebrew alphabetical ordering across all dropdowns and lists.
+
+---
+
 *Last updated: 2025-11-25*
 *Total locked files: 28 pages + 58 components = 86 files*

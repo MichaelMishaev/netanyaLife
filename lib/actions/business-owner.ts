@@ -180,6 +180,9 @@ export async function updateBusinessDetails(
     whatsapp_number?: string
     website_url?: string
     email?: string
+    instagram_url?: string
+    facebook_url?: string
+    tiktok_url?: string
     opening_hours_he?: string
     opening_hours_ru?: string
     address_he?: string
@@ -232,6 +235,9 @@ export async function updateBusinessDetails(
           whatsapp_number: data.whatsapp_number || null,
           website_url: data.website_url || null,
           email: data.email || null,
+          instagram_url: data.instagram_url || null,
+          facebook_url: data.facebook_url || null,
+          tiktok_url: data.tiktok_url || null,
           opening_hours_he: data.opening_hours_he || null,
           opening_hours_ru: data.opening_hours_ru || null,
           address_he: data.address_he || null,
@@ -251,6 +257,9 @@ export async function updateBusinessDetails(
           whatsapp_number: data.whatsapp_number || null,
           website_url: data.website_url || null,
           email: data.email || null,
+          instagram_url: data.instagram_url || null,
+          facebook_url: data.facebook_url || null,
+          tiktok_url: data.tiktok_url || null,
           opening_hours_he: data.opening_hours_he || null,
           opening_hours_ru: data.opening_hours_ru || null,
           address_he: data.address_he || null,
@@ -357,6 +366,9 @@ export async function createOwnerBusiness(data: {
   whatsapp_number?: string
   website_url?: string
   email?: string
+  instagram_url?: string
+  facebook_url?: string
+  tiktok_url?: string
   opening_hours_he?: string
   opening_hours_ru?: string
   address_he?: string
@@ -434,6 +446,9 @@ export async function createOwnerBusiness(data: {
         whatsapp_number: data.whatsapp_number || null,
         website_url: data.website_url || null,
         email: data.email || null,
+        instagram_url: data.instagram_url || null,
+        facebook_url: data.facebook_url || null,
+        tiktok_url: data.tiktok_url || null,
         opening_hours: data.opening_hours_he || null,
         address: data.address_he || null,
         serves_all_city: data.serves_all_city || false,
@@ -682,5 +697,43 @@ export async function dismissRejectedEdit(businessId: string) {
   } catch (error) {
     console.error('Error dismissing rejected edit:', error)
     return { error: 'Failed to dismiss rejected edit' }
+  }
+}
+
+/**
+ * Discard a rejected pending business (permanently remove it)
+ */
+export async function discardRejectedBusiness(businessId: string) {
+  try {
+    const session = await getOwnerSession()
+
+    if (!session) {
+      return { error: 'Unauthorized' }
+    }
+
+    // Find the rejected pending business
+    const rejectedBusiness = await prisma.pendingBusiness.findFirst({
+      where: {
+        id: businessId,
+        owner_id: session.userId,
+        status: 'REJECTED',
+      },
+    })
+
+    if (!rejectedBusiness) {
+      return { error: 'No rejected business found' }
+    }
+
+    // Delete the rejected pending business record
+    await prisma.pendingBusiness.delete({
+      where: { id: rejectedBusiness.id },
+    })
+
+    revalidatePath('/[locale]/business-portal')
+
+    return { success: true }
+  } catch (error) {
+    console.error('Error discarding rejected business:', error)
+    return { error: 'Failed to discard rejected business' }
   }
 }

@@ -48,6 +48,9 @@ export const addBusinessSchema = z
         },
         { message: 'כתובת האתר אינה תקינה' }
       ),
+    instagramUrl: z.string().optional(),
+    facebookUrl: z.string().optional(),
+    tiktokUrl: z.string().optional(),
 
     // Location Info
     address: z.string().optional(),
