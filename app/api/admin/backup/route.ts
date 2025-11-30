@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         `"id"`, `"category_id"`, `"neighborhood_id"`, `"name_he"`, `"name_ru"`,
         `"description_he"`, `"description_ru"`, `"address_he"`, `"address_ru"`,
         `"phone"`, `"whatsapp_number"`, `"website_url"`, `"facebook_url"`,
-        `"instagram_url"`, `"tiktok_url"`, `"youtube_url"`,
+        `"instagram_url"`, `"tiktok_url"`,
         `"opening_hours_he"`, `"opening_hours_ru"`, `"owner_id"`, `"is_visible"`,
         `"is_verified"`, `"is_pinned"`, `"slug"`, `"created_at"`, `"updated_at"`
       ];
@@ -51,8 +51,8 @@ export async function GET(request: NextRequest) {
         escapeString(b.phone), escapeString(b.whatsapp_number),
         escapeString(b.website_url), escapeString(b.facebook_url),
         escapeString(b.instagram_url), escapeString(b.tiktok_url),
-        escapeString(b.youtube_url), escapeString(b.opening_hours_he),
-        escapeString(b.opening_hours_ru), escapeString(b.owner_id),
+        escapeString(b.opening_hours_he), escapeString(b.opening_hours_ru),
+        escapeString(b.owner_id),
         `${b.is_visible}`, `${b.is_verified}`, `${b.is_pinned}`,
         escapeString(b.slug), `'${b.created_at.toISOString()}'`, `'${b.updated_at.toISOString()}'`
       ];
@@ -61,31 +61,32 @@ export async function GET(request: NextRequest) {
 
     const reviews = await prisma.review.findMany();
     for (const r of reviews) {
-      sql += `INSERT INTO "Review" ("id", "business_id", "rating", "comment", "author_name", "created_at") VALUES ('${r.id}', '${r.business_id}', ${r.rating}, ${escapeString(r.comment)}, ${escapeString(r.author_name)}, '${r.created_at.toISOString()}') ON CONFLICT (id) DO NOTHING;\n`;
+      sql += `INSERT INTO "Review" ("id", "business_id", "rating", "comment_he", "comment_ru", "language", "author_name", "is_approved", "created_at", "updated_at") VALUES ('${r.id}', '${r.business_id}', ${r.rating}, ${escapeString(r.comment_he)}, ${escapeString(r.comment_ru)}, ${escapeString(r.language)}, ${escapeString(r.author_name)}, ${r.is_approved}, '${r.created_at.toISOString()}', '${r.updated_at.toISOString()}') ON CONFLICT (id) DO NOTHING;\n`;
     }
 
     const pendingBusinesses = await prisma.pendingBusiness.findMany();
     for (const pb of pendingBusinesses) {
       const fields = [
-        `"id"`, `"category_id"`, `"neighborhood_id"`, `"name_he"`, `"name_ru"`,
-        `"description_he"`, `"description_ru"`, `"address_he"`, `"address_ru"`,
-        `"phone"`, `"whatsapp_number"`, `"website_url"`, `"facebook_url"`,
-        `"instagram_url"`, `"tiktok_url"`, `"youtube_url"`,
-        `"opening_hours_he"`, `"opening_hours_ru"`, `"submitter_name"`,
-        `"submitter_phone"`, `"status"`, `"rejection_reason"`, `"created_at"`, `"updated_at"`
+        `"id"`, `"category_id"`, `"neighborhood_id"`, `"name"`,
+        `"description"`, `"language"`, `"address"`,
+        `"phone"`, `"whatsapp_number"`, `"website_url"`, `"email"`,
+        `"facebook_url"`, `"instagram_url"`, `"tiktok_url"`,
+        `"opening_hours"`, `"submitter_name"`, `"submitter_email"`,
+        `"submitter_phone"`, `"status"`, `"admin_notes"`, `"rejection_reason"`,
+        `"created_at"`, `"updated_at"`
       ];
       const values = [
         `'${pb.id}'`, `'${pb.category_id}'`, `'${pb.neighborhood_id}'`,
-        escapeString(pb.name_he), escapeString(pb.name_ru),
-        escapeString(pb.description_he), escapeString(pb.description_ru),
-        escapeString(pb.address_he), escapeString(pb.address_ru),
+        escapeString(pb.name), escapeString(pb.description),
+        escapeString(pb.language), escapeString(pb.address),
         escapeString(pb.phone), escapeString(pb.whatsapp_number),
-        escapeString(pb.website_url), escapeString(pb.facebook_url),
-        escapeString(pb.instagram_url), escapeString(pb.tiktok_url),
-        escapeString(pb.youtube_url), escapeString(pb.opening_hours_he),
-        escapeString(pb.opening_hours_ru), escapeString(pb.submitter_name),
+        escapeString(pb.website_url), escapeString(pb.email),
+        escapeString(pb.facebook_url), escapeString(pb.instagram_url),
+        escapeString(pb.tiktok_url), escapeString(pb.opening_hours),
+        escapeString(pb.submitter_name), escapeString(pb.submitter_email),
         escapeString(pb.submitter_phone), escapeString(pb.status),
-        escapeString(pb.rejection_reason), `'${pb.created_at.toISOString()}'`, `'${pb.updated_at.toISOString()}'`
+        escapeString(pb.admin_notes), escapeString(pb.rejection_reason),
+        `'${pb.created_at.toISOString()}'`, `'${pb.updated_at.toISOString()}'`
       ];
       sql += `INSERT INTO "PendingBusiness" (${fields.join(', ')}) VALUES (${values.join(', ')}) ON CONFLICT (id) DO NOTHING;\n`;
     }
