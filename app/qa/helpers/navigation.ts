@@ -231,7 +231,7 @@ export async function extractBusinessCards(page: Page): Promise<BusinessCardData
     // Extract rating
     const ratingElement = card.locator('[data-testid="rating"], .rating, text=/★|⭐/').first()
     const ratingText = await ratingElement.textContent().catch(() => '0')
-    const rating = parseFloat(ratingText.match(/[\d.]+/)?.[0] || '0')
+    const rating = parseFloat((ratingText || '0').match(/[\d.]+/)?.[0] || '0')
 
     // Extract href
     const href = await card.getAttribute('href') || ''
