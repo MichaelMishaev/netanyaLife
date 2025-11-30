@@ -289,9 +289,9 @@ export async function extractCTAButtons(page: Page): Promise<CTAButtons> {
     hasWebsite,
     hasDirections,
     hasShare,
-    phoneHref,
-    whatsappHref,
-    websiteHref
+    phoneHref: phoneHref || undefined,
+    whatsappHref: whatsappHref || undefined,
+    websiteHref: websiteHref || undefined
   }
 }
 
