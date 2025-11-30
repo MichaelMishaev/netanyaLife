@@ -355,7 +355,11 @@ export default function OwnerAddBusinessForm({
       <form
         onSubmit={(e) => {
           e.preventDefault()
-          currentStep === TOTAL_STEPS ? handleSubmit() : handleNext()
+          if (currentStep === TOTAL_STEPS) {
+            handleSubmit()
+          } else {
+            handleNext()
+          }
         }}
         className="space-y-6"
       >
