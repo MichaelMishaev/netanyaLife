@@ -1444,7 +1444,7 @@ export default function BusinessMapDashboard({
                       </div>
                       <div>
                         <p className="text-sm text-gray-500">{text.withWhatsApp}</p>
-                        <a href={`https://wa.me/${selectedBusinessForDetails.whatsapp_number.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="font-medium text-green-600 hover:underline" dir="ltr">
+                        <a href={`https://wa.me/${selectedBusinessForDetails.whatsapp_number.replace(/\D/g, '')}?text=${encodeURIComponent('היי, הגעתי מפורטל העסקים של נתניה, ארצה לברר פרטים על השירות שלכם')}`} target="_blank" rel="noopener noreferrer" className="font-medium text-green-600 hover:underline" dir="ltr">
                           {selectedBusinessForDetails.whatsapp_number}
                         </a>
                       </div>

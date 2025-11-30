@@ -249,7 +249,7 @@ export default function BusinessCard({ business, locale, showSubcategory = false
           )}
           {business.whatsapp_number && (
             <a
-              href={`https://wa.me/${formatPhoneForWhatsApp(business.whatsapp_number)}`}
+              href={`https://wa.me/${formatPhoneForWhatsApp(business.whatsapp_number)}?text=${encodeURIComponent('היי, הגעתי מפורטל העסקים של נתניה, ארצה לברר פרטים על השירות שלכם')}`}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => {

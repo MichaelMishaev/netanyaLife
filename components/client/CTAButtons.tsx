@@ -60,7 +60,7 @@ export default function CTAButtons({
       )}
       {whatsappNumber && (
         <a
-          href={`https://wa.me/${formatPhoneForWhatsApp(whatsappNumber)}`}
+          href={`https://wa.me/${formatPhoneForWhatsApp(whatsappNumber)}?text=${encodeURIComponent('היי, הגעתי מפורטל העסקים של נתניה, ארצה לברר פרטים על השירות שלכם')}`}
           target="_blank"
           rel="noopener noreferrer"
           onClick={() => {
